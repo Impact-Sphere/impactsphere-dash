@@ -12,21 +12,28 @@ enum UserType {
   ADMIN
 }
 
+enum ApprovalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 model User {
-  id            String       @id
-  name          String?
-  email         String
-  emailVerified Boolean
-  image         String?
-  createdAt     DateTime
-  updatedAt     DateTime
-  userType      UserType?
-  ngoInfo       NgoInfo?
-  companyInfo   CompanyInfo?
-  sessions      Session[]
-  accounts      Account[]
-  projects      Project[]
-  donations     Donation[]
+  id              String          @id
+  name            String?
+  email           String
+  emailVerified   Boolean
+  image           String?
+  createdAt       DateTime
+  updatedAt       DateTime
+  userType        UserType?
+  approvalStatus  ApprovalStatus  @default(PENDING)
+  ngoInfo         NgoInfo?
+  companyInfo     CompanyInfo?
+  sessions        Session[]
+  accounts        Account[]
+  projects        Project[]
+  donations       Donation[]
 
   @@unique([email])
   @@map("user")
@@ -109,19 +116,20 @@ enum ProjectStatus {
 }
 
 model Project {
-  id            String        @id @default(uuid())
-  title         String
-  description   String
-  category      String
-  image         String?
-  targetBudget  Int
-  currentAmount Int           @default(0)
-  status        ProjectStatus @default(ACTIVE)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
-  ngoId         String
-  ngo           User          @relation(fields: [ngoId], references: [id], onDelete: Cascade)
-  donations     Donation[]
+  id               String          @id @default(uuid())
+  title            String
+  description      String
+  category         String
+  image            String?
+  targetBudget     Int
+  currentAmount    Int             @default(0)
+  status           ProjectStatus   @default(ACTIVE)
+  approvalStatus   ApprovalStatus  @default(PENDING)
+  createdAt        DateTime        @default(now())
+  updatedAt        DateTime        @updatedAt
+  ngoId            String
+  ngo              User            @relation(fields: [ngoId], references: [id], onDelete: Cascade)
+  donations        Donation[]
 
   @@map("project")
 }

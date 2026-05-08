@@ -89,6 +89,8 @@ export default function ProjectDetailPage() {
   const isLoggedIn = !!session?.user;
   const isNgo = userType === "NGO";
   const isOwner = isNgo && session?.user?.id === project.ngoId;
+  const isAdmin = userType === "ADMIN";
+  const showApprovalBadge = isOwner || isAdmin;
 
   return (
     <main className="ml-72 min-h-screen bg-surface py-12 px-8">
@@ -110,6 +112,23 @@ export default function ProjectDetailPage() {
             {project.status === "COMPLETED" && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
                 Fully Funded
+              </span>
+            )}
+            {showApprovalBadge && (
+              <span
+                className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                  project.approvalStatus === "APPROVED"
+                    ? "bg-emerald-100 text-emerald-700"
+                    : project.approvalStatus === "PENDING"
+                      ? "bg-amber-100 text-amber-700"
+                      : "bg-red-100 text-red-700"
+                }`}
+              >
+                {project.approvalStatus === "APPROVED"
+                  ? "Approved"
+                  : project.approvalStatus === "PENDING"
+                    ? "Pending Approval"
+                    : "Rejected"}
               </span>
             )}
           </div>

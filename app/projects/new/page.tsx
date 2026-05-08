@@ -31,11 +31,11 @@ export default function NewProjectPage() {
       router.push("/login");
       return;
     }
-    // Verify user is NGO
+    // Verify user is approved NGO
     fetch("/api/profile")
       .then((res) => res.json())
       .then((data) => {
-        if (data.userType !== "NGO") {
+        if (data.userType !== "NGO" || data.approvalStatus !== "APPROVED") {
           router.push("/discover");
         } else {
           setChecking(false);

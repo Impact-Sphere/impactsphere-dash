@@ -14,6 +14,7 @@ export interface Project {
   targetBudget: number;
   currentAmount: number;
   status: string;
+  approvalStatus?: string;
   createdAt: string;
   updatedAt: string;
   ngoId: string;

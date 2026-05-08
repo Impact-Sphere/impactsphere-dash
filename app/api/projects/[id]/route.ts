@@ -1,4 +1,6 @@
+import { headers } from "next/headers";
 import { NextResponse } from "next/server";
+import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
 
 export async function GET(
@@ -37,6 +39,28 @@ export async function GET(
 
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
+  }
+
+  // If project is not approved, only allow admin or the owner NGO to view it
+  if (project.approvalStatus !== "APPROVED") {
+    const session = await auth.api.getSession({
+      headers: await headers(),
+    });
+
+    const isOwner = session?.user?.id === project.ngoId;
+    const isAdmin =
+      session &&
+      (await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { userType: true },
+      }))?.userType === "ADMIN";
+
+    if (!isOwner && !isAdmin) {
+      return NextResponse.json(
+        { error: "Project not found" },
+        { status: 404 },
+      );
+    }
   }
 
   return NextResponse.json(project);

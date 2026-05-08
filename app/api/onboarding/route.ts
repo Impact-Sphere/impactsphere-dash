@@ -72,7 +72,7 @@ export async function POST(request: Request) {
   await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     await tx.user.update({
       where: { id: session.user.id },
-      data: { userType },
+      data: { userType, approvalStatus: "PENDING" },
     });
 
     if (userType === "COMPANY") {

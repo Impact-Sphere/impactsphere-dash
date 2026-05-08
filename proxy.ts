@@ -6,7 +6,7 @@ export function proxy(request: NextRequest) {
   const sessionCookie = getSessionCookie(request);
 
   // Protect routes that require authentication
-  const protectedPaths = ["/dashboard"];
+  const protectedPaths = ["/dashboard", "/admin", "/projects/new"];
   const isProtected = protectedPaths.some((path) =>
     request.nextUrl.pathname.startsWith(path),
   );
@@ -19,5 +19,5 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/dashboard/:path*"],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/projects/new"],
 };

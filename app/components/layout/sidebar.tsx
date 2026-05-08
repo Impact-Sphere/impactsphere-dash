@@ -2,14 +2,40 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const { data: session } = authClient.useSession();
+  const [userType, setUserType] = useState<string | null>(null);
+  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!session) return;
+    fetch("/api/profile")
+      .then((res) => res.json())
+      .then((data) => {
+        setUserType(data.userType || null);
+        setApprovalStatus(data.approvalStatus || null);
+
+        const isPending =
+          data.approvalStatus === "PENDING" &&
+          ["NGO", "COMPANY"].includes(data.userType);
+
+        if (isPending && pathname !== "/pending-approval") {
+          router.push("/pending-approval");
+        }
+      })
+      .catch(() => {});
+  }, [session, pathname, router]);
+
+  const isAdmin = userType === "ADMIN";
+  const isApprovedNgo = userType === "NGO" && approvalStatus === "APPROVED";
 
   return (
     <aside className="h-screen w-72 fixed left-0 top-0 overflow-y-auto bg-slate-50 flex flex-col p-6 space-y-8 z-40">
@@ -51,17 +77,36 @@ export function Sidebar() {
             </Link>
           );
         })}
+        {isAdmin && (
+          <Link
+            href="/admin"
+            className={cn(
+              "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+              "hover:translate-x-1",
+              pathname === "/admin"
+                ? "bg-white text-violet-700 shadow-sm"
+                : "text-slate-500 hover:bg-slate-200/50",
+            )}
+          >
+            <span className="material-symbols-outlined">admin_panel_settings</span>
+            <span className="text-sm font-semibold font-inter">
+              Admin Dashboard
+            </span>
+          </Link>
+        )}
       </nav>
 
       {/* CTA Button */}
-      <div className="pt-6 border-t border-outline-variant/10">
-        <Link
-          href="/projects/new"
-          className="block w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm shadow-xl shadow-primary/20 active:scale-95 transition-transform text-center"
-        >
-          Create Project
-        </Link>
-      </div>
+      {(isAdmin || isApprovedNgo) && (
+        <div className="pt-6 border-t border-outline-variant/10">
+          <Link
+            href="/projects/new"
+            className="block w-full py-4 rounded-xl bg-gradient-to-r from-primary to-primary-container text-white font-bold text-sm shadow-xl shadow-primary/20 active:scale-95 transition-transform text-center"
+          >
+            Create Project
+          </Link>
+        </div>
+      )}
 
       {/* Footer Navigation */}
       <div className="space-y-2 mt-auto">

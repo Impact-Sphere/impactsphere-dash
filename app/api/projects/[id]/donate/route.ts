@@ -41,6 +41,13 @@ export async function POST(
     );
   }
 
+  if (project.approvalStatus !== "APPROVED") {
+    return NextResponse.json(
+      { error: "Project is not approved for donations" },
+      { status: 400 },
+    );
+  }
+
   const donationAmount = Number(amount);
 
   await prisma.$transaction(async (tx) => {

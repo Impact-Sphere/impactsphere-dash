@@ -68,7 +68,7 @@ export function OnboardingForm() {
     setSubmitting(false);
 
     if (res.ok) {
-      router.push("/");
+      router.push("/pending-approval");
       router.refresh();
     } else {
       const data = await res.json().catch(() => ({}));

@@ -26,6 +26,19 @@ export function LoginForm() {
     if (error) {
       setError(error.message || "Invalid email or password");
     } else {
+      const profileRes = await fetch("/api/profile");
+      const profile = await profileRes.json();
+
+      const isPending =
+        profile.approvalStatus === "PENDING" &&
+        ["NGO", "COMPANY"].includes(profile.userType);
+
+      if (isPending) {
+        router.push("/pending-approval");
+        router.refresh();
+        return;
+      }
+
       const onRes = await fetch("/api/onboarding");
       const onData = await onRes.json();
       if (onData.needsOnboarding) {

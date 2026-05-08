@@ -273,6 +273,7 @@ async function seedAdmin() {
       name,
       emailVerified: true,
       userType: "ADMIN",
+      approvalStatus: "APPROVED",
       createdAt: now,
       updatedAt: now,
     },
@@ -316,6 +317,7 @@ async function seedNgos() {
         name: ngo.name,
         emailVerified: true,
         userType: "NGO",
+        approvalStatus: "APPROVED",
         createdAt: now,
         updatedAt: now,
         ngoInfo: {
@@ -372,6 +374,7 @@ async function seedCompanies() {
         name: corp.name,
         emailVerified: true,
         userType: "COMPANY",
+        approvalStatus: "APPROVED",
         createdAt: now,
         updatedAt: now,
         companyInfo: {
@@ -429,6 +432,7 @@ async function seedProjects(ngoIds: string[]) {
         targetBudget: p.target,
         currentAmount: p.current,
         status,
+        approvalStatus: "APPROVED",
         createdAt: now,
         updatedAt: now,
         ngoId,
