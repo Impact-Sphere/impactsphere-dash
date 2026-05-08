@@ -1,4 +1,4 @@
-import type { Prisma } from "@prisma/client";
+import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
