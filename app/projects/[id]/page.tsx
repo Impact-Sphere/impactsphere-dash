@@ -532,7 +532,7 @@ export default function ProjectDetailPage() {
 
                   return (
                     <div
-                      key={`${slot.start}-${slot.end}`}
+                      key={`${slot.start}-${slot.end}-${index}`}
                       className={`p-4 rounded-xl border ${
                         invalid
                           ? "border-red-300 bg-red-50"
