@@ -312,7 +312,7 @@ export function Meetings({
                 <div className="max-h-52 overflow-y-auto space-y-2 pr-2">
                   {req.proposedTimes?.map((slot) => (
                     <div
-                      key={`${slot.start}-${slot.end}`}
+                      key={`${req.id}-${slot.start}-${slot.end}`}
                       className="text-sm text-gray-600 bg-gray-50 rounded-lg p-2"
                     >
                       <div>Start: {formatUserLocal(slot.start)}</div>
@@ -428,7 +428,7 @@ export function Meetings({
 
                   return (
                     <div
-                      key={`${slot.start}-${slot.end}`}
+                      key={`${slot.start}-${slot.end}-${index}`}
                       className={`p-4 rounded-xl border ${
                         invalid
                           ? "border-red-300 bg-red-50"
