@@ -267,7 +267,7 @@ export default function ProjectDetailPage() {
       {/* Donate Modal */}
       {donateOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6 max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-on-surface">
               Make a Donation
             </h2>

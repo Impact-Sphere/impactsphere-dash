@@ -71,7 +71,6 @@ export async function POST(
       projectId: id,
       userId: session.user.id,
     },
-    payment_method_types: ["card", "mbway"],
   });
 
   // Save the payment intent ID
