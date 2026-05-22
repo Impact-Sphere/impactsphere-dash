@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
+import { stripe } from "@/app/lib/stripe";
 
 export async function POST(
   request: Request,
@@ -49,33 +50,38 @@ export async function POST(
   }
 
   const donationAmount = Number(amount);
+  const donationAmountCents = donationAmount * 100;
 
-  await prisma.donation.create({
+  // Create a pending donation record
+  const pendingDonation = await prisma.donation.create({
     data: {
       amount: donationAmount,
       projectId: id,
       companyId: session.user.id,
+      status: "PENDING",
     },
   });
 
-  await prisma.project.update({
-    where: { id },
-    data: {
-      currentAmount: { increment: donationAmount },
+  // Create a Stripe PaymentIntent
+  const paymentIntent = await stripe.paymentIntents.create({
+    amount: donationAmountCents,
+    currency: "eur",
+    metadata: {
+      donationId: pendingDonation.id,
+      projectId: id,
+      userId: session.user.id,
     },
+    payment_method_types: ["card", "mbway"],
   });
 
-  const updatedProject = await prisma.project.findUnique({
-    where: { id },
-    select: { currentAmount: true, targetBudget: true },
+  // Save the payment intent ID
+  await prisma.donation.update({
+    where: { id: pendingDonation.id },
+    data: { stripePaymentIntentId: paymentIntent.id },
   });
 
-  if (updatedProject && updatedProject.currentAmount >= updatedProject.targetBudget) {
-    await prisma.project.update({
-      where: { id },
-      data: { status: "COMPLETED" },
-    });
-  }
-
-  return NextResponse.json({ success: true });
+  return NextResponse.json({
+    clientSecret: paymentIntent.client_secret,
+    donationId: pendingDonation.id,
+  });
 }

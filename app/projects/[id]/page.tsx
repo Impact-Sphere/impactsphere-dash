@@ -1,7 +1,10 @@
 "use client";
 
+import { Elements } from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { authClient } from "@/app/lib/auth-client";
@@ -13,6 +16,14 @@ import {
 } from "@/app/lib/project-utils";
 import type { Project } from "@/app/types/project";
 
+const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+
+if (!publishableKey) {
+  throw new Error("NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY is not set");
+}
+
+const stripePromise = loadStripe(publishableKey);
+
 export default function ProjectDetailPage() {
   const params = useParams();
   const id = params.id as string;
@@ -23,6 +34,7 @@ export default function ProjectDetailPage() {
   const [donateOpen, setDonateOpen] = useState(false);
   const [donateAmount, setDonateAmount] = useState("");
   const [donating, setDonating] = useState(false);
+  const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [userType, setUserType] = useState<string | null>(null);
 
   const fetchProject = useCallback(async () => {
@@ -47,7 +59,19 @@ export default function ProjectDetailPage() {
       .catch(() => {});
   }, [session]);
 
-  const handleDonate = async () => {
+  const openDonateModal = () => {
+    setDonateOpen(true);
+    setClientSecret(null);
+    setDonateAmount("");
+  };
+
+  const closeDonateModal = () => {
+    setDonateOpen(false);
+    setClientSecret(null);
+    setDonateAmount("");
+  };
+
+  const handleInitiatePayment = async () => {
     if (!donateAmount || Number(donateAmount) <= 0) return;
     setDonating(true);
 
@@ -57,16 +81,20 @@ export default function ProjectDetailPage() {
       body: JSON.stringify({ amount: Number(donateAmount) }),
     });
 
-    setDonating(false);
+    const data = await res.json().catch(() => ({}));
 
-    if (res.ok) {
-      setDonateOpen(false);
-      setDonateAmount("");
-      await fetchProject();
+    if (res.ok && data.clientSecret) {
+      setClientSecret(data.clientSecret);
     } else {
-      const data = await res.json().catch(() => ({}));
-      alert(data.error || "Donation failed.");
+      alert(data.error || "Failed to initiate payment.");
     }
+
+    setDonating(false);
+  };
+
+  const handlePaymentSuccess = () => {
+    closeDonateModal();
+    fetchProject();
   };
 
   if (loading) {
@@ -175,7 +203,7 @@ export default function ProjectDetailPage() {
           {isLoggedIn && project.status === "ACTIVE" && (
             <button
               type="button"
-              onClick={() => setDonateOpen(true)}
+              onClick={openDonateModal}
               className="flex items-center justify-center space-x-3 w-full md:w-auto bg-primary hover:bg-primary-container text-on-primary px-10 py-5 rounded-2xl text-lg font-bold shadow-xl shadow-primary/20 transition-all duration-300 hover:-translate-y-1 hover:shadow-primary/30 active:scale-95"
             >
               <span className="material-symbols-outlined text-2xl transition-transform hover:scale-110">
@@ -243,44 +271,55 @@ export default function ProjectDetailPage() {
             <h2 className="text-xl font-bold text-on-surface">
               Make a Donation
             </h2>
-            <p className="text-gray-500 text-sm">
-              Your contribution helps bring &quot;{project.title}&quot; to life.
-            </p>
-            <div className="space-y-2">
-              <div className="text-sm font-medium text-on-surface">
-                Amount (USD)
-              </div>
-              <input
-                type="number"
-                value={donateAmount}
-                onChange={(e) => setDonateAmount(e.target.value)}
-                min={1}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-                placeholder="1000"
-              />
-            </div>
-            <div className="flex gap-3">
-              <button
-                type="button"
-                onClick={() => {
-                  setDonateOpen(false);
-                  setDonateAmount("");
-                }}
-                className="flex-1 py-2.5 px-4 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDonate}
-                disabled={
-                  donating || !donateAmount || Number(donateAmount) <= 0
-                }
-                className="flex-1 py-2.5 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {donating ? "Processing..." : "Donate"}
-              </button>
-            </div>
+
+            {!clientSecret ? (
+              <>
+                <p className="text-gray-500 text-sm">
+                  Your contribution helps bring &quot;{project.title}&quot; to
+                  life.
+                </p>
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-on-surface">
+                    Amount (EUR)
+                  </div>
+                  <input
+                    type="number"
+                    value={donateAmount}
+                    onChange={(e) => setDonateAmount(e.target.value)}
+                    min={1}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+                    placeholder="1000"
+                  />
+                </div>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={closeDonateModal}
+                    className="flex-1 py-2.5 px-4 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleInitiatePayment}
+                    disabled={
+                      donating || !donateAmount || Number(donateAmount) <= 0
+                    }
+                    className="flex-1 py-2.5 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    {donating ? "Processing..." : "Proceed to Payment"}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <StripeCheckoutForm
+                  projectTitle={project.title}
+                  onSuccess={handlePaymentSuccess}
+                  onCancel={closeDonateModal}
+                />
+              </Elements>
+            )}
           </div>
         </div>
       )}
