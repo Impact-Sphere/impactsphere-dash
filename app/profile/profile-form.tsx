@@ -13,6 +13,7 @@ type ProfileData = {
   email: string;
   image: string | null;
   userType: "NGO" | "COMPANY" | "ADMIN" | null;
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
   createdAt: string;
   ngoInfo: {
     ngoName: string;
@@ -188,6 +189,15 @@ export function ProfileForm() {
         ? "bg-blue-100 text-blue-700"
         : "bg-violet-100 text-violet-700";
 
+  const approvalStatusConfig =
+    profile.approvalStatus === "APPROVED"
+      ? { label: "Approved", color: "bg-emerald-100 text-emerald-700", icon: "check_circle" }
+      : profile.approvalStatus === "REJECTED"
+        ? { label: "Rejected", color: "bg-red-100 text-red-700", icon: "cancel" }
+        : profile.approvalStatus === "PENDING"
+          ? { label: "Pending", color: "bg-amber-100 text-amber-700", icon: "hourglass_empty" }
+          : null;
+
   const avatarUrl = profile.image || undefined;
   const initials = (profile.name || profile.email || "?")
     .charAt(0)
@@ -270,16 +280,31 @@ export function ProfileForm() {
                 </h1>
               </div>
               <p className="text-gray-500">{profile.email}</p>
-              <div
-                className={cn(
-                  "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
-                  typeColor,
+              <div className="flex items-center gap-2 flex-wrap">
+                <div
+                  className={cn(
+                    "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                    typeColor,
+                  )}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {typeIcon}
+                  </span>
+                  <span>{typeLabel}</span>
+                </div>
+                {approvalStatusConfig && profile.userType !== "ADMIN" && (
+                  <div
+                    className={cn(
+                      "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                      approvalStatusConfig.color,
+                    )}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {approvalStatusConfig.icon}
+                    </span>
+                    <span>{approvalStatusConfig.label}</span>
+                  </div>
                 )}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {typeIcon}
-                </span>
-                <span>{typeLabel}</span>
               </div>
             </div>
           </div>
