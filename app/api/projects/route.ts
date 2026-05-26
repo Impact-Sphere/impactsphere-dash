@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
+import type { Project } from "@/app/types/project";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({
@@ -78,10 +79,10 @@ export async function GET(request: Request) {
         },
         orderBy: { createdAt: "desc" },
       });
-      const seen = new Set();
+      const seen = new Set<string>();
       const projects = donations
-        .map((d) => d.project)
-        .filter((p) => {
+        .map((d: any) => d.project as Project)
+        .filter((p: Project) => {
           if (seen.has(p.id)) return false;
           seen.add(p.id);
           return true;
