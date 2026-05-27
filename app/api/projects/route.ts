@@ -90,7 +90,7 @@ export async function GET(request: Request) {
         const p = donation.project;
         if (!seen.has(p.id)) {
           seen.add(p.id);
-          projects.push(p as unknown as Project);
+          projects.push(p);
         }
       }
       return NextResponse.json(projects);
