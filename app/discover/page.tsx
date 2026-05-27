@@ -42,17 +42,6 @@ function DiscoverContent() {
     [pathname, router, searchParams],
   );
 
-  // Debounced search update
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      const trimmed = inputValue.trim();
-      if (trimmed !== q) {
-        updateUrl({ q: trimmed || null });
-      }
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [inputValue, q, updateUrl]);
-
   // Fetch projects whenever URL params change
   useEffect(() => {
     const doFetch = async () => {

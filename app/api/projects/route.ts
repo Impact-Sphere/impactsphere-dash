@@ -109,6 +109,8 @@ export async function GET(request: Request) {
         ? Prisma.sql`AND p.category = ${category}`
         : Prisma.sql``;
 
+    const searchQuery = Prisma.sql`websearch_to_tsquery('english', ${q})`;
+
     const searchResults = await prisma.$queryRaw<{ id: string }[]>`
       SELECT p.id
       FROM project p
@@ -117,21 +119,12 @@ export async function GET(request: Request) {
       WHERE p.status = 'ACTIVE'
         ${approvalFilter}
         ${categoryFilter}
-        AND to_tsvector('english',
-          coalesce(p.title, '') || ' ' ||
-          coalesce(p.description, '') || ' ' ||
-          coalesce(p.category, '') || ' ' ||
-          coalesce(n."ngoName", '')
-        ) @@ websearch_to_tsquery('english', ${q})
-      ORDER BY ts_rank(
-        to_tsvector('english',
-          coalesce(p.title, '') || ' ' ||
-          coalesce(p.description, '') || ' ' ||
-          coalesce(p.category, '') || ' ' ||
-          coalesce(n."ngoName", '')
-        ),
-        websearch_to_tsquery('english', ${q})
-      ) DESC, p."createdAt" DESC
+        AND (
+          p."searchVector" @@ ${searchQuery}
+          OR to_tsvector('english', coalesce(n."ngoName", '')) @@ ${searchQuery}
+        )
+      ORDER BY ts_rank(p."searchVector", ${searchQuery}) DESC,
+               p."createdAt" DESC
     `;
 
     const projectIds = searchResults.map((r) => r.id);
