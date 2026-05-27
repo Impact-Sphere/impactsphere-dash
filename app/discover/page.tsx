@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useCallback, useEffect, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { Header } from "@/app/components/layout/header";
 import { CategoryFilter } from "@/app/components/project/category-filter";
 import { FeaturedProjectCard } from "@/app/components/project/featured-project-card";
@@ -127,86 +127,80 @@ function DiscoverContent() {
 
         {loading ? (
           <div className="grid grid-cols-12 gap-8">
-            {Array.from({ length: 6 }).map((_, i) => (
+            {["sk-a", "sk-b", "sk-c", "sk-d", "sk-e", "sk-f"].map((key) => (
               <ProjectCardSkeleton
-                key={i}
+                key={key}
                 className="col-span-12 md:col-span-6 lg:col-span-4"
               />
             ))}
           </div>
+        ) : hasNoResults ? (
+          <div className="flex flex-col items-center justify-center py-24 text-center">
+            <span className="material-symbols-outlined text-6xl text-on-surface-variant mb-4">
+              search_off
+            </span>
+            <h3 className="text-xl font-bold text-on-surface mb-2">
+              No initiatives found
+            </h3>
+            <p className="text-sm text-on-surface-variant mb-6 max-w-md">
+              {q
+                ? `We couldn't find any projects matching "${q}". Try different keywords or clear your filters.`
+                : "We couldn't find any projects with the current filters."}
+            </p>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="px-6 py-3 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary/90 transition-colors"
+            >
+              Clear filters
+            </button>
+          </div>
         ) : (
           <>
-            {hasNoResults ? (
-              <div className="flex flex-col items-center justify-center py-24 text-center">
-                <span className="material-symbols-outlined text-6xl text-on-surface-variant mb-4">
-                  search_off
-                </span>
-                <h3 className="text-xl font-bold text-on-surface mb-2">
-                  No initiatives found
-                </h3>
-                <p className="text-sm text-on-surface-variant mb-6 max-w-md">
-                  {q
-                    ? `We couldn't find any projects matching "${q}". Try different keywords or clear your filters.`
-                    : "We couldn't find any projects with the current filters."}
-                </p>
+            {/* Project Grid */}
+            <div className="grid grid-cols-12 gap-8">
+              {/* Featured Project */}
+              {!isSearching && featured && (
+                <FeaturedProjectCard project={featured} />
+              )}
+
+              {/* Standard Project Cards */}
+              {rest.map((project) => (
+                <ProjectCard
+                  key={project.id}
+                  project={project}
+                  className="col-span-12 md:col-span-6 lg:col-span-4"
+                />
+              ))}
+
+              {/* Impact Pulse Widget */}
+              {!isSearching && <ImpactPulse percentage={64} amount="$24.8k" />}
+            </div>
+
+            {/* Pagination */}
+            <footer className="px-12 py-12 flex justify-between items-center opacity-60">
+              <span className="text-xs font-medium">
+                Showing {projects.length} active initiative
+                {projects.length !== 1 ? "s" : ""}
+              </span>
+              <div className="flex space-x-2">
                 <button
                   type="button"
-                  onClick={clearFilters}
-                  className="px-6 py-3 bg-primary text-white rounded-full text-sm font-bold hover:bg-primary/90 transition-colors"
+                  className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-colors"
+                  aria-label="Previous page"
                 >
-                  Clear filters
+                  <span className="material-symbols-outlined text-sm">
+                    chevron_left
+                  </span>
+                </button>
+                <button
+                  type="button"
+                  className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center bg-primary text-white"
+                >
+                  1
                 </button>
               </div>
-            ) : (
-              <>
-                {/* Project Grid */}
-                <div className="grid grid-cols-12 gap-8">
-                  {/* Featured Project */}
-                  {!isSearching && featured && (
-                    <FeaturedProjectCard project={featured} />
-                  )}
-
-                  {/* Standard Project Cards */}
-                  {rest.map((project) => (
-                    <ProjectCard
-                      key={project.id}
-                      project={project}
-                      className="col-span-12 md:col-span-6 lg:col-span-4"
-                    />
-                  ))}
-
-                  {/* Impact Pulse Widget */}
-                  {!isSearching && (
-                    <ImpactPulse percentage={64} amount="$24.8k" />
-                  )}
-                </div>
-
-                {/* Pagination */}
-                <footer className="px-12 py-12 flex justify-between items-center opacity-60">
-                  <span className="text-xs font-medium">
-                    Showing {projects.length} active initiative
-                    {projects.length !== 1 ? "s" : ""}
-                  </span>
-                  <div className="flex space-x-2">
-                    <button
-                      type="button"
-                      className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-colors"
-                      aria-label="Previous page"
-                    >
-                      <span className="material-symbols-outlined text-sm">
-                        chevron_left
-                      </span>
-                    </button>
-                    <button
-                      type="button"
-                      className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center bg-primary text-white"
-                    >
-                      1
-                    </button>
-                  </div>
-                </footer>
-              </>
-            )}
+            </footer>
           </>
         )}
       </section>
@@ -237,9 +231,16 @@ function DiscoverFallback() {
           ))}
         </div>
         <div className="grid grid-cols-12 gap-8">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {[
+            "fb-sk-a",
+            "fb-sk-b",
+            "fb-sk-c",
+            "fb-sk-d",
+            "fb-sk-e",
+            "fb-sk-f",
+          ].map((key) => (
             <ProjectCardSkeleton
-              key={i}
+              key={key}
               className="col-span-12 md:col-span-6 lg:col-span-4"
             />
           ))}

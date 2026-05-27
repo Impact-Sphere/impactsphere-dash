@@ -2,10 +2,10 @@
 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
+import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { authClient } from "@/app/lib/auth-client";
@@ -127,7 +127,6 @@ export default function ProjectDetailPage() {
   };
 
   const handleInitiatePayment = async () => {
-
     if (!donateAmount || Number(donateAmount) <= 0) return;
     setDonating(true);
 

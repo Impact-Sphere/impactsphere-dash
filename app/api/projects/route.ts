@@ -1,6 +1,6 @@
+import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
-import { Prisma } from "@prisma/client";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
 import type { Project } from "@/app/types/project";
@@ -86,11 +86,11 @@ export async function GET(request: Request) {
       });
       const seen = new Set<string>();
       const projects: Project[] = [];
-      for (const donation of donations as any[]) {
+      for (const donation of donations) {
         const p = donation.project;
         if (!seen.has(p.id)) {
           seen.add(p.id);
-          projects.push(p);
+          projects.push(p as unknown as Project);
         }
       }
       return NextResponse.json(projects);
@@ -154,7 +154,7 @@ export async function GET(request: Request) {
   }
 
   // Standard discovery list with optional recent filter
-  const where: any = {
+  const where: Prisma.ProjectWhereInput = {
     status: "ACTIVE",
     ...(isAdmin ? {} : { approvalStatus: "APPROVED" }),
     ...(category && category !== "all" ? { category } : {}),

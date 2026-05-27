@@ -1,6 +1,6 @@
+import type { Prisma } from "@prisma/client";
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
-import { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/db";
 import { getStripe } from "@/app/lib/stripe";
 
