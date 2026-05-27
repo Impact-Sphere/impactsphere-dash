@@ -101,8 +101,8 @@ export function PendingApprovalContent() {
             </p>
           </div>
           <div className="bg-red-50 rounded-xl p-4 text-sm text-red-800">
-            You can still browse public projects, but you cannot create
-            projects or make donations until your account is approved.
+            You can still browse public projects, but you cannot create projects
+            or make donations until your account is approved.
           </div>
           <div className="flex gap-3">
             <button
@@ -135,7 +135,9 @@ export function PendingApprovalContent() {
           </span>
         </div>
         <div className="space-y-2">
-          <h1 className="text-2xl font-bold text-on-surface">Pending Approval</h1>
+          <h1 className="text-2xl font-bold text-on-surface">
+            Pending Approval
+          </h1>
           <p className="text-gray-500">
             Your account is currently under review by our administrators. You
             will be notified once your account has been approved.

@@ -200,11 +200,23 @@ export function ProfileForm() {
 
   const approvalStatusConfig =
     profile.approvalStatus === "APPROVED"
-      ? { label: "Approved", color: "bg-emerald-100 text-emerald-700", icon: "check_circle" }
+      ? {
+          label: "Approved",
+          color: "bg-emerald-100 text-emerald-700",
+          icon: "check_circle",
+        }
       : profile.approvalStatus === "REJECTED"
-        ? { label: "Rejected", color: "bg-red-100 text-red-700", icon: "cancel" }
+        ? {
+            label: "Rejected",
+            color: "bg-red-100 text-red-700",
+            icon: "cancel",
+          }
         : profile.approvalStatus === "PENDING"
-          ? { label: "Pending", color: "bg-amber-100 text-amber-700", icon: "hourglass_empty" }
+          ? {
+              label: "Pending",
+              color: "bg-amber-100 text-amber-700",
+              icon: "hourglass_empty",
+            }
           : null;
 
   const avatarUrl = profile.image || undefined;

@@ -2,10 +2,10 @@
 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
+import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { authClient } from "@/app/lib/auth-client";
@@ -127,7 +127,6 @@ export default function ProjectDetailPage() {
   };
 
   const handleInitiatePayment = async () => {
-
     if (!donateAmount || Number(donateAmount) <= 0) return;
     setDonating(true);
 
@@ -380,13 +379,50 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Description */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-          <h2 className="text-lg font-semibold text-on-surface mb-4">
-            About this project
-          </h2>
-          <p className="text-gray-700 whitespace-pre-line leading-relaxed">
-            {project.description}
-          </p>
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold text-on-surface mb-4">
+              About this project
+            </h2>
+            <p className="text-gray-700 whitespace-pre-line leading-relaxed">
+              {project.description}
+            </p>
+          </div>
+
+          {project.projectDocuments && project.projectDocuments.length > 0 && (
+            <div>
+              <h2 className="text-lg font-semibold text-on-surface mb-4">
+                Supporting Documents
+              </h2>
+              <div className="space-y-3">
+                {project.projectDocuments.map((doc) => (
+                  <div
+                    key={doc.id}
+                    className="flex items-center justify-between rounded-2xl bg-gray-50 p-4"
+                  >
+                    <div>
+                      <p className="font-medium text-on-surface truncate">
+                        {doc.fileName}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {doc.mimeType || "Document"}
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3 text-sm">
+                      <a
+                        href={doc.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-primary"
+                      >
+                        View
+                      </a>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Donations */}

@@ -36,8 +36,17 @@ export async function GET() {
       approvalStatus: "PENDING",
     },
     include: {
-      ngoInfo: true,
-      companyInfo: true,
+      ngoInfo: {
+        include: {
+          registrationDocuments: true,
+          activityProofUrls: true,
+        },
+      },
+      companyInfo: {
+        include: {
+          registrationDocuments: true,
+        },
+      },
     },
     orderBy: { createdAt: "desc" },
   });

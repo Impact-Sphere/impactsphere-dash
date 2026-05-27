@@ -83,5 +83,4 @@ export async function POST(
     clientSecret: paymentIntent.client_secret,
     donationId: pendingDonation.id,
   });
-
 }

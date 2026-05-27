@@ -21,6 +21,15 @@ export default function NewProjectPage() {
   const [description, setDescription] = useState("");
   const [category, setCategory] = useState("Environment");
   const [image, setImage] = useState("");
+  const [projectDocuments, setProjectDocuments] = useState<
+    {
+      id: string;
+      url: string;
+      fileName: string;
+      mimeType?: string;
+      size?: number;
+    }[]
+  >([]);
   const [targetBudget, setTargetBudget] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checking, setChecking] = useState(true);
@@ -44,6 +53,54 @@ export default function NewProjectPage() {
       .catch(() => router.push("/discover"));
   }, [session, isPending, router]);
 
+  const handleUploadDocuments = async (files: FileList | null) => {
+    if (!files?.length) return;
+
+    const countLeft = 5 - projectDocuments.length;
+    if (countLeft <= 0) {
+      alert("You can only upload up to 5 documents.");
+      return;
+    }
+
+    const selectedFiles = Array.from(files).slice(0, countLeft);
+    if (files.length > countLeft) {
+      alert(
+        `Only ${countLeft} more document${countLeft === 1 ? "" : "s"} can be added.`,
+      );
+    }
+
+    const uploaded: typeof projectDocuments = [];
+    for (const file of selectedFiles) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        uploaded.push({
+          id: data.id,
+          url: data.url,
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+        });
+      } else {
+        const error = await res
+          .json()
+          .catch(() => ({ error: "Upload failed" }));
+        alert(error.error || "Unable to upload document.");
+      }
+    }
+
+    setProjectDocuments((current) => [...current, ...uploaded]);
+  };
+
+  const removeDocument = (id: string) => {
+    setProjectDocuments((current) => current.filter((doc) => doc.id !== id));
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setSubmitting(true);
@@ -57,6 +114,7 @@ export default function NewProjectPage() {
         category,
         image: image || undefined,
         targetBudget: Number(targetBudget),
+        projectDocuments: projectDocuments.map((doc) => doc.id),
       }),
     });
 
@@ -151,6 +209,59 @@ export default function NewProjectPage() {
               <p className="text-xs text-gray-400">
                 Optional. Leave blank for a default image.
               </p>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Supporting Documents
+              </div>
+              <input
+                type="file"
+                multiple
+                onChange={(e) => handleUploadDocuments(e.target.files)}
+                disabled={projectDocuments.length >= 5}
+                className="w-full text-sm text-gray-500 file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 file:rounded-lg file:hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              {projectDocuments.length ? (
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {projectDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="group relative flex items-center justify-center w-28 h-28 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-xs text-left overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-white/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                      <div className="relative z-10 w-full h-full flex flex-col justify-between">
+                        <div className="text-xs font-semibold text-gray-800 truncate">
+                          {doc.fileName}
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary underline text-[11px]"
+                          >
+                            Open
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(doc.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600"
+                            aria-label="Remove document"
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-400">
+                  Optional. Add documents that explain your project purpose.
+                </p>
+              )}
+              <p className="text-xs text-gray-400">Up to 5 documents.</p>
             </div>
 
             <div className="space-y-2">
