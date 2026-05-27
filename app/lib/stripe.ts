@@ -1,11 +1,16 @@
 import Stripe from "stripe";
 
-const secretKey = process.env.STRIPE_SECRET_KEY;
+let stripeInstance: Stripe | undefined;
 
-if (!secretKey) {
-  throw new Error("STRIPE_SECRET_KEY is not set");
+export function getStripe(): Stripe {
+  if (!stripeInstance) {
+    const secretKey = process.env.STRIPE_SECRET_KEY;
+    if (!secretKey) {
+      throw new Error("STRIPE_SECRET_KEY is not set");
+    }
+    stripeInstance = new Stripe(secretKey, {
+      apiVersion: "2026-04-22.dahlia",
+    });
+  }
+  return stripeInstance;
 }
-
-export const stripe = new Stripe(secretKey, {
-  apiVersion: "2026-04-22.dahlia",
-});

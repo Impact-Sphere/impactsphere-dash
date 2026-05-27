@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 
 export async function POST(
   request: Request,
@@ -63,7 +63,7 @@ export async function POST(
   });
 
   // Create a Stripe PaymentIntent
-  const paymentIntent = await stripe.paymentIntents.create({
+  const paymentIntent = await getStripe().paymentIntents.create({
     amount: donationAmountCents,
     currency: "eur",
     metadata: {

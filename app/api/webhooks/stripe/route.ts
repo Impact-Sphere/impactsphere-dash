@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import type Stripe from "stripe";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/app/lib/db";
-import { stripe } from "@/app/lib/stripe";
+import { getStripe } from "@/app/lib/stripe";
 
 const endpointSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
     if (!endpointSecret) {
       throw new Error("STRIPE_WEBHOOK_SECRET is not set");
     }
-    event = stripe.webhooks.constructEvent(payload, sig, endpointSecret);
+    event = getStripe().webhooks.constructEvent(payload, sig, endpointSecret);
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json(
@@ -43,7 +44,7 @@ export async function POST(request: Request) {
         );
       }
 
-      await prisma.$transaction(async (tx) => {
+      await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
         // Mark donation as succeeded
         await tx.donation.update({
           where: { id: donationId },
