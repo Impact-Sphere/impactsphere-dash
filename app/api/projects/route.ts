@@ -1,3 +1,4 @@
+import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
@@ -12,6 +13,8 @@ export async function GET(request: Request) {
   const category = searchParams.get("category");
   const mine = searchParams.get("mine");
   const ngoId = searchParams.get("ngoId");
+  const q = searchParams.get("q")?.trim();
+  const recent = searchParams.get("recent");
 
   const isAdmin =
     session &&
@@ -82,11 +85,12 @@ export async function GET(request: Request) {
       });
       const seen = new Set<string>();
       const projects: (typeof donations)[number]["project"][] = [];
+
       for (const donation of donations) {
         const p = donation.project;
         if (!seen.has(p.id)) {
           seen.add(p.id);
-          projects.push(p);
+          projects.push(p as unknown as Project);
         }
       }
       return NextResponse.json(projects);
@@ -95,12 +99,68 @@ export async function GET(request: Request) {
     return NextResponse.json([]);
   }
 
+  // Full-text search overrides everything else on the discovery list
+  if (q) {
+    const approvalFilter = isAdmin
+      ? Prisma.sql``
+      : Prisma.sql`AND p."approvalStatus" = 'APPROVED'`;
+    const categoryFilter =
+      category && category !== "all"
+        ? Prisma.sql`AND p.category = ${category}`
+        : Prisma.sql``;
+
+    const searchQuery = Prisma.sql`websearch_to_tsquery('english', ${q})`;
+
+    const searchResults = await prisma.$queryRaw<{ id: string }[]>`
+      SELECT p.id
+      FROM project p
+      LEFT JOIN "user" u ON p."ngoId" = u.id
+      LEFT JOIN ngo_info n ON u.id = n."userId"
+      WHERE p.status = 'ACTIVE'
+        ${approvalFilter}
+        ${categoryFilter}
+        AND (
+          p."searchVector" @@ ${searchQuery}
+          OR to_tsvector('english', coalesce(n."ngoName", '')) @@ ${searchQuery}
+        )
+      ORDER BY ts_rank(p."searchVector", ${searchQuery}) DESC,
+               p."createdAt" DESC
+    `;
+
+    const projectIds = searchResults.map((r) => r.id);
+    if (projectIds.length === 0) return NextResponse.json([]);
+
+    const projects = await prisma.project.findMany({
+      where: { id: { in: projectIds } },
+      include: {
+        ngo: { select: { name: true, image: true, ngoInfo: true } },
+        _count: { select: { donations: true } },
+      },
+    });
+
+    const projectMap = new Map(projects.map((p) => [p.id, p]));
+    const ordered = projectIds
+      .map((id) => projectMap.get(id))
+      .filter((p): p is NonNullable<typeof p> => p !== undefined);
+
+    return NextResponse.json(ordered);
+  }
+
+  // Standard discovery list with optional recent filter
+  const where: Prisma.ProjectWhereInput = {
+    status: "ACTIVE",
+    ...(isAdmin ? {} : { approvalStatus: "APPROVED" }),
+    ...(category && category !== "all" ? { category } : {}),
+  };
+
+  if (recent === "true") {
+    const thirtyDaysAgo = new Date();
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    where.createdAt = { gte: thirtyDaysAgo };
+  }
+
   const projects = await prisma.project.findMany({
-    where: {
-      status: "ACTIVE",
-      ...(isAdmin ? {} : { approvalStatus: "APPROVED" }),
-      ...(category && category !== "all" ? { category } : {}),
-    },
+    where,
     include: {
       ngo: { select: { name: true, image: true, ngoInfo: true } },
       _count: { select: { donations: true } },

@@ -18,6 +18,7 @@
             pnpm
             openssl
             prisma-engines
+            stripe-cli
           ];
 
           shellHook = ''
