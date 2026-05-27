@@ -159,6 +159,20 @@ export default function AdminDashboardPage() {
           >
             Pending Projects ({projects.length})
           </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/services")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50"
+          >
+            Services
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/acquisitions")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50"
+          >
+            Acquisitions
+          </button>
         </div>
 
         {activeTab === "users" && (

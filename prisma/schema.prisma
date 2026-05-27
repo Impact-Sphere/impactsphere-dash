@@ -28,6 +28,9 @@ model User {
   updatedAt       DateTime
   userType        UserType?
   approvalStatus  ApprovalStatus  @default(PENDING)
+  adminNotes      String?
+  meetingStatus   MeetingStatus   @default(NOT_REQUESTED)
+  providerBio     String?
   ngoInfo         NgoInfo?
   companyInfo     CompanyInfo?
   sessions        Session[]
@@ -35,20 +38,28 @@ model User {
   projects        Project[]
   donations       Donation[]
   meetingRequests MeetingRequest[]
+  services        Service[]
 
   @@unique([email])
   @@map("user")
 }
 
 model NgoInfo {
-  id                      String @id
-  userId                  String @unique
-  user                    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id                      String           @id
+  userId                  String           @unique
+  user                    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   ngoName                 String
   taxIdentificationNumber String
   contactInfo             String
   mainGoals               String
   challenges              String
+  legalRepName            String?
+  legalRepIdUrl           String?
+  statutesUrl             String?
+  activityReportUrl       String?
+  partnerLetterUrl        String?
+  socialMediaLinks        String?
+  verificationTier        VerificationTier @default(PENDING_DOCUMENTS)
 
   @@map("ngo_info")
 }
@@ -61,6 +72,8 @@ model CompanyInfo {
   taxIdentificationNumber String
   contactInfo             String
   causesSupported         String
+  representativeName      String?
+  representativePosition  String?
 
   @@map("company_info")
 }
@@ -132,6 +145,7 @@ model Project {
   ngo              User            @relation(fields: [ngoId], references: [id], onDelete: Cascade)
   donations        Donation[]
   meetingRequests  MeetingRequest[]
+  serviceAcquisitions ServiceAcquisition[]
 
   @@map("project")
 }
@@ -162,6 +176,19 @@ enum MeetingRequestStatus {
   APPROVED
   REJECTED
   SCHEDULED
+}
+
+enum MeetingStatus {
+  NOT_REQUESTED
+  PENDING
+  COMPLETED
+}
+
+enum VerificationTier {
+  FORMAL_REGISTRATION
+  PARTNER_REFERRAL
+  SOCIAL_MEDIA_VERIFIED
+  PENDING_DOCUMENTS
 }
 
 model MeetingTimeSlot {
@@ -205,4 +232,129 @@ model MeetingRequest {
   @@map("meeting_request")
 }
 
+enum ServiceAcquisitionStatus {
+  ACTIVE
+  DELIVERED
+  REVISION_REQUESTED
+  COMPLETED
+  CANCELLED
+}
+
+model Service {
+  id              String               @id @default(uuid())
+  name            String
+  description     String
+  category        String
+  tags            String[]             @default([])
+  image           String?
+  portfolioImages String[]             @default([])
+  featured        Boolean              @default(false)
+  rating          Float                @default(0)
+  reviewCount     Int                  @default(0)
+  active          Boolean              @default(true)
+  providerId      String
+  provider        User                 @relation(fields: [providerId], references: [id], onDelete: Cascade)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  packages        ServicePackage[]
+  acquisitions    ServiceAcquisition[]
+  reviews         ServiceReview[]
+
+  @@index([category])
+  @@index([providerId])
+  @@index([active])
+  @@index([featured])
+
+  @@map("service")
+}
+
+model ServicePackage {
+  id              String               @id @default(uuid())
+  serviceId       String
+  service         Service              @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  name            String               // Basic, Standard, Premium
+  description     String
+  price           Int                  // in cents
+  deliveryDays    Int
+  revisions       Int                  @default(1)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  acquisitions    ServiceAcquisition[]
+
+  @@index([serviceId])
+  @@map("service_package")
+}
+
+model ServiceAcquisition {
+  id              String                   @id @default(uuid())
+  projectId       String
+  project         Project                  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  serviceId       String
+  service         Service                  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  packageId       String
+  package         ServicePackage           @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  status          ServiceAcquisitionStatus @default(ACTIVE)
+  startDate       DateTime                 @default(now())
+  endDate         DateTime?
+  deliveredAt     DateTime?
+  completedAt     DateTime?
+  revisionsUsed   Int                      @default(0)
+  deliveryMessage String?
+  createdAt       DateTime                 @default(now())
+  updatedAt       DateTime                 @updatedAt
+
+  chat            Chat?
+  review          ServiceReview?
+
+  @@index([projectId])
+  @@index([serviceId])
+  @@index([status])
+
+  @@map("service_acquisition")
+}
+
+model ServiceReview {
+  id                    String               @id @default(uuid())
+  serviceId             String
+  service               Service              @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  acquisitionId         String               @unique
+  acquisition           ServiceAcquisition   @relation(fields: [acquisitionId], references: [id], onDelete: Cascade)
+  userId                String
+  rating                Int                  // 1-5 stars
+  comment               String?
+  createdAt             DateTime             @default(now())
+
+  @@index([serviceId])
+  @@index([userId])
+
+  @@map("service_review")
+}
+
+model Chat {
+  id                    String               @id @default(uuid())
+  serviceAcquisitionId  String               @unique
+  serviceAcquisition    ServiceAcquisition   @relation(fields: [serviceAcquisitionId], references: [id], onDelete: Cascade)
+  createdAt             DateTime             @default(now())
+  updatedAt             DateTime             @updatedAt
+
+  messages              Message[]
+
+  @@map("chat")
+}
+
+model Message {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      Chat     @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+
+  @@map("message")
+}
 

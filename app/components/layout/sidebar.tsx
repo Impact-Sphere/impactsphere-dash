@@ -96,6 +96,40 @@ export function Sidebar() {
             </span>
           </Link>
         )}
+        {isApprovedNgo && (
+          <>
+            <Link
+              href="/services"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/services"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">handshake</span>
+              <span className="text-sm font-semibold font-inter">
+                Services
+              </span>
+            </Link>
+            <Link
+              href="/my-services"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/my-services"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">inventory_2</span>
+              <span className="text-sm font-semibold font-inter">
+                My Services
+              </span>
+            </Link>
+          </>
+        )}
       </nav>
 
       {/* CTA Button */}
