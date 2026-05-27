@@ -50,16 +50,15 @@ export async function GET(
     const isOwner = session?.user?.id === project.ngoId;
     const isAdmin =
       session &&
-      (await prisma.user.findUnique({
-        where: { id: session.user.id },
-        select: { userType: true },
-      }))?.userType === "ADMIN";
+      (
+        await prisma.user.findUnique({
+          where: { id: session.user.id },
+          select: { userType: true },
+        })
+      )?.userType === "ADMIN";
 
     if (!isOwner && !isAdmin) {
-      return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 },
-      );
+      return NextResponse.json({ error: "Project not found" }, { status: 404 });
     }
   }
 

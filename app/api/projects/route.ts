@@ -15,10 +15,12 @@ export async function GET(request: Request) {
 
   const isAdmin =
     session &&
-    (await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { userType: true },
-    }))?.userType === "ADMIN";
+    (
+      await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { userType: true },
+      })
+    )?.userType === "ADMIN";
 
   if (ngoId) {
     const projects = await prisma.project.findMany({
@@ -131,7 +133,10 @@ export async function POST(request: Request) {
 
   if (user.approvalStatus !== "APPROVED") {
     return NextResponse.json(
-      { error: "Your account is pending approval. You cannot create projects yet." },
+      {
+        error:
+          "Your account is pending approval. You cannot create projects yet.",
+      },
       { status: 403 },
     );
   }

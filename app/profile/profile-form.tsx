@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
 import { authClient } from "@/app/lib/auth-client";
 import { cn } from "@/app/lib/utils";
+import { Meetings } from "./project-meetings";
 import { UserProjects } from "./user-projects";
 
 type ProfileData = {
@@ -31,12 +32,13 @@ type ProfileData = {
 
 export function ProfileForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"projects" | "details">(
-    "projects",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "projects" | "meetings" | "details"
+  >("projects");
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -89,6 +91,13 @@ export function ProfileForm() {
       fetchProfile();
     }
   }, [session, sessionPending, router, fetchProfile]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "projects" || tab === "meetings" || tab === "details") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleSave = async () => {
     if (!profile) return;
@@ -198,7 +207,7 @@ export function ProfileForm() {
     label,
     icon,
   }: {
-    tab: "projects" | "details";
+    tab: "projects" | "meetings" | "details";
     label: string;
     icon: string;
   }) => (
@@ -304,6 +313,13 @@ export function ProfileForm() {
       {/* Tabs */}
       <div className="flex items-center space-x-2">
         <TabButton tab="projects" label="Projects" icon="grid_view" />
+        {(profile.userType === "NGO" || profile.userType === "COMPANY") && (
+          <TabButton
+            tab="meetings"
+            label="Meeting Requests"
+            icon="calendar_month"
+          />
+        )}
         <TabButton tab="details" label="Organization Details" icon="badge" />
       </div>
 
@@ -315,6 +331,9 @@ export function ProfileForm() {
           )}
         </div>
       )}
+
+      {/* Meetings Tab */}
+      {activeTab === "meetings" && <Meetings userType={profile.userType} />}
 
       {/* Details Tab */}
       {activeTab === "details" && (

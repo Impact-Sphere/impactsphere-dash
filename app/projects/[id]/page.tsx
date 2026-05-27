@@ -1,20 +1,33 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import DatePicker from "react-datepicker";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { authClient } from "@/app/lib/auth-client";
+import {
+  createDefaultSlot,
+  getEndMinTimeForDate,
+  getMinEndDate,
+  getNextHalfHourStart,
+  getSlotValidation,
+  getStartMinTimeForDate,
+  mergeContiguousSlots,
+} from "@/app/lib/meetings-utils";
 import {
   formatCurrency,
   getFundedPercent,
   getNgoName,
   getProjectImage,
 } from "@/app/lib/project-utils";
+import type { MeetingRequest, TimeSlot } from "@/app/types/meeting";
 import type { Project } from "@/app/types/project";
+import "react-datepicker/dist/react-datepicker.css";
 
 export default function ProjectDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const id = params.id as string;
   const { data: session } = authClient.useSession();
 
@@ -25,6 +38,15 @@ export default function ProjectDetailPage() {
   const [donating, setDonating] = useState(false);
   const [userType, setUserType] = useState<string | null>(null);
 
+  const [meetingOpen, setMeetingOpen] = useState(false);
+  const [meetingTimes, setMeetingTimes] = useState<TimeSlot[]>([]);
+  const [meetingNotes, setMeetingNotes] = useState("");
+  const [savingMeeting, setSavingMeeting] = useState(false);
+  const [existingRequest, setExistingRequest] = useState<MeetingRequest | null>(
+    null,
+  );
+  const [loadingRequest, setLoadingRequest] = useState(false);
+
   const fetchProject = useCallback(async () => {
     const res = await fetch(`/api/projects/${id}`);
     if (res.ok) {
@@ -33,6 +55,37 @@ export default function ProjectDetailPage() {
     }
     setLoading(false);
   }, [id]);
+
+  const fetchExistingRequest = useCallback(async () => {
+    if (!session?.user?.id || userType !== "COMPANY") return;
+    setLoadingRequest(true);
+    const res = await fetch(`/api/meeting-requests?projectId=${id}`);
+    if (res.ok) {
+      const requests = await res.json();
+      const existing = requests.find((r: MeetingRequest) => r.projectId === id);
+      if (existing) {
+        setExistingRequest(existing);
+        if (existing.proposedTimes && existing.proposedTimes.length > 0) {
+          const convertedTimes = existing.proposedTimes.map(
+            (slot: TimeSlot) => {
+              const startDate = new Date(slot.start);
+              const endDate = new Date(slot.end);
+
+              return {
+                start: startDate.toISOString(),
+                end: endDate.toISOString(),
+              };
+            },
+          );
+          setMeetingTimes(mergeContiguousSlots(convertedTimes));
+        }
+        if (existing.notes) {
+          setMeetingNotes(existing.notes.trim());
+        }
+      }
+    }
+    setLoadingRequest(false);
+  }, [id, session?.user?.id, userType]);
 
   useEffect(() => {
     if (!id) return;
@@ -43,9 +96,17 @@ export default function ProjectDetailPage() {
     if (!session) return;
     fetch("/api/profile")
       .then((res) => res.json())
-      .then((data) => setUserType(data.userType || null))
+      .then((data) => {
+        setUserType(data.userType || null);
+      })
       .catch(() => {});
   }, [session]);
+
+  useEffect(() => {
+    if (userType === "COMPANY" && session?.user?.id) {
+      fetchExistingRequest();
+    }
+  }, [userType, session?.user?.id, fetchExistingRequest]);
 
   const handleDonate = async () => {
     if (!donateAmount || Number(donateAmount) <= 0) return;
@@ -69,6 +130,110 @@ export default function ProjectDetailPage() {
     }
   };
 
+  const handleRequestMeeting = async () => {
+    if (hasInvalidSlots) {
+      alert(
+        "Some meeting slots are invalid or overlapping. Please fix them before saving.",
+      );
+
+      return;
+    }
+
+    const mergedTimes = mergeContiguousSlots(meetingTimes);
+
+    setSavingMeeting(true);
+
+    const trimmedNotes = meetingNotes.trim();
+    const res = await fetch(`/api/meeting-requests`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        projectId: id,
+        proposedTimes: mergedTimes,
+        notes: trimmedNotes,
+      }),
+    });
+
+    setSavingMeeting(false);
+
+    if (res.ok) {
+      setMeetingOpen(false);
+      setMeetingTimes([]);
+      setMeetingNotes("");
+      await fetchExistingRequest();
+      alert("Meeting request sent successfully!");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to send meeting request.");
+    }
+  };
+
+  const MAX_TIME_SLOTS = 10;
+
+  const addTimeSlot = () => {
+    setMeetingTimes((prev) =>
+      prev.length >= MAX_TIME_SLOTS ? prev : [...prev, createDefaultSlot()],
+    );
+  };
+
+  const updateSlotStart = (index: number, newStart: Date) => {
+    const updated = [...meetingTimes];
+    const currentEnd = new Date(updated[index].end);
+    const minStart = getNextHalfHourStart();
+
+    if (newStart.getTime() < minStart.getTime()) {
+      newStart = minStart;
+    }
+
+    const duration =
+      currentEnd.getTime() - new Date(updated[index].start).getTime();
+
+    let newEnd = new Date(newStart.getTime() + duration);
+
+    if (newEnd.getTime() - newStart.getTime() < 30 * 60000) {
+      newEnd = new Date(newStart.getTime() + 30 * 60000);
+    }
+
+    updated[index] = {
+      start: newStart.toISOString(),
+      end: newEnd.toISOString(),
+    };
+
+    setMeetingTimes(updated);
+  };
+
+  const updateSlotEnd = (index: number, newEnd: Date) => {
+    const updated = [...meetingTimes];
+    const currentStart = new Date(updated[index].start);
+    const minEnd = new Date(currentStart.getTime() + 30 * 60000);
+
+    if (newEnd < minEnd) {
+      newEnd = minEnd;
+    }
+
+    updated[index] = {
+      ...updated[index],
+      end: newEnd.toISOString(),
+    };
+
+    setMeetingTimes(updated);
+  };
+
+  const removeTimeSlot = (index: number) => {
+    setMeetingTimes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const hasInvalidSlots = meetingTimes.some((slot, index) => {
+    const { invalidRange, pastStart, colliding } = getSlotValidation(
+      slot,
+      meetingTimes,
+      index,
+    );
+    return invalidRange || pastStart || colliding;
+  });
+
   if (loading) {
     return (
       <main className="ml-72 min-h-screen flex items-center justify-center">
@@ -90,6 +255,7 @@ export default function ProjectDetailPage() {
   const isNgo = userType === "NGO";
   const isOwner = isNgo && session?.user?.id === project.ngoId;
   const isAdmin = userType === "ADMIN";
+  const isCompany = userType === "COMPANY";
   const showApprovalBadge = isOwner || isAdmin;
 
   return (
@@ -234,6 +400,59 @@ export default function ProjectDetailPage() {
             </div>
           </div>
         )}
+
+        {isLoggedIn && isCompany && (
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+            <h2 className="text-lg font-semibold text-on-surface">
+              Want to know better the project before donating? Request a
+              meeting!
+            </h2>
+            {loadingRequest ? (
+              <div className="flex items-center justify-center py-6">
+                <div className="w-6 h-6 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
+              </div>
+            ) : existingRequest ? (
+              <div className="space-y-3">
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-800 font-medium">
+                    You have already requested a meeting for this project
+                  </p>
+                  <p className="text-xs text-blue-700 mt-1">
+                    Status:{" "}
+                    <span className="font-semibold">
+                      {existingRequest.status}
+                    </span>
+                  </p>
+                </div>
+                <div className="flex">
+                  <button
+                    type="button"
+                    onClick={() => router.push("/profile?tab=meetings")}
+                    className="flex-1 flex items-center justify-center space-x-2 bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-xl text-sm font-medium transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-base">
+                      arrow_forward
+                    </span>
+                    <span>View in Profile</span>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="flex">
+                <button
+                  type="button"
+                  onClick={() => setMeetingOpen(true)}
+                  className="flex-1 flex items-center justify-center space-x-2 bg-primary hover:bg-primary-container text-on-primary px-6 py-3 rounded-xl text-sm font-medium transition-colors"
+                >
+                  <span className="material-symbols-outlined text-xl">
+                    calendar_month
+                  </span>
+                  <span>Request Meeting</span>
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Donate Modal */}
@@ -279,6 +498,206 @@ export default function ProjectDetailPage() {
                 className="flex-1 py-2.5 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
               >
                 {donating ? "Processing..." : "Donate"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {meetingOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-on-surface">
+              Request Meeting
+            </h2>
+
+            <p className="text-sm text-gray-500">
+              Select the timeframes according to your availability (All times
+              are shown in YOUR local timezone).
+            </p>
+
+            <div className="space-y-4">
+              {hasInvalidSlots && (
+                <div className="rounded-xl border border-red-300 bg-red-50 p-4 text-sm text-red-700">
+                  Some time slots are invalid or overlapping. Fix the
+                  highlighted ones before saving.
+                </div>
+              )}
+
+              <div className="max-h-[38vh] overflow-y-auto space-y-4 pr-2">
+                {meetingTimes.map((slot, index) => {
+                  const { invalidRange, pastStart, colliding } =
+                    getSlotValidation(slot, meetingTimes, index);
+                  const invalid = invalidRange || pastStart || colliding;
+
+                  return (
+                    <div
+                      key={`${slot.start}-${slot.end}-${index}`}
+                      className={`p-4 rounded-xl border ${
+                        invalid
+                          ? "border-red-300 bg-red-50"
+                          : "border-gray-200 bg-gray-50"
+                      }`}
+                    >
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <div className="text-sm font-medium">Start</div>
+
+                          <DatePicker
+                            selected={new Date(slot.start)}
+                            onChange={(date: Date | null) => {
+                              if (!date) return;
+
+                              updateSlotStart(index, date);
+                            }}
+                            showTimeSelect
+                            timeIntervals={30}
+                            dateFormat="dd/MM/yyyy HH:mm"
+                            timeFormat="HH:mm"
+                            minDate={getNextHalfHourStart()}
+                            minTime={getStartMinTimeForDate(
+                              new Date(slot.start),
+                            )}
+                            maxTime={
+                              new Date(
+                                new Date(slot.start).setHours(23, 59, 59, 999),
+                              )
+                            }
+                            filterTime={(time) => {
+                              const selectedDate = new Date(time);
+                              return (
+                                selectedDate.getTime() >=
+                                getStartMinTimeForDate(selectedDate).getTime()
+                              );
+                            }}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                          />
+                        </div>
+
+                        <div className="space-y-2">
+                          <div className="text-sm font-medium">End</div>
+
+                          <DatePicker
+                            selected={new Date(slot.end)}
+                            onChange={(date: Date | null) => {
+                              if (!date) return;
+
+                              updateSlotEnd(index, date);
+                            }}
+                            showTimeSelect
+                            timeIntervals={30}
+                            dateFormat="dd/MM/yyyy HH:mm"
+                            timeFormat="HH:mm"
+                            minDate={getMinEndDate(slot)}
+                            minTime={getEndMinTimeForDate(
+                              new Date(slot.end),
+                              slot,
+                            )}
+                            maxTime={
+                              new Date(
+                                new Date(slot.end).setHours(23, 59, 59, 999),
+                              )
+                            }
+                            filterTime={(time) => {
+                              const selectedDate = new Date(time);
+                              return (
+                                selectedDate.getTime() >=
+                                getEndMinTimeForDate(
+                                  selectedDate,
+                                  slot,
+                                ).getTime()
+                              );
+                            }}
+                            className="w-full px-3 py-2 border border-gray-200 rounded-lg"
+                          />
+                        </div>
+                      </div>
+
+                      {pastStart && (
+                        <div className="text-red-600 text-sm mt-3">
+                          Start time must be in the future and at the next
+                          available hour.
+                        </div>
+                      )}
+
+                      {invalidRange && !pastStart && (
+                        <div className="text-red-600 text-sm mt-3">
+                          Slots must be at least 30 minutes long.
+                        </div>
+                      )}
+
+                      {colliding && (
+                        <div className="text-red-600 text-sm mt-3">
+                          This slot overlaps another proposed slot.
+                        </div>
+                      )}
+
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          onClick={() => removeTimeSlot(index)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          Remove
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex items-center justify-between gap-4">
+                <button
+                  type="button"
+                  onClick={addTimeSlot}
+                  disabled={meetingTimes.length >= MAX_TIME_SLOTS}
+                  className="text-blue-600 hover:text-blue-800 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  + Add Time Slot
+                </button>
+                {meetingTimes.length >= MAX_TIME_SLOTS && (
+                  <div className="text-sm text-gray-500">
+                    Max {MAX_TIME_SLOTS} time slots allowed.
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* NOTES */}
+            <div className="space-y-2">
+              <div className="text-sm font-medium">Additional Notes</div>
+
+              <textarea
+                value={meetingNotes}
+                onChange={(e) => setMeetingNotes(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
+              />
+            </div>
+
+            {/* ACTIONS */}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setMeetingNotes("");
+                  setMeetingTimes([]);
+                  setMeetingOpen(false);
+                }}
+                className="flex-1 py-2.5 px-4 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+
+              <button
+                type="button"
+                onClick={handleRequestMeeting}
+                disabled={
+                  savingMeeting || meetingTimes.length === 0 || hasInvalidSlots
+                }
+                className="flex-1 py-2.5 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {savingMeeting ? "Saving..." : "Save"}
               </button>
             </div>
           </div>

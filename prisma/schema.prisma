@@ -34,6 +34,7 @@ model User {
   accounts        Account[]
   projects        Project[]
   donations       Donation[]
+  meetingRequests MeetingRequest[]
 
   @@unique([email])
   @@map("user")
@@ -130,6 +131,7 @@ model Project {
   ngoId            String
   ngo              User            @relation(fields: [ngoId], references: [id], onDelete: Cascade)
   donations        Donation[]
+  meetingRequests  MeetingRequest[]
 
   @@map("project")
 }
@@ -145,3 +147,53 @@ model Donation {
 
   @@map("donation")
 }
+
+enum MeetingRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  SCHEDULED
+}
+
+model MeetingTimeSlot {
+  id        String   @id @default(uuid())
+
+  meetingId String
+  meeting   MeetingRequest @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  start     DateTime
+  end       DateTime
+
+  @@index([meetingId])
+  @@map("meeting_time_slot")
+}
+
+model MeetingRequest {
+  id            String               @id @default(uuid())
+
+  projectId     String
+  project       Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  companyId     String
+  company       User                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  requestedAt   DateTime             @default(now())
+
+  status        MeetingRequestStatus @default(PENDING)
+
+  proposedTimes MeetingTimeSlot[]
+  selectedTime  DateTime?
+
+  notes         String?
+
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+
+  @@index([companyId])
+  @@index([projectId])
+  @@index([status])
+
+  @@map("meeting_request")
+}
+
+

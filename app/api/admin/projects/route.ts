@@ -27,10 +27,7 @@ async function requireAdmin() {
 export async function GET() {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const projects = await prisma.project.findMany({
@@ -56,20 +53,14 @@ export async function GET() {
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const body = await request.json();
   const { projectId, action } = body;
 
   if (!projectId || !["approve", "reject"].includes(action)) {
-    return NextResponse.json(
-      { error: "Invalid request" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
   const project = await prisma.project.findUnique({
@@ -78,10 +69,7 @@ export async function POST(request: Request) {
   });
 
   if (!project) {
-    return NextResponse.json(
-      { error: "Project not found" },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
   const newStatus = action === "approve" ? "APPROVED" : "REJECTED";

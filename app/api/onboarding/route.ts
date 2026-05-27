@@ -29,11 +29,22 @@ export async function GET() {
   if (!user.userType) {
     needsOnboarding = true;
   } else if (user.userType === "COMPANY" && user.companyInfo) {
-    if (!user.companyInfo.companyName || !user.companyInfo.taxIdentificationNumber || !user.companyInfo.contactInfo || !user.companyInfo.causesSupported) {
+    if (
+      !user.companyInfo.companyName ||
+      !user.companyInfo.taxIdentificationNumber ||
+      !user.companyInfo.contactInfo ||
+      !user.companyInfo.causesSupported
+    ) {
       needsOnboarding = true;
     }
   } else if (user.userType === "NGO" && user.ngoInfo) {
-    if (!user.ngoInfo.ngoName || !user.ngoInfo.taxIdentificationNumber || !user.ngoInfo.contactInfo || !user.ngoInfo.mainGoals || !user.ngoInfo.challenges) {
+    if (
+      !user.ngoInfo.ngoName ||
+      !user.ngoInfo.taxIdentificationNumber ||
+      !user.ngoInfo.contactInfo ||
+      !user.ngoInfo.mainGoals ||
+      !user.ngoInfo.challenges
+    ) {
       needsOnboarding = true;
     }
   }

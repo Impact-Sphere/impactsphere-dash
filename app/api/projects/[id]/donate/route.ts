@@ -70,7 +70,10 @@ export async function POST(
     select: { currentAmount: true, targetBudget: true },
   });
 
-  if (updatedProject && updatedProject.currentAmount >= updatedProject.targetBudget) {
+  if (
+    updatedProject &&
+    updatedProject.currentAmount >= updatedProject.targetBudget
+  ) {
     await prisma.project.update({
       where: { id },
       data: { status: "COMPLETED" },
