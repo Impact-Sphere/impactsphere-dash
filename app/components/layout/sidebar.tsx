@@ -88,7 +88,9 @@ export function Sidebar() {
                 : "text-slate-500 hover:bg-slate-200/50",
             )}
           >
-            <span className="material-symbols-outlined">admin_panel_settings</span>
+            <span className="material-symbols-outlined">
+              admin_panel_settings
+            </span>
             <span className="text-sm font-semibold font-inter">
               Admin Dashboard
             </span>

@@ -1,10 +1,11 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
 import { authClient } from "@/app/lib/auth-client";
 import { cn } from "@/app/lib/utils";
+import { Meetings } from "./project-meetings";
 import { UserProjects } from "./user-projects";
 
 type ProfileData = {
@@ -13,6 +14,7 @@ type ProfileData = {
   email: string;
   image: string | null;
   userType: "NGO" | "COMPANY" | "ADMIN" | null;
+  approvalStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
   createdAt: string;
   ngoInfo: {
     ngoName: string;
@@ -31,12 +33,13 @@ type ProfileData = {
 
 export function ProfileForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: session, isPending: sessionPending } = authClient.useSession();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"projects" | "details">(
-    "projects",
-  );
+  const [activeTab, setActiveTab] = useState<
+    "projects" | "meetings" | "details"
+  >("projects");
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
 
@@ -89,6 +92,13 @@ export function ProfileForm() {
       fetchProfile();
     }
   }, [session, sessionPending, router, fetchProfile]);
+
+  useEffect(() => {
+    const tab = searchParams.get("tab");
+    if (tab === "projects" || tab === "meetings" || tab === "details") {
+      setActiveTab(tab);
+    }
+  }, [searchParams]);
 
   const handleSave = async () => {
     if (!profile) return;
@@ -188,6 +198,15 @@ export function ProfileForm() {
         ? "bg-blue-100 text-blue-700"
         : "bg-violet-100 text-violet-700";
 
+  const approvalStatusConfig =
+    profile.approvalStatus === "APPROVED"
+      ? { label: "Approved", color: "bg-emerald-100 text-emerald-700", icon: "check_circle" }
+      : profile.approvalStatus === "REJECTED"
+        ? { label: "Rejected", color: "bg-red-100 text-red-700", icon: "cancel" }
+        : profile.approvalStatus === "PENDING"
+          ? { label: "Pending", color: "bg-amber-100 text-amber-700", icon: "hourglass_empty" }
+          : null;
+
   const avatarUrl = profile.image || undefined;
   const initials = (profile.name || profile.email || "?")
     .charAt(0)
@@ -198,7 +217,7 @@ export function ProfileForm() {
     label,
     icon,
   }: {
-    tab: "projects" | "details";
+    tab: "projects" | "meetings" | "details";
     label: string;
     icon: string;
   }) => (
@@ -270,16 +289,31 @@ export function ProfileForm() {
                 </h1>
               </div>
               <p className="text-gray-500">{profile.email}</p>
-              <div
-                className={cn(
-                  "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
-                  typeColor,
+              <div className="flex items-center gap-2 flex-wrap">
+                <div
+                  className={cn(
+                    "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                    typeColor,
+                  )}
+                >
+                  <span className="material-symbols-outlined text-[18px]">
+                    {typeIcon}
+                  </span>
+                  <span>{typeLabel}</span>
+                </div>
+                {approvalStatusConfig && profile.userType !== "ADMIN" && (
+                  <div
+                    className={cn(
+                      "inline-flex items-center space-x-1.5 px-3 py-1 rounded-full text-sm font-medium",
+                      approvalStatusConfig.color,
+                    )}
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      {approvalStatusConfig.icon}
+                    </span>
+                    <span>{approvalStatusConfig.label}</span>
+                  </div>
                 )}
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  {typeIcon}
-                </span>
-                <span>{typeLabel}</span>
               </div>
             </div>
           </div>
@@ -304,6 +338,13 @@ export function ProfileForm() {
       {/* Tabs */}
       <div className="flex items-center space-x-2">
         <TabButton tab="projects" label="Projects" icon="grid_view" />
+        {(profile.userType === "NGO" || profile.userType === "COMPANY") && (
+          <TabButton
+            tab="meetings"
+            label="Meeting Requests"
+            icon="calendar_month"
+          />
+        )}
         <TabButton tab="details" label="Organization Details" icon="badge" />
       </div>
 
@@ -315,6 +356,9 @@ export function ProfileForm() {
           )}
         </div>
       )}
+
+      {/* Meetings Tab */}
+      {activeTab === "meetings" && <Meetings userType={profile.userType} />}
 
       {/* Details Tab */}
       {activeTab === "details" && (

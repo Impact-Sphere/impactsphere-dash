@@ -94,17 +94,20 @@ export function UserProjects({
                   <h3 className="text-sm font-bold text-on-surface truncate">
                     {project.title}
                   </h3>
-                  {project.approvalStatus && project.approvalStatus !== "APPROVED" && (
-                    <span
-                      className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                        project.approvalStatus === "PENDING"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-red-100 text-red-700"
-                      }`}
-                    >
-                      {project.approvalStatus === "PENDING" ? "Pending" : "Rejected"}
-                    </span>
-                  )}
+                  {project.approvalStatus &&
+                    project.approvalStatus !== "APPROVED" && (
+                      <span
+                        className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-medium ${
+                          project.approvalStatus === "PENDING"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-red-100 text-red-700"
+                        }`}
+                      >
+                        {project.approvalStatus === "PENDING"
+                          ? "Pending"
+                          : "Rejected"}
+                      </span>
+                    )}
                 </div>
                 <p className="text-xs text-gray-500">{project.category}</p>
                 <div className="flex items-center space-x-2 text-xs">

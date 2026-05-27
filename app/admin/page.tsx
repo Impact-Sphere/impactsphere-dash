@@ -85,7 +85,10 @@ export default function AdminDashboardPage() {
       .catch(() => router.push("/discover"));
   }, [session, isPending, router, fetchData]);
 
-  const handleUserAction = async (userId: string, action: "approve" | "reject") => {
+  const handleUserAction = async (
+    userId: string,
+    action: "approve" | "reject",
+  ) => {
     const res = await fetch("/api/admin/users", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -97,7 +100,10 @@ export default function AdminDashboardPage() {
     }
   };
 
-  const handleProjectAction = async (projectId: string, action: "approve" | "reject") => {
+  const handleProjectAction = async (
+    projectId: string,
+    action: "approve" | "reject",
+  ) => {
     const res = await fetch("/api/admin/projects", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -272,8 +278,11 @@ export default function AdminDashboardPage() {
                         {project.title}
                       </h3>
                       <p className="text-sm text-gray-500">
-                        by {project.ngo.ngoInfo?.ngoName || project.ngo.name || "Unknown NGO"} ·{" "}
-                        {project.category}
+                        by{" "}
+                        {project.ngo.ngoInfo?.ngoName ||
+                          project.ngo.name ||
+                          "Unknown NGO"}{" "}
+                        · {project.category}
                       </p>
                     </div>
                     <div className="flex space-x-2">

@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
+import type { Project } from "@/app/types/project";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({
@@ -15,10 +16,12 @@ export async function GET(request: Request) {
 
   const isAdmin =
     session &&
-    (await prisma.user.findUnique({
-      where: { id: session.user.id },
-      select: { userType: true },
-    }))?.userType === "ADMIN";
+    (
+      await prisma.user.findUnique({
+        where: { id: session.user.id },
+        select: { userType: true },
+      })
+    )?.userType === "ADMIN";
 
   if (ngoId) {
     const projects = await prisma.project.findMany({
@@ -83,6 +86,7 @@ export async function GET(request: Request) {
       for (const donation of donations as any[]) {
         const p = donation.project;
         if (!seen.has(p.id)) {
+
           seen.add(p.id);
           projects.push(p);
         }
@@ -132,7 +136,10 @@ export async function POST(request: Request) {
 
   if (user.approvalStatus !== "APPROVED") {
     return NextResponse.json(
-      { error: "Your account is pending approval. You cannot create projects yet." },
+      {
+        error:
+          "Your account is pending approval. You cannot create projects yet.",
+      },
       { status: 403 },
     );
   }
