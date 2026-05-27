@@ -305,7 +305,7 @@ export default function MyServicesPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 md:grid-cols-5 gap-4 text-sm">
+                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                   <div className="space-y-1">
                     <span className="text-gray-400">Category</span>
                     <p className="font-medium text-on-surface">{acq.service.category}</p>
@@ -316,7 +316,18 @@ export default function MyServicesPage() {
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Cost</span>
-                    <p className="font-medium text-on-surface">€{(acq.package.price / 100).toFixed(2)}</p>
+                    <p className="font-medium text-on-surface">€{acq.package.price.toFixed(2)}</p>
+                  </div>
+                  <div className="space-y-1">
+                    <span className="text-gray-400">Donation spend</span>
+                    <p className="font-medium text-on-surface">
+                      €{acq.package.price.toFixed(2)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {acq.status === "DELIVERED" || acq.status === "COMPLETED"
+                        ? "Spent from donations"
+                        : "Due on delivery"}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Delivery</span>

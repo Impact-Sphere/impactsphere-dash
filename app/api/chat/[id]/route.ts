@@ -18,6 +18,12 @@ async function canAccessChat(chatId: string, userId: string) {
 
   if (!chat) return false;
 
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { userType: true },
+  });
+  if (user?.userType === "ADMIN") return true;
+
   const isProjectOwner = chat.serviceAcquisition.project.ngoId === userId;
   const isServiceProvider = chat.serviceAcquisition.service.providerId === userId;
 
@@ -25,7 +31,7 @@ async function canAccessChat(chatId: string, userId: string) {
 }
 
 export async function GET(
-  request: Request,
+  _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const session = await auth.api.getSession({
@@ -65,8 +71,26 @@ export async function POST(
 
   const { id } = await params;
 
-  const hasAccess = await canAccessChat(id, session.user.id);
-  if (!hasAccess) {
+  const chat = await prisma.chat.findUnique({
+    where: { id },
+    include: {
+      serviceAcquisition: {
+        include: {
+          service: { select: { providerId: true } },
+          project: { select: { ngoId: true } },
+        },
+      },
+    },
+  });
+
+  if (!chat) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  const isProjectOwner = chat.serviceAcquisition.project.ngoId === session.user.id;
+  const isServiceProvider = chat.serviceAcquisition.service.providerId === session.user.id;
+
+  if (!isProjectOwner && !isServiceProvider) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

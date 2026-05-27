@@ -123,10 +123,10 @@ export default function AdminAcquisitionsPage() {
                   </div>
                   {acq.chat && (
                     <Link
-                      href={`/admin/manager/${acq.chat.id}`}
+                      href={`/chat/${acq.chat.id}`}
                       className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
                     >
-                      Manage Work
+                      Open Workroom
                     </Link>
                   )}
                 </div>
@@ -138,7 +138,7 @@ export default function AdminAcquisitionsPage() {
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Package Cost</span>
-                    <p className="font-medium text-on-surface">€{(acq.package.price / 100).toFixed(2)}</p>
+                    <p className="font-medium text-on-surface">€{acq.package.price.toFixed(2)}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Provider</span>

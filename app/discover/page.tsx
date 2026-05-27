@@ -76,7 +76,7 @@ export default function DiscoverPage() {
               ))}
 
               {/* Impact Pulse Widget */}
-              <ImpactPulse percentage={64} amount="$24.8k" />
+              <ImpactPulse percentage={64} amount="€24.8k" />
             </div>
 
             {/* Pagination */}

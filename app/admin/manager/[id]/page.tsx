@@ -1,19 +1,35 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { authClient } from "@/app/lib/auth-client";
-import { formatCurrency } from "@/app/lib/project-utils";
+import { useCurrency } from "@/app/components/currency/currency-context";
 
-interface Chat {
+interface Workroom {
   id: string;
   serviceAcquisition: {
     id: string;
     status: string;
     revisionsUsed: number;
-    service: { name: string; providerId: string };
-    project: { title: string; ngoId: string };
-    package: { name: string; price: number; revisions: number };
+    deliveredAt: string | null;
+    completedAt: string | null;
+    service: {
+      name: string;
+      providerId: string;
+      provider: { name: string | null; email: string };
+    };
+    project: {
+      title: string;
+      ngoId: string;
+      ngo: { name: string | null; email: string; ngoInfo: { ngoName: string } | null };
+    };
+    package: {
+      name: string;
+      price: number;
+      deliveryDays: number;
+      revisions: number;
+    };
+    review: { id: string; rating: number; comment: string | null } | null;
   };
 }
 
@@ -29,21 +45,22 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: "Delivered",
   REVISION_REQUESTED: "Revision Requested",
   COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
 };
 
-export default function ManagerWorkroomPage({
+export default function AdminWorkroomPage({
   params,
 }: {
   params: Promise<{ id: string }>;
 }) {
   const router = useRouter();
+  const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
   const [chatId, setChatId] = useState<string | null>(null);
-  const [chat, setChat] = useState<Chat | null>(null);
+  const [workroom, setWorkroom] = useState<Workroom | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [loading, setLoading] = useState(true);
-  const [isAdmin, setIsAdmin] = useState(false);
   const [sending, setSending] = useState(false);
   const [actionLoading, setActionLoading] = useState(false);
   const [showDeliverModal, setShowDeliverModal] = useState(false);
@@ -52,15 +69,6 @@ export default function ManagerWorkroomPage({
   const [revisionMessage, setRevisionMessage] = useState("");
   const [error, setError] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  const revisionsLeft = useMemo(() => {
-    if (!chat) return 0;
-    return Math.max(
-      0,
-      chat.serviceAcquisition.package.revisions -
-        chat.serviceAcquisition.revisionsUsed,
-    );
-  }, [chat]);
 
   useEffect(() => {
     params.then(({ id }) => setChatId(id));
@@ -77,41 +85,33 @@ export default function ManagerWorkroomPage({
     let chatInterval: ReturnType<typeof setInterval> | null = null;
     let messageInterval: ReturnType<typeof setInterval> | null = null;
 
-    fetch("/api/profile")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.userType !== "ADMIN") {
-          router.push("/discover");
-          return;
-        }
+    const loadWorkroom = () =>
+      fetch(`/api/workroom/${chatId}`)
+        .then(async (res) => {
+          if (!res.ok) {
+            const data = await res.json().catch(() => ({}));
+            throw new Error(data.error || "Workroom not found");
+          }
+          return res.json();
+        })
+        .then((data: Workroom) => {
+          setWorkroom(data);
+          setLoading(false);
+        })
+        .catch((err) => {
+          setError(err.message || "Workroom not found");
+          setLoading(false);
+        });
 
-        setIsAdmin(true);
+    const loadMessages = () =>
+      fetch(`/api/chat/${chatId}`)
+        .then((r) => r.json())
+        .then((data: Message[]) => setMessages(data));
 
-        const loadChat = () =>
-          fetch("/api/chat")
-            .then((r) => r.json())
-            .then((chatData: Chat[]) => {
-              const target = chatData.find((c) => c.id === chatId) || null;
-              if (!target) {
-                setError("Workroom not found or access denied");
-                setLoading(false);
-                return;
-              }
-              setChat(target);
-              setLoading(false);
-            });
-
-        const loadMessages = () =>
-          fetch(`/api/chat/${chatId}`)
-            .then((r) => r.json())
-            .then((data: Message[]) => setMessages(data));
-
-        loadChat();
-        loadMessages();
-        chatInterval = setInterval(loadChat, 3000);
-        messageInterval = setInterval(loadMessages, 3000);
-      })
-      .catch(() => router.push("/discover"));
+    loadWorkroom();
+    loadMessages();
+    chatInterval = setInterval(loadWorkroom, 3000);
+    messageInterval = setInterval(loadMessages, 3000);
 
     return () => {
       if (chatInterval) clearInterval(chatInterval);
@@ -140,18 +140,24 @@ export default function ManagerWorkroomPage({
       const message = await res.json();
       setMessages((prev) => [...prev, message]);
       setNewMessage("");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Unable to send message");
     }
   };
 
   const handleDeliver = async () => {
-    if (!chat) return;
+    if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(`/api/services/${chat.serviceAcquisition.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "deliver", message: deliveryMessage }),
-    });
+    const res = await fetch(
+      `/api/services/${workroom.serviceAcquisition.id}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "deliver", message: deliveryMessage }),
+      },
+    );
     setActionLoading(false);
 
     if (res.ok) {
@@ -164,14 +170,17 @@ export default function ManagerWorkroomPage({
   };
 
   const handleAccept = async () => {
-    if (!chat) return;
+    if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(`/api/services/${chat.serviceAcquisition.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "accept" }),
-    });
+    const res = await fetch(
+      `/api/services/${workroom.serviceAcquisition.id}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "accept" }),
+      },
+    );
     setActionLoading(false);
 
     if (!res.ok) {
@@ -181,14 +190,17 @@ export default function ManagerWorkroomPage({
   };
 
   const handleRevision = async () => {
-    if (!chat) return;
+    if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(`/api/services/${chat.serviceAcquisition.id}`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ action: "revision", message: revisionMessage }),
-    });
+    const res = await fetch(
+      `/api/services/${workroom.serviceAcquisition.id}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "revision", message: revisionMessage }),
+      },
+    );
     setActionLoading(false);
 
     if (res.ok) {
@@ -200,7 +212,7 @@ export default function ManagerWorkroomPage({
     }
   };
 
-  if (isPending || loading || !isAdmin) {
+  if (isPending || loading) {
     return (
       <main className="ml-72 min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -215,44 +227,50 @@ export default function ManagerWorkroomPage({
           <p className="text-gray-500">{error}</p>
           <button
             type="button"
-            onClick={() => router.push("/admin/acquisitions")}
+            onClick={() => router.back()}
             className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
           >
-            Back to Acquisitions
+            Go Back
           </button>
         </div>
       </main>
     );
   }
 
-  if (!chat) {
+  if (!workroom) {
     return null;
   }
 
-  const isProvider =
-    chat.serviceAcquisition.service.providerId === session?.user?.id;
-  const isNgo = chat.serviceAcquisition.project.ngoId === session?.user?.id;
-  const acqStatus = chat.serviceAcquisition.status || "ACTIVE";
+  const acq = workroom.serviceAcquisition;
+  const isProvider = acq.service.providerId === session?.user?.id;
+  const isNgo = acq.project.ngoId === session?.user?.id;
+  const canMessage = isProvider || isNgo;
+  const acqStatus = acq.status || "ACTIVE";
   const statusLabel = STATUS_LABELS[acqStatus] || acqStatus;
+  const revisionsLeft = useMemo(() => {
+    return Math.max(0, acq.package.revisions - acq.revisionsUsed);
+  }, [acq.package.revisions, acq.revisionsUsed]);
+  const spendLabel =
+    acqStatus === "DELIVERED" || acqStatus === "COMPLETED"
+      ? "Spent from donations"
+      : "Due on delivery";
 
   return (
     <main className="ml-72 min-h-screen bg-surface py-10 px-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-on-surface">
-              Service Workroom
-            </h1>
+            <h1 className="text-2xl font-bold text-on-surface">Workroom</h1>
             <p className="text-sm text-gray-500">
               Chat, deliver work, and handle revisions for this service.
             </p>
           </div>
           <button
             type="button"
-            onClick={() => router.push("/admin/acquisitions")}
+            onClick={() => router.back()}
             className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
-            Back to Acquisitions
+            Back
           </button>
         </div>
 
@@ -262,14 +280,13 @@ export default function ManagerWorkroomPage({
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-semibold text-on-surface">
-                    {chat.serviceAcquisition.service.name}
+                    {acq.service.name}
                     <span className="text-primary text-sm font-normal">
-                      {" "}
-                      - {chat.serviceAcquisition.package.name}
+                      {" "}- {acq.package.name}
                     </span>
                   </h3>
                   <p className="text-xs text-gray-500">
-                    Project: {chat.serviceAcquisition.project.title}
+                    Project: {acq.project.title}
                   </p>
                 </div>
                 <span
@@ -347,19 +364,25 @@ export default function ManagerWorkroomPage({
             </div>
 
             <div className="p-4 border-t border-gray-100">
+              {!canMessage && (
+                <p className="text-xs text-gray-400 mb-2">
+                  You have read-only access to this workroom.
+                </p>
+              )}
               <div className="flex gap-2">
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder="Type a message..."
+                  placeholder={canMessage ? "Type a message..." : "Read-only"}
                   className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  disabled={!canMessage}
                 />
                 <button
                   type="button"
                   onClick={sendMessage}
-                  disabled={sending || !newMessage.trim()}
+                  disabled={sending || !newMessage.trim() || !canMessage}
                   className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {sending ? "..." : "Send"}
@@ -374,7 +397,7 @@ export default function ManagerWorkroomPage({
                 Delivery Summary
               </h3>
               <p className="text-xs text-gray-500">
-                Track status, revisions, and package details.
+                Track status, revisions, and donation spend.
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
@@ -384,27 +407,26 @@ export default function ManagerWorkroomPage({
               </p>
               <p className="text-xs text-gray-400">Revisions</p>
               <p className="text-sm font-semibold text-on-surface">
-                {chat.serviceAcquisition.revisionsUsed} used, {revisionsLeft} left
+                {acq.revisionsUsed} used, {revisionsLeft} left
               </p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-              <p className="text-xs text-gray-400">Package</p>
+              <p className="text-xs text-gray-400">Donation spend</p>
               <p className="text-sm font-semibold text-on-surface">
-                {chat.serviceAcquisition.package.name}
+                {format(acq.package.price)}
               </p>
-              <p className="text-xs text-gray-400">Price</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {formatCurrency(chat.serviceAcquisition.package.price)}
-              </p>
+              <p className="text-xs text-gray-500">{spendLabel}</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
               <p className="text-xs text-gray-400">Project</p>
               <p className="text-sm font-semibold text-on-surface">
-                {chat.serviceAcquisition.project.title}
+                {acq.project.ngo.ngoInfo?.ngoName ||
+                  acq.project.ngo.name ||
+                  acq.project.ngo.email}
               </p>
               <p className="text-xs text-gray-400">Service</p>
               <p className="text-sm font-semibold text-on-surface">
-                {chat.serviceAcquisition.service.name}
+                {acq.service.name}
               </p>
             </div>
           </aside>

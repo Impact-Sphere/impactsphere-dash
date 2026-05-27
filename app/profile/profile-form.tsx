@@ -5,6 +5,7 @@ import { useCallback, useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
 import { authClient } from "@/app/lib/auth-client";
 import { cn } from "@/app/lib/utils";
+import { SUPPORTED_CURRENCIES } from "@/app/lib/currency";
 import { Meetings } from "./project-meetings";
 import { UserProjects } from "./user-projects";
 
@@ -15,6 +16,7 @@ type ProfileData = {
   image: string | null;
   userType: "NGO" | "COMPANY" | "ADMIN" | null;
   approvalStatus: "PENDING" | "APPROVED" | "REJECTED" | null;
+  preferredCurrency: string;
   createdAt: string;
   ngoInfo: {
     ngoName: string;
@@ -45,6 +47,7 @@ export function ProfileForm() {
 
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
+  const [preferredCurrency, setPreferredCurrency] = useState("EUR");
   const [organizationName, setOrganizationName] = useState("");
   const [taxIdentificationNumber, setTaxIdentificationNumber] = useState("");
   const [contactInfo, setContactInfo] = useState("");
@@ -60,6 +63,7 @@ export function ProfileForm() {
         setProfile(data);
         setName(data.name || "");
         setImage(data.image || "");
+        setPreferredCurrency(data.preferredCurrency || "EUR");
         if (data.ngoInfo) {
           setOrganizationName(data.ngoInfo.ngoName || "");
           setTaxIdentificationNumber(
@@ -107,6 +111,7 @@ export function ProfileForm() {
     const payload: Record<string, string | undefined> = {
       name: name || undefined,
       image: image || undefined,
+      preferredCurrency: preferredCurrency || undefined,
       organizationName: organizationName || undefined,
       taxIdentificationNumber: taxIdentificationNumber || undefined,
       contactInfo: contactInfo || undefined,
@@ -378,6 +383,29 @@ export function ProfileForm() {
                 />
               ) : (
                 <p className="text-gray-700">{profile.name || "—"}</p>
+              )}
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Preferred Currency
+              </div>
+              {isEditing ? (
+                <select
+                  value={preferredCurrency}
+                  onChange={(e) => setPreferredCurrency(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+                >
+                  {SUPPORTED_CURRENCIES.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.symbol} {c.name}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <p className="text-gray-700">
+                  {SUPPORTED_CURRENCIES.find((c) => c.code === (profile.preferredCurrency || "EUR"))?.symbol} {SUPPORTED_CURRENCIES.find((c) => c.code === (profile.preferredCurrency || "EUR"))?.name}
+                </p>
               )}
             </div>
 

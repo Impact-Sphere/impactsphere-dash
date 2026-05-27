@@ -1,8 +1,10 @@
+"use client";
+
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { useCurrency } from "@/app/components/currency/currency-context";
 import {
-  formatCurrency,
   getFundedPercent,
   getProjectImage,
 } from "@/app/lib/project-utils";
@@ -18,6 +20,7 @@ export function FeaturedProjectCard({
   project,
   className,
 }: FeaturedProjectCardProps) {
+  const { format } = useCurrency();
   const funded = getFundedPercent(project.currentAmount, project.targetBudget);
 
   return (
@@ -56,9 +59,9 @@ export function FeaturedProjectCard({
                   </span>
                 </span>
                 <span className="text-sm font-bold">
-                  {formatCurrency(project.currentAmount)}{" "}
+                  {format(project.currentAmount)}{" "}
                   <span className="text-on-surface-variant font-normal">
-                    of {formatCurrency(project.targetBudget)}
+                    of {format(project.targetBudget)}
                   </span>
                 </span>
               </div>

@@ -55,20 +55,20 @@ export async function POST(request: Request) {
     );
   }
 
-  // Check if project has enough funds
-  if (project.currentAmount < pkg.price) {
+  // Check budget
+  const availableBudget = project.currentAmount - project.serviceSpent;
+  if (availableBudget < pkg.price) {
     return NextResponse.json(
-      { error: "Insufficient funds" },
+      { error: `Insufficient funds. Available: €${availableBudget.toFixed(2)}, needed: €${pkg.price.toFixed(2)}` },
       { status: 400 },
     );
   }
 
-  // Check if already acquired
+  // Check if already acquired for this project+service combo (any status)
   const existing = await prisma.serviceAcquisition.findFirst({
     where: {
       projectId,
       serviceId,
-      status: "ACTIVE",
     },
   });
 
@@ -79,6 +79,12 @@ export async function POST(request: Request) {
     );
   }
 
+  // Deduct from project budget
+  await prisma.project.update({
+    where: { id: projectId },
+    data: { serviceSpent: { increment: pkg.price } },
+  });
+
   const acquisition = await prisma.serviceAcquisition.create({
     data: {
       id: crypto.randomUUID(),
@@ -87,14 +93,6 @@ export async function POST(request: Request) {
       packageId,
       status: "ACTIVE",
       startDate: new Date(),
-    },
-  });
-
-  // Deduct funds from project
-  await prisma.project.update({
-    where: { id: projectId },
-    data: {
-      currentAmount: { decrement: pkg.price },
     },
   });
 

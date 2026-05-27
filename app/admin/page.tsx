@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
-import { formatCurrency } from "@/app/lib/project-utils";
+import { useCurrency } from "@/app/components/currency/currency-context";
 
 interface PendingUser {
   id: string;
@@ -42,6 +42,7 @@ interface PendingProject {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<"users" | "projects">("users");
   const [users, setUsers] = useState<PendingUser[]>([]);
@@ -327,7 +328,7 @@ export default function AdminDashboardPage() {
                     <div>
                       <span className="text-gray-400">Target Budget</span>
                       <p className="font-medium text-on-surface">
-                        {formatCurrency(project.targetBudget)}
+                        {format(project.targetBudget)}
                       </p>
                     </div>
                     <div>

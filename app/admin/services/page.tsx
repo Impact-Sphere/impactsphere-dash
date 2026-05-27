@@ -104,7 +104,7 @@ export default function AdminServicesPage() {
       .map((p) => ({
         name: p.name,
         description: p.description,
-        price: Number(p.price) * 100,
+        price: Number(p.price),
         deliveryDays: Number(p.deliveryDays),
         revisions: Number(p.revisions),
       }));
@@ -163,7 +163,7 @@ export default function AdminServicesPage() {
       packages: service.packages.map((p) => ({
         name: p.name,
         description: p.description,
-        price: (p.price / 100).toString(),
+        price: p.price.toString(),
         deliveryDays: p.deliveryDays.toString(),
         revisions: p.revisions.toString(),
       })),
@@ -212,7 +212,7 @@ export default function AdminServicesPage() {
                   <div className="flex gap-4 text-sm">
                     {service.packages.map((p) => (
                       <span key={p.id} className="text-gray-600">
-                        {p.name}: €{(p.price / 100).toFixed(0)}
+                        {p.name}: €{p.price.toFixed(0)}
                       </span>
                     ))}
                   </div>

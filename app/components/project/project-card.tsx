@@ -1,8 +1,10 @@
+"use client";
+
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { useCurrency } from "@/app/components/currency/currency-context";
 import {
-  formatCurrency,
   getFundedPercent,
   getProjectImage,
 } from "@/app/lib/project-utils";
@@ -15,6 +17,8 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project, className }: ProjectCardProps) {
+  const { format } = useCurrency();
+
   const getBadgeVariant = (category: string) => {
     switch (category) {
       case "Education":
@@ -70,8 +74,8 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
           <div className="flex justify-between text-xs font-bold">
             <span className="text-primary">{funded}%</span>
             <span className="text-on-surface-variant">
-              {formatCurrency(project.currentAmount)} /{" "}
-              {formatCurrency(project.targetBudget)}
+              {format(project.currentAmount)} /{" "}
+              {format(project.targetBudget)}
             </span>
           </div>
           <ProgressBar value={funded} size="sm" />

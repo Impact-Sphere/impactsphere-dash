@@ -23,7 +23,7 @@ export async function POST(
     where: { id: acquisitionId },
     include: {
       service: { select: { providerId: true, name: true } },
-      project: { select: { ngoId: true, title: true } },
+      project: { select: { ngoId: true, title: true, currentAmount: true } },
       package: true,
       chat: true,
     },
@@ -47,6 +47,12 @@ export async function POST(
     }
     if (acquisition.status !== "ACTIVE" && acquisition.status !== "REVISION_REQUESTED") {
       return NextResponse.json({ error: "Cannot deliver in current status" }, { status: 400 });
+    }
+    if (acquisition.project.currentAmount < acquisition.package.price) {
+      return NextResponse.json(
+        { error: "Insufficient donated funds for delivery" },
+        { status: 400 },
+      );
     }
 
     await prisma.serviceAcquisition.update({

@@ -507,9 +507,9 @@ const SERVICES = [
     category: "Social Media",
     tags: ["social media", "content", "management", "strategy"],
     packages: [
-      { name: "Basic", description: "1 platform, 8 posts/month, basic analytics", price: 15000, deliveryDays: 30, revisions: 1 },
-      { name: "Standard", description: "3 platforms, 20 posts/month, full analytics, engagement", price: 25000, deliveryDays: 30, revisions: 2 },
-      { name: "Premium", description: "All platforms, unlimited posts, full analytics, engagement, monthly strategy call", price: 40000, deliveryDays: 30, revisions: 3 },
+      { name: "Basic", description: "1 platform, 8 posts/month, basic analytics", price: 1200, deliveryDays: 30, revisions: 1 },
+      { name: "Standard", description: "3 platforms, 20 posts/month, full analytics, engagement", price: 2500, deliveryDays: 30, revisions: 2 },
+      { name: "Premium", description: "All platforms, unlimited posts, full analytics, engagement, monthly strategy call", price: 4000, deliveryDays: 30, revisions: 3 },
     ],
   },
   {
@@ -518,9 +518,9 @@ const SERVICES = [
     category: "Social Media",
     tags: ["content", "video", "photo", "production"],
     packages: [
-      { name: "Basic", description: "10 photos, basic editing", price: 8000, deliveryDays: 7, revisions: 1 },
-      { name: "Standard", description: "20 photos + 2 short videos, pro editing", price: 15000, deliveryDays: 10, revisions: 2 },
-      { name: "Premium", description: "40 photos + 5 videos, pro editing, motion graphics", price: 25000, deliveryDays: 14, revisions: 3 },
+      { name: "Basic", description: "10 photos, basic editing", price: 800, deliveryDays: 7, revisions: 1 },
+      { name: "Standard", description: "20 photos + 2 short videos, pro editing", price: 1800, deliveryDays: 10, revisions: 2 },
+      { name: "Premium", description: "40 photos + 5 videos, pro editing, motion graphics", price: 3500, deliveryDays: 14, revisions: 3 },
     ],
   },
   {
@@ -529,9 +529,9 @@ const SERVICES = [
     category: "Events",
     tags: ["events", "planning", "logistics", "coordination"],
     packages: [
-      { name: "Basic", description: "Small event up to 50 people, venue + basic logistics", price: 30000, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "Medium event up to 200 people, full logistics, catering coordination", price: 50000, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "Large event 500+ people, full production, AV, entertainment, VIP management", price: 90000, deliveryDays: 30, revisions: 3 },
+      { name: "Basic", description: "Small event up to 50 people, venue + basic logistics", price: 2500, deliveryDays: 14, revisions: 1 },
+      { name: "Standard", description: "Medium event up to 200 people, full logistics, catering coordination", price: 5000, deliveryDays: 21, revisions: 2 },
+      { name: "Premium", description: "Large event 500+ people, full production, AV, entertainment, VIP management", price: 10000, deliveryDays: 30, revisions: 3 },
     ],
   },
   {
@@ -540,9 +540,9 @@ const SERVICES = [
     category: "Communication",
     tags: ["strategy", "communication", "planning", "messaging"],
     packages: [
-      { name: "Basic", description: "1-page strategy doc, 1 channel recommendation", price: 20000, deliveryDays: 7, revisions: 1 },
-      { name: "Standard", description: "Full strategy doc, 3 channels, content calendar template", price: 35000, deliveryDays: 14, revisions: 2 },
-      { name: "Premium", description: "Complete strategy, all channels, 3-month content calendar, KPI framework", price: 55000, deliveryDays: 21, revisions: 3 },
+      { name: "Basic", description: "1-page strategy doc, 1 channel recommendation", price: 1500, deliveryDays: 7, revisions: 1 },
+      { name: "Standard", description: "Full strategy doc, 3 channels, content calendar template", price: 3500, deliveryDays: 14, revisions: 2 },
+      { name: "Premium", description: "Complete strategy, all channels, 3-month content calendar, KPI framework", price: 6000, deliveryDays: 21, revisions: 3 },
     ],
   },
   {
@@ -551,9 +551,9 @@ const SERVICES = [
     category: "Partnerships",
     tags: ["partnerships", "relations", "outreach", "networking"],
     packages: [
-      { name: "Basic", description: "5 partner prospects, initial outreach templates", price: 25000, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "15 prospects, personalized outreach, 2 intro meetings", price: 40000, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "30 prospects, full campaign, 5 meetings, partnership agreements", price: 65000, deliveryDays: 30, revisions: 3 },
+      { name: "Basic", description: "5 partner prospects, initial outreach templates", price: 2000, deliveryDays: 14, revisions: 1 },
+      { name: "Standard", description: "15 prospects, personalized outreach, 2 intro meetings", price: 4000, deliveryDays: 21, revisions: 2 },
+      { name: "Premium", description: "30 prospects, full campaign, 5 meetings, partnership agreements", price: 7500, deliveryDays: 30, revisions: 3 },
     ],
   },
   {
@@ -562,9 +562,9 @@ const SERVICES = [
     category: "Events",
     tags: ["merchandise", "design", "branding", "production"],
     packages: [
-      { name: "Basic", description: "1 item design, 50 units production", price: 12000, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "3 item designs, 200 units, packaging", price: 20000, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "5 item designs, 500 units, premium packaging, shipping", price: 35000, deliveryDays: 30, revisions: 3 },
+      { name: "Basic", description: "1 item design, 50 units production", price: 1000, deliveryDays: 14, revisions: 1 },
+      { name: "Standard", description: "3 item designs, 200 units, packaging", price: 2500, deliveryDays: 21, revisions: 2 },
+      { name: "Premium", description: "5 item designs, 500 units, premium packaging, shipping", price: 5000, deliveryDays: 30, revisions: 3 },
     ],
   },
 ];
@@ -617,6 +617,45 @@ async function seedServices() {
     }
 
     console.log(`Service created: ${svc.name} with ${svc.packages.length} packages`);
+  }
+
+  // Create a test acquisition for demo purposes
+  const testService = await prisma.service.findFirst({ where: { name: "Social Media Management" } });
+  const testNgo = await prisma.user.findFirst({ where: { email: "ngo1@demo.local" } });
+  const testProject = await prisma.project.findFirst({ where: { ngoId: testNgo?.id } });
+
+  if (testService && testNgo && testProject && admin) {
+    const existingAcq = await prisma.serviceAcquisition.findFirst({
+      where: { projectId: testProject.id, serviceId: testService.id },
+    });
+
+    if (!existingAcq) {
+      const standardPkg = await prisma.servicePackage.findFirst({
+        where: { serviceId: testService.id, name: "Standard" },
+      });
+
+      if (standardPkg) {
+        const acquisition = await prisma.serviceAcquisition.create({
+          data: {
+            id: crypto.randomUUID(),
+            projectId: testProject.id,
+            serviceId: testService.id,
+            packageId: standardPkg.id,
+            status: "ACTIVE",
+            startDate: new Date(),
+          },
+        });
+
+        await prisma.chat.create({
+          data: {
+            id: crypto.randomUUID(),
+            serviceAcquisitionId: acquisition.id,
+          },
+        });
+
+        console.log(`Test acquisition created: ${testService.name} for ${testProject.title}`);
+      }
+    }
   }
 }
 

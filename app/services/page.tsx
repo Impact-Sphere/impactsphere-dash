@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { authClient } from "@/app/lib/auth-client";
+import { useCurrency } from "@/app/components/currency/currency-context";
 
 interface Package {
   id: string;
@@ -32,10 +33,14 @@ interface Project {
   id: string;
   title: string;
   currentAmount: number;
+  serviceSpent: number;
 }
 
-export default function ServicesCatalogPage() {
+function ServicesCatalogContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const { format } = useCurrency();
+  const preselectedProjectId = searchParams.get("projectId");
   const { data: session, isPending } = authClient.useSession();
   const [services, setServices] = useState<Service[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
@@ -43,10 +48,13 @@ export default function ServicesCatalogPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [loading, setLoading] = useState(true);
   const [acquiringService, setAcquiringService] = useState<string | null>(null);
-  const [selectedProject, setSelectedProject] = useState<string>("");
+  const [selectedProject, setSelectedProject] = useState<string>(preselectedProjectId || "");
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [showAcquireModal, setShowAcquireModal] = useState(false);
   const [activeService, setActiveService] = useState<Service | null>(null);
+
+  const activeProject = projects.find((p) => p.id === selectedProject);
+  const availableBudget = activeProject ? activeProject.currentAmount - (activeProject.serviceSpent || 0) : 0;
 
   useEffect(() => {
     if (isPending) return;
@@ -64,6 +72,12 @@ export default function ServicesCatalogPage() {
       setLoading(false);
     });
   }, [session, isPending, router]);
+
+  useEffect(() => {
+    if (preselectedProjectId) {
+      setSelectedProject(preselectedProjectId);
+    }
+  }, [preselectedProjectId]);
 
   const categories = ["all", ...Array.from(new Set(services.map((s) => s.category)))];
 
@@ -143,6 +157,14 @@ export default function ServicesCatalogPage() {
           <p className="text-gray-500">
             Browse professional services to boost your project impact
           </p>
+          {activeProject && (
+            <div className="flex items-center gap-2 text-sm">
+              <span className="text-gray-500">Buying for:</span>
+              <span className="font-medium text-on-surface">{activeProject.title}</span>
+              <span className="text-gray-400">·</span>
+              <span className="text-emerald-600 font-medium">{format(availableBudget)} available</span>
+            </div>
+          )}
         </div>
 
         {/* Search */}
@@ -227,51 +249,62 @@ export default function ServicesCatalogPage() {
 
               {/* Fiverr-style Package Comparison */}
               <div className="grid grid-cols-1 md:grid-cols-3 divide-y md:divide-y-0 md:divide-x divide-gray-100">
-                {service.packages.map((pkg, idx) => (
-                  <div
-                    key={pkg.id}
-                    className={`p-6 ${idx === 1 ? "bg-violet-50/50" : ""}`}
-                  >
-                    <div className="space-y-4">
-                      <div>
-                        <h4 className="font-semibold text-on-surface">{pkg.name}</h4>
-                        <p className="text-sm text-gray-500 mt-1">{pkg.description}</p>
-                      </div>
-
-                      <div className="text-2xl font-bold text-on-surface">
-                        €{(pkg.price / 100).toFixed(2)}
-                      </div>
-
-                      <div className="space-y-2 text-sm text-gray-600">
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-base">schedule</span>
-                          {pkg.deliveryDays} day delivery
+                {service.packages.map((pkg, idx) => {
+                  const canAfford = !activeProject || availableBudget >= pkg.price;
+                  return (
+                    <div
+                      key={pkg.id}
+                      className={`p-6 ${idx === 1 ? "bg-violet-50/50" : ""}`}
+                    >
+                      <div className="space-y-4">
+                        <div>
+                          <h4 className="font-semibold text-on-surface">{pkg.name}</h4>
+                          <p className="text-sm text-gray-500 mt-1">{pkg.description}</p>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <span className="material-symbols-outlined text-base">replay</span>
-                          {pkg.revisions} revision{pkg.revisions !== 1 ? "s" : ""}
-                        </div>
+
+                        <div className="text-2xl font-bold text-on-surface">
+                          {format(pkg.price)}
                       </div>
 
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setActiveService(service);
-                          setSelectedPackage(pkg.id);
-                          setShowAcquireModal(true);
-                        }}
-                        disabled={acquiringService === service.id}
-                        className={`w-full py-2.5 font-medium rounded-lg transition-colors ${
-                          idx === 1
-                            ? "bg-primary text-white hover:bg-primary/90"
-                            : "border-2 border-primary text-primary hover:bg-primary/5"
-                        } disabled:opacity-50`}
-                      >
-                        {acquiringService === service.id ? "..." : "Continue"}
-                      </button>
+                      {activeProject && !canAfford && (
+                          <p className="text-xs text-red-500 font-medium">
+                            Needs {format(pkg.price)} — you have {format(availableBudget)}
+                          </p>
+                      )}
+
+                        <div className="space-y-2 text-sm text-gray-600">
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-base">schedule</span>
+                            {pkg.deliveryDays} day delivery
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="material-symbols-outlined text-base">replay</span>
+                            {pkg.revisions} revision{pkg.revisions !== 1 ? "s" : ""}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setActiveService(service);
+                            setSelectedPackage(pkg.id);
+                            setShowAcquireModal(true);
+                          }}
+                          disabled={acquiringService === service.id || !canAfford}
+                          className={`w-full py-2.5 font-medium rounded-lg transition-colors ${
+                            idx === 1
+                              ? "bg-primary text-white hover:bg-primary/90"
+                              : "border-2 border-primary text-primary hover:bg-primary/5"
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                        >
+                          {acquiringService === service.id ? "..." :
+                           !canAfford ? "Insufficient Funds" :
+                           "Continue"}
+                        </button>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}
@@ -307,7 +340,7 @@ export default function ServicesCatalogPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-500">Price</span>
                   <span className="font-medium">
-                    €{((activeService.packages.find((p) => p.id === selectedPackage)?.price || 0) / 100).toFixed(2)}
+                    {format(activeService.packages.find((p) => p.id === selectedPackage)?.price || 0)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -329,12 +362,20 @@ export default function ServicesCatalogPage() {
                 className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">Choose a project...</option>
-                {projects.map((project) => (
-                  <option key={project.id} value={project.id}>
-                    {project.title} (€{(project.currentAmount / 100).toFixed(2)} available)
-                  </option>
-                ))}
+                {projects.map((project) => {
+                  const remaining = project.currentAmount - (project.serviceSpent || 0);
+                  return (
+                    <option key={project.id} value={project.id}>
+                       {project.title} ({format(remaining)} available)
+                    </option>
+                  );
+                })}
               </select>
+              {activeProject && (
+                <p className="text-xs text-gray-500">
+                  This project has {format(availableBudget)} available after service spending.
+                </p>
+              )}
             </div>
 
             <div className="flex gap-3">
@@ -358,5 +399,17 @@ export default function ServicesCatalogPage() {
         </div>
       )}
     </main>
+  );
+}
+
+export default function ServicesCatalogPage() {
+  return (
+    <Suspense fallback={
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </main>
+    }>
+      <ServicesCatalogContent />
+    </Suspense>
   );
 }
