@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { useCurrency } from "@/app/components/currency/currency-context";
 import { authClient } from "@/app/lib/auth-client";
-import { formatCurrency } from "@/app/lib/project-utils";
 
 type UploadedFile = {
   id: string;
@@ -88,6 +88,7 @@ interface PendingProject {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
   const [activeTab, setActiveTab] = useState<"users" | "projects">("users");
   const [users, setUsers] = useState<PendingUser[]>([]);
@@ -204,6 +205,20 @@ export default function AdminDashboardPage() {
             }`}
           >
             Pending Projects ({projects.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/services")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50"
+          >
+            Services
+          </button>
+          <button
+            type="button"
+            onClick={() => router.push("/admin/acquisitions")}
+            className="px-4 py-2 rounded-lg text-sm font-medium transition-colors text-gray-500 hover:bg-gray-50"
+          >
+            Acquisitions
           </button>
         </div>
 
@@ -650,7 +665,7 @@ export default function AdminDashboardPage() {
                     <div>
                       <span className="text-gray-400">Target Budget</span>
                       <p className="font-medium text-on-surface">
-                        {formatCurrency(project.targetBudget)}
+                        {format(project.targetBudget)}
                       </p>
                     </div>
                     <div>

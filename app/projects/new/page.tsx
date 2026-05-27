@@ -266,7 +266,7 @@ export default function NewProjectPage() {
 
             <div className="space-y-2">
               <div className="text-sm font-medium text-on-surface">
-                Target Budget (USD)
+                Target Budget (EUR)
               </div>
               <input
                 type="number"

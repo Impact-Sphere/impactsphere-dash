@@ -5,6 +5,9 @@ interface HeaderProps {
   title: string;
   subtitle: string;
   searchPlaceholder?: string;
+  searchValue?: string;
+  onSearchChange?: (value: string) => void;
+  onSearchSubmit?: () => void;
   activeTab?: "all" | "recent";
   onTabChange?: (tab: "all" | "recent") => void;
 }
@@ -13,6 +16,9 @@ export function Header({
   title,
   subtitle,
   searchPlaceholder = "Search initiatives...",
+  searchValue = "",
+  onSearchChange,
+  onSearchSubmit,
   activeTab = "all",
   onTabChange,
 }: HeaderProps) {
@@ -27,7 +33,15 @@ export function Header({
         </p>
       </div>
       <div className="flex items-center space-x-6">
-        <SearchInput placeholder={searchPlaceholder} className="w-80" />
+        <SearchInput
+          placeholder={searchPlaceholder}
+          className="w-80"
+          value={searchValue}
+          onChange={(e) => onSearchChange?.(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") onSearchSubmit?.();
+          }}
+        />
         <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
           <button
             type="button"
