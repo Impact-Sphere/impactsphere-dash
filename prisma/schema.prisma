@@ -136,14 +136,23 @@ model Project {
   @@map("project")
 }
 
+enum DonationStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+}
+
 model Donation {
-  id        String   @id @default(uuid())
-  amount    Int
-  projectId String
-  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  companyId String
-  company   User     @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
+  id                      String          @id @default(uuid())
+  amount                  Int
+  projectId               String
+  project                 Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  companyId               String
+  company                 User            @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stripePaymentIntentId   String?         @unique
+  status                  DonationStatus  @default(PENDING)
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime?       @updatedAt
 
   @@map("donation")
 }

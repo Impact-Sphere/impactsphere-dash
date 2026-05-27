@@ -21,6 +21,7 @@ export async function GET(
         },
       },
       donations: {
+        where: { status: "SUCCEEDED" },
         include: {
           company: {
             select: {

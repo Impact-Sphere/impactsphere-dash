@@ -82,13 +82,15 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
       });
       const seen = new Set<string>();
-      const projects = donations
-        .map((d: any) => d.project as Project)
-        .filter((p: Project) => {
-          if (seen.has(p.id)) return false;
+      const projects: any[] = [];
+      for (const donation of donations as any[]) {
+        const p = donation.project;
+        if (!seen.has(p.id)) {
+
           seen.add(p.id);
-          return true;
-        });
+          projects.push(p);
+        }
+      }
       return NextResponse.json(projects);
     }
 
