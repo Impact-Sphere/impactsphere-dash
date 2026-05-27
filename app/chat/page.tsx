@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Chat {
@@ -78,7 +78,7 @@ export default function ChatPage() {
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+  }, []);
 
   const sendMessage = async () => {
     if (!activeChat || !newMessage.trim()) return;
@@ -115,7 +115,9 @@ export default function ChatPage() {
       setShowDeliverModal(false);
       setDeliveryMessage("");
       // Reload chats to get updated status
-      fetch("/api/chat").then((r) => r.json()).then(setChats);
+      fetch("/api/chat")
+        .then((r) => r.json())
+        .then(setChats);
     } else {
       const data = await res.json().catch(() => ({}));
       alert(data.error || "Delivery failed");
@@ -135,7 +137,9 @@ export default function ChatPage() {
     setActionLoading(false);
 
     if (res.ok) {
-      fetch("/api/chat").then((r) => r.json()).then(setChats);
+      fetch("/api/chat")
+        .then((r) => r.json())
+        .then(setChats);
     }
   };
 
@@ -154,7 +158,9 @@ export default function ChatPage() {
     if (res.ok) {
       setShowRevisionModal(false);
       setRevisionMessage("");
-      fetch("/api/chat").then((r) => r.json()).then(setChats);
+      fetch("/api/chat")
+        .then((r) => r.json())
+        .then(setChats);
     } else {
       const data = await res.json().catch(() => ({}));
       alert(data.error || "Revision request failed");
@@ -162,8 +168,10 @@ export default function ChatPage() {
   };
 
   const activeChatData = chats.find((c) => c.id === activeChat);
-  const isProvider = activeChatData?.serviceAcquisition.service.providerId === session?.user?.id;
-  const isNgo = activeChatData?.serviceAcquisition.project.ngoId === session?.user?.id;
+  const isProvider =
+    activeChatData?.serviceAcquisition.service.providerId === session?.user?.id;
+  const isNgo =
+    activeChatData?.serviceAcquisition.project.ngoId === session?.user?.id;
   const acqStatus = activeChatData?.serviceAcquisition.status;
 
   if (isPending || loading) {
@@ -199,23 +207,37 @@ export default function ChatPage() {
                 >
                   <p className="font-medium text-sm text-on-surface">
                     {chat.serviceAcquisition.service.name}
-                    <span className="text-primary"> — {chat.serviceAcquisition.package.name}</span>
+                    <span className="text-primary">
+                      {" "}
+                      — {chat.serviceAcquisition.package.name}
+                    </span>
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
                     {chat.serviceAcquisition.project.title}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
-                    <span className={`text-xs px-1.5 py-0.5 rounded-full ${
-                      chat.serviceAcquisition.status === "DELIVERED" ? "bg-blue-100 text-blue-700" :
-                      chat.serviceAcquisition.status === "COMPLETED" ? "bg-violet-100 text-violet-700" :
-                      chat.serviceAcquisition.status === "REVISION_REQUESTED" ? "bg-amber-100 text-amber-700" :
-                      "bg-emerald-100 text-emerald-700"
-                    }`}>
-                      {chat.serviceAcquisition.status === "ACTIVE" ? "In Progress" :
-                       chat.serviceAcquisition.status === "DELIVERED" ? "Delivered" :
-                       chat.serviceAcquisition.status === "REVISION_REQUESTED" ? "Revision" :
-                       chat.serviceAcquisition.status === "COMPLETED" ? "Completed" :
-                       chat.serviceAcquisition.status}
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${
+                        chat.serviceAcquisition.status === "DELIVERED"
+                          ? "bg-blue-100 text-blue-700"
+                          : chat.serviceAcquisition.status === "COMPLETED"
+                            ? "bg-violet-100 text-violet-700"
+                            : chat.serviceAcquisition.status ===
+                                "REVISION_REQUESTED"
+                              ? "bg-amber-100 text-amber-700"
+                              : "bg-emerald-100 text-emerald-700"
+                      }`}
+                    >
+                      {chat.serviceAcquisition.status === "ACTIVE"
+                        ? "In Progress"
+                        : chat.serviceAcquisition.status === "DELIVERED"
+                          ? "Delivered"
+                          : chat.serviceAcquisition.status ===
+                              "REVISION_REQUESTED"
+                            ? "Revision"
+                            : chat.serviceAcquisition.status === "COMPLETED"
+                              ? "Completed"
+                              : chat.serviceAcquisition.status}
                     </span>
                   </div>
                   {chat.messages[0] && (
@@ -238,37 +260,51 @@ export default function ChatPage() {
                   <div>
                     <h3 className="font-semibold text-on-surface">
                       {activeChatData.serviceAcquisition.service.name}
-                      <span className="text-primary text-sm font-normal"> — {activeChatData.serviceAcquisition.package.name}</span>
+                      <span className="text-primary text-sm font-normal">
+                        {" "}
+                        — {activeChatData.serviceAcquisition.package.name}
+                      </span>
                     </h3>
                     <p className="text-xs text-gray-500">
                       Project: {activeChatData.serviceAcquisition.project.title}
                     </p>
                   </div>
-                  <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                    acqStatus === "DELIVERED" ? "bg-blue-100 text-blue-700" :
-                    acqStatus === "COMPLETED" ? "bg-violet-100 text-violet-700" :
-                    acqStatus === "REVISION_REQUESTED" ? "bg-amber-100 text-amber-700" :
-                    "bg-emerald-100 text-emerald-700"
-                  }`}>
-                    {acqStatus === "ACTIVE" ? "In Progress" :
-                     acqStatus === "DELIVERED" ? "Delivered" :
-                     acqStatus === "REVISION_REQUESTED" ? "Revision Requested" :
-                     acqStatus === "COMPLETED" ? "Completed" :
-                     acqStatus}
+                  <span
+                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                      acqStatus === "DELIVERED"
+                        ? "bg-blue-100 text-blue-700"
+                        : acqStatus === "COMPLETED"
+                          ? "bg-violet-100 text-violet-700"
+                          : acqStatus === "REVISION_REQUESTED"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-emerald-100 text-emerald-700"
+                    }`}
+                  >
+                    {acqStatus === "ACTIVE"
+                      ? "In Progress"
+                      : acqStatus === "DELIVERED"
+                        ? "Delivered"
+                        : acqStatus === "REVISION_REQUESTED"
+                          ? "Revision Requested"
+                          : acqStatus === "COMPLETED"
+                            ? "Completed"
+                            : acqStatus}
                   </span>
                 </div>
 
                 {/* Action buttons */}
                 <div className="flex gap-2 mt-3">
-                  {isProvider && (acqStatus === "ACTIVE" || acqStatus === "REVISION_REQUESTED") && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeliverModal(true)}
-                      className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
-                    >
-                      📦 Deliver Work
-                    </button>
-                  )}
+                  {isProvider &&
+                    (acqStatus === "ACTIVE" ||
+                      acqStatus === "REVISION_REQUESTED") && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeliverModal(true)}
+                        className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
+                      >
+                        📦 Deliver Work
+                      </button>
+                    )}
                   {isNgo && acqStatus === "DELIVERED" && (
                     <>
                       <button
@@ -282,10 +318,17 @@ export default function ChatPage() {
                       <button
                         type="button"
                         onClick={() => setShowRevisionModal(true)}
-                        disabled={actionLoading || activeChatData.serviceAcquisition.revisionsUsed >= activeChatData.serviceAcquisition.package.revisions}
+                        disabled={
+                          actionLoading ||
+                          activeChatData.serviceAcquisition.revisionsUsed >=
+                            activeChatData.serviceAcquisition.package.revisions
+                        }
                         className="px-3 py-1.5 border border-amber-300 text-amber-700 font-medium rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50"
                       >
-                        🔄 Revision ({activeChatData.serviceAcquisition.package.revisions - activeChatData.serviceAcquisition.revisionsUsed} left)
+                        🔄 Revision (
+                        {activeChatData.serviceAcquisition.package.revisions -
+                          activeChatData.serviceAcquisition.revisionsUsed}{" "}
+                        left)
                       </button>
                     </>
                   )}
@@ -350,7 +393,9 @@ export default function ChatPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-bold">Deliver Work</h3>
-            <p className="text-sm text-gray-500">Add a note describing what you&apos;ve delivered.</p>
+            <p className="text-sm text-gray-500">
+              Add a note describing what you&apos;ve delivered.
+            </p>
             <textarea
               value={deliveryMessage}
               onChange={(e) => setDeliveryMessage(e.target.value)}
@@ -359,8 +404,19 @@ export default function ChatPage() {
               placeholder="Describe what you've completed..."
             />
             <div className="flex gap-3">
-              <button onClick={() => setShowDeliverModal(false)} className="flex-1 py-2 border text-gray-600 rounded-lg">Cancel</button>
-              <button onClick={handleDeliver} disabled={actionLoading} className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50">
+              <button
+                type="button"
+                onClick={() => setShowDeliverModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeliver}
+                disabled={actionLoading}
+                className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
+              >
                 {actionLoading ? "..." : "Submit Delivery"}
               </button>
             </div>
@@ -373,7 +429,9 @@ export default function ChatPage() {
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-bold">Request Revision</h3>
-            <p className="text-sm text-gray-500">Describe what needs to be changed.</p>
+            <p className="text-sm text-gray-500">
+              Describe what needs to be changed.
+            </p>
             <textarea
               value={revisionMessage}
               onChange={(e) => setRevisionMessage(e.target.value)}
@@ -382,8 +440,19 @@ export default function ChatPage() {
               placeholder="What needs to be revised?"
             />
             <div className="flex gap-3">
-              <button onClick={() => setShowRevisionModal(false)} className="flex-1 py-2 border text-gray-600 rounded-lg">Cancel</button>
-              <button onClick={handleRevision} disabled={actionLoading} className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50">
+              <button
+                type="button"
+                onClick={() => setShowRevisionModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleRevision}
+                disabled={actionLoading}
+                className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50"
+              >
                 {actionLoading ? "..." : "Request Revision"}
               </button>
             </div>

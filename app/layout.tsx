@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
-import { Sidebar } from "./components/layout/sidebar";
 import { CurrencyProvider } from "./components/currency/currency-context";
+import { Sidebar } from "./components/layout/sidebar";
 
 const inter = Inter({
   variable: "--font-inter",

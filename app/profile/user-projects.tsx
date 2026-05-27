@@ -2,10 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
-import {
-  getFundedPercent,
-  getProjectImage,
-} from "@/app/lib/project-utils";
+import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import type { Project } from "@/app/types/project";
 
 export function UserProjects({

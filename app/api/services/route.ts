@@ -12,13 +12,15 @@ export async function GET(request: Request) {
       active: true,
       ...(category && category !== "all" ? { category } : {}),
       ...(tag ? { tags: { has: tag } } : {}),
-      ...(search ? {
-        OR: [
-          { name: { contains: search, mode: "insensitive" } },
-          { description: { contains: search, mode: "insensitive" } },
-          { tags: { has: search } },
-        ],
-      } : {}),
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search, mode: "insensitive" } },
+              { description: { contains: search, mode: "insensitive" } },
+              { tags: { has: search } },
+            ],
+          }
+        : {}),
     },
     include: {
       provider: {
@@ -32,11 +34,7 @@ export async function GET(request: Request) {
       },
       _count: { select: { reviews: true } },
     },
-    orderBy: [
-      { featured: "desc" },
-      { rating: "desc" },
-      { createdAt: "desc" },
-    ],
+    orderBy: [{ featured: "desc" }, { rating: "desc" }, { createdAt: "desc" }],
   });
 
   return NextResponse.json(services);

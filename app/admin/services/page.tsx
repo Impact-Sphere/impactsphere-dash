@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Package {
@@ -46,11 +46,35 @@ export default function AdminServicesPage() {
     image: "",
     featured: false,
     packages: [
-      { name: "Basic", description: "", price: "", deliveryDays: "", revisions: "1" },
-      { name: "Standard", description: "", price: "", deliveryDays: "", revisions: "2" },
-      { name: "Premium", description: "", price: "", deliveryDays: "", revisions: "3" },
+      {
+        name: "Basic",
+        description: "",
+        price: "",
+        deliveryDays: "",
+        revisions: "1",
+      },
+      {
+        name: "Standard",
+        description: "",
+        price: "",
+        deliveryDays: "",
+        revisions: "2",
+      },
+      {
+        name: "Premium",
+        description: "",
+        price: "",
+        deliveryDays: "",
+        revisions: "3",
+      },
     ],
   });
+
+  const loadData = useCallback(async () => {
+    const res = await fetch("/api/admin/services");
+    if (res.ok) setServices(await res.json());
+    setLoading(false);
+  }, []);
 
   useEffect(() => {
     if (isPending) return;
@@ -70,13 +94,7 @@ export default function AdminServicesPage() {
         }
       })
       .catch(() => router.push("/discover"));
-  }, [session, isPending, router]);
-
-  const loadData = async () => {
-    const res = await fetch("/api/admin/services");
-    if (res.ok) setServices(await res.json());
-    setLoading(false);
-  };
+  }, [session, isPending, router, loadData]);
 
   const resetForm = () => {
     setFormData({
@@ -87,9 +105,27 @@ export default function AdminServicesPage() {
       image: "",
       featured: false,
       packages: [
-        { name: "Basic", description: "", price: "", deliveryDays: "", revisions: "1" },
-        { name: "Standard", description: "", price: "", deliveryDays: "", revisions: "2" },
-        { name: "Premium", description: "", price: "", deliveryDays: "", revisions: "3" },
+        {
+          name: "Basic",
+          description: "",
+          price: "",
+          deliveryDays: "",
+          revisions: "1",
+        },
+        {
+          name: "Standard",
+          description: "",
+          price: "",
+          deliveryDays: "",
+          revisions: "2",
+        },
+        {
+          name: "Premium",
+          description: "",
+          price: "",
+          deliveryDays: "",
+          revisions: "3",
+        },
       ],
     });
     setEditingService(null);
@@ -120,7 +156,10 @@ export default function AdminServicesPage() {
       body: JSON.stringify({
         ...formData,
         id: editingService?.id,
-        tags: formData.tags.split(",").map((t) => t.trim()).filter(Boolean),
+        tags: formData.tags
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean),
         providerId: session?.user.id,
         packages,
       }),
@@ -138,7 +177,9 @@ export default function AdminServicesPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm("Are you sure?")) return;
-    const res = await fetch(`/api/admin/services?id=${id}`, { method: "DELETE" });
+    const res = await fetch(`/api/admin/services?id=${id}`, {
+      method: "DELETE",
+    });
     if (res.ok) loadData();
   };
 
@@ -184,12 +225,19 @@ export default function AdminServicesPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-on-surface">Services Management</h1>
-            <p className="text-gray-500">Create and manage services with packages.</p>
+            <h1 className="text-2xl font-bold text-on-surface">
+              Services Management
+            </h1>
+            <p className="text-gray-500">
+              Create and manage services with packages.
+            </p>
           </div>
           <button
             type="button"
-            onClick={() => { resetForm(); setShowModal(true); }}
+            onClick={() => {
+              resetForm();
+              setShowModal(true);
+            }}
             className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90"
           >
             + New Service
@@ -198,13 +246,22 @@ export default function AdminServicesPage() {
 
         <div className="space-y-4">
           {services.map((service) => (
-            <div key={service.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div
+              key={service.id}
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+            >
               <div className="flex items-start justify-between">
                 <div className="space-y-1">
                   <div className="flex items-center gap-2">
                     <h3 className="text-lg font-semibold">{service.name}</h3>
-                    {service.featured && <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Featured</span>}
-                    <span className={`text-xs px-2 py-0.5 rounded-full ${service.active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}>
+                    {service.featured && (
+                      <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
+                        Featured
+                      </span>
+                    )}
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full ${service.active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-600"}`}
+                    >
                       {service.active ? "Active" : "Inactive"}
                     </span>
                   </div>
@@ -218,9 +275,27 @@ export default function AdminServicesPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => handleToggleActive(service)} className="px-3 py-1.5 border text-sm rounded-lg">{service.active ? "Deactivate" : "Activate"}</button>
-                  <button onClick={() => openEdit(service)} className="px-3 py-1.5 border text-sm rounded-lg">Edit</button>
-                  <button onClick={() => handleDelete(service.id)} className="px-3 py-1.5 border border-red-200 text-red-600 text-sm rounded-lg">Delete</button>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleActive(service)}
+                    className="px-3 py-1.5 border text-sm rounded-lg"
+                  >
+                    {service.active ? "Deactivate" : "Activate"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => openEdit(service)}
+                    className="px-3 py-1.5 border text-sm rounded-lg"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDelete(service.id)}
+                    className="px-3 py-1.5 border border-red-200 text-red-600 text-sm rounded-lg"
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </div>
@@ -232,45 +307,120 @@ export default function AdminServicesPage() {
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-bold">{editingService ? "Edit Service" : "New Service"}</h3>
+            <h3 className="text-xl font-bold">
+              {editingService ? "Edit Service" : "New Service"}
+            </h3>
 
             <div className="space-y-4">
-              <input type="text" placeholder="Service Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-              <textarea placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={3} className="w-full px-3 py-2 border rounded-lg resize-none" />
-              <input type="text" placeholder="Category" value={formData.category} onChange={(e) => setFormData({ ...formData, category: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-              <input type="text" placeholder="Tags (comma separated)" value={formData.tags} onChange={(e) => setFormData({ ...formData, tags: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
-              <input type="url" placeholder="Image URL" value={formData.image} onChange={(e) => setFormData({ ...formData, image: e.target.value })} className="w-full px-3 py-2 border rounded-lg" />
+              <input
+                type="text"
+                placeholder="Service Name"
+                value={formData.name}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+              <textarea
+                placeholder="Description"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
+                rows={3}
+                className="w-full px-3 py-2 border rounded-lg resize-none"
+              />
+              <input
+                type="text"
+                placeholder="Category"
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+              <input
+                type="text"
+                placeholder="Tags (comma separated)"
+                value={formData.tags}
+                onChange={(e) =>
+                  setFormData({ ...formData, tags: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-lg"
+              />
+              <input
+                type="url"
+                placeholder="Image URL"
+                value={formData.image}
+                onChange={(e) =>
+                  setFormData({ ...formData, image: e.target.value })
+                }
+                className="w-full px-3 py-2 border rounded-lg"
+              />
               <label className="flex items-center gap-2">
-                <input type="checkbox" checked={formData.featured} onChange={(e) => setFormData({ ...formData, featured: e.target.checked })} />
+                <input
+                  type="checkbox"
+                  checked={formData.featured}
+                  onChange={(e) =>
+                    setFormData({ ...formData, featured: e.target.checked })
+                  }
+                />
                 <span className="text-sm">Featured</span>
               </label>
 
               <div className="space-y-4">
                 <h4 className="font-medium">Packages</h4>
                 {formData.packages.map((pkg, idx) => (
-                  <div key={idx} className="border rounded-lg p-4 space-y-3">
+                  <div
+                    key={pkg.name}
+                    className="border rounded-lg p-4 space-y-3"
+                  >
                     <h5 className="font-medium text-sm">{pkg.name}</h5>
-                    <input type="text" placeholder="Description" value={pkg.description} onChange={(e) => {
-                      const newPackages = [...formData.packages];
-                      newPackages[idx].description = e.target.value;
-                      setFormData({ ...formData, packages: newPackages });
-                    }} className="w-full px-3 py-2 border rounded-lg text-sm" />
+                    <input
+                      type="text"
+                      placeholder="Description"
+                      value={pkg.description}
+                      onChange={(e) => {
+                        const newPackages = [...formData.packages];
+                        newPackages[idx].description = e.target.value;
+                        setFormData({ ...formData, packages: newPackages });
+                      }}
+                      className="w-full px-3 py-2 border rounded-lg text-sm"
+                    />
                     <div className="grid grid-cols-3 gap-2">
-                      <input type="number" placeholder="Price (€)" value={pkg.price} onChange={(e) => {
-                        const newPackages = [...formData.packages];
-                        newPackages[idx].price = e.target.value;
-                        setFormData({ ...formData, packages: newPackages });
-                      }} className="px-3 py-2 border rounded-lg text-sm" />
-                      <input type="number" placeholder="Days" value={pkg.deliveryDays} onChange={(e) => {
-                        const newPackages = [...formData.packages];
-                        newPackages[idx].deliveryDays = e.target.value;
-                        setFormData({ ...formData, packages: newPackages });
-                      }} className="px-3 py-2 border rounded-lg text-sm" />
-                      <input type="number" placeholder="Revisions" value={pkg.revisions} onChange={(e) => {
-                        const newPackages = [...formData.packages];
-                        newPackages[idx].revisions = e.target.value;
-                        setFormData({ ...formData, packages: newPackages });
-                      }} className="px-3 py-2 border rounded-lg text-sm" />
+                      <input
+                        type="number"
+                        placeholder="Price (€)"
+                        value={pkg.price}
+                        onChange={(e) => {
+                          const newPackages = [...formData.packages];
+                          newPackages[idx].price = e.target.value;
+                          setFormData({ ...formData, packages: newPackages });
+                        }}
+                        className="px-3 py-2 border rounded-lg text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Days"
+                        value={pkg.deliveryDays}
+                        onChange={(e) => {
+                          const newPackages = [...formData.packages];
+                          newPackages[idx].deliveryDays = e.target.value;
+                          setFormData({ ...formData, packages: newPackages });
+                        }}
+                        className="px-3 py-2 border rounded-lg text-sm"
+                      />
+                      <input
+                        type="number"
+                        placeholder="Revisions"
+                        value={pkg.revisions}
+                        onChange={(e) => {
+                          const newPackages = [...formData.packages];
+                          newPackages[idx].revisions = e.target.value;
+                          setFormData({ ...formData, packages: newPackages });
+                        }}
+                        className="px-3 py-2 border rounded-lg text-sm"
+                      />
                     </div>
                   </div>
                 ))}
@@ -278,8 +428,23 @@ export default function AdminServicesPage() {
             </div>
 
             <div className="flex gap-3">
-              <button onClick={() => setShowModal(false)} className="flex-1 py-2.5 border text-gray-600 rounded-lg">Cancel</button>
-              <button onClick={handleSubmit} disabled={!formData.name || !formData.description || !formData.category} className="flex-1 py-2.5 bg-primary text-white rounded-lg disabled:opacity-50">{editingService ? "Update" : "Create"}</button>
+              <button
+                type="button"
+                onClick={() => setShowModal(false)}
+                className="flex-1 py-2.5 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSubmit}
+                disabled={
+                  !formData.name || !formData.description || !formData.category
+                }
+                className="flex-1 py-2.5 bg-primary text-white rounded-lg disabled:opacity-50"
+              >
+                {editingService ? "Update" : "Create"}
+              </button>
             </div>
           </div>
         </div>

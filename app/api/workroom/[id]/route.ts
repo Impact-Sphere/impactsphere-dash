@@ -29,13 +29,36 @@ export async function GET(
       serviceAcquisition: {
         include: {
           service: {
-            select: { id: true, name: true, description: true, category: true, providerId: true, provider: { select: { name: true, email: true } } },
+            select: {
+              id: true,
+              name: true,
+              description: true,
+              category: true,
+              providerId: true,
+              provider: { select: { name: true, email: true } },
+            },
           },
           project: {
-            select: { id: true, title: true, ngoId: true, ngo: { select: { name: true, email: true, ngoInfo: { select: { ngoName: true } } } } },
+            select: {
+              id: true,
+              title: true,
+              ngoId: true,
+              ngo: {
+                select: {
+                  name: true,
+                  email: true,
+                  ngoInfo: { select: { ngoName: true } },
+                },
+              },
+            },
           },
           package: {
-            select: { name: true, price: true, deliveryDays: true, revisions: true },
+            select: {
+              name: true,
+              price: true,
+              deliveryDays: true,
+              revisions: true,
+            },
           },
           review: {
             select: { id: true, rating: true, comment: true },
@@ -49,8 +72,10 @@ export async function GET(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const isProjectOwner = chat.serviceAcquisition.project.ngoId === session.user.id;
-  const isServiceProvider = chat.serviceAcquisition.service.providerId === session.user.id;
+  const isProjectOwner =
+    chat.serviceAcquisition.project.ngoId === session.user.id;
+  const isServiceProvider =
+    chat.serviceAcquisition.service.providerId === session.user.id;
 
   if (!isAdmin && !isProjectOwner && !isServiceProvider) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });

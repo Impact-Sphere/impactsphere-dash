@@ -1,8 +1,8 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Acquisition {
@@ -36,6 +36,14 @@ export default function AdminAcquisitionsPage() {
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
 
+  const loadAcquisitions = useCallback(async () => {
+    const res = await fetch("/api/admin/acquisitions");
+    if (res.ok) {
+      setAcquisitions(await res.json());
+    }
+    setLoading(false);
+  }, []);
+
   useEffect(() => {
     if (isPending) return;
     if (!session) {
@@ -54,15 +62,7 @@ export default function AdminAcquisitionsPage() {
         }
       })
       .catch(() => router.push("/discover"));
-  }, [session, isPending, router]);
-
-  const loadAcquisitions = async () => {
-    const res = await fetch("/api/admin/acquisitions");
-    if (res.ok) {
-      setAcquisitions(await res.json());
-    }
-    setLoading(false);
-  };
+  }, [session, isPending, router, loadAcquisitions]);
 
   const statusBadge = (status: string) => {
     const styles: Record<string, string> = {
@@ -71,7 +71,9 @@ export default function AdminAcquisitionsPage() {
       CANCELLED: "bg-gray-100 text-gray-600",
     };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}
+      >
         {status}
       </span>
     );
@@ -90,10 +92,17 @@ export default function AdminAcquisitionsPage() {
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
-            <h1 className="text-2xl font-bold text-on-surface">Service Acquisitions</h1>
-            <p className="text-gray-500">Overview of all service acquisitions across projects.</p>
+            <h1 className="text-2xl font-bold text-on-surface">
+              Service Acquisitions
+            </h1>
+            <p className="text-gray-500">
+              Overview of all service acquisitions across projects.
+            </p>
           </div>
-          <Link href="/admin" className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm">
+          <Link
+            href="/admin"
+            className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+          >
             Back to Dashboard
           </Link>
         </div>
@@ -105,20 +114,32 @@ export default function AdminAcquisitionsPage() {
             </div>
           ) : (
             acquisitions.map((acq) => (
-              <div key={acq.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+              <div
+                key={acq.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+              >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-3">
                       <h3 className="text-lg font-semibold text-on-surface">
                         {acq.service.name}
-                        <span className="text-primary font-medium"> — {acq.package.name}</span>
+                        <span className="text-primary font-medium">
+                          {" "}
+                          — {acq.package.name}
+                        </span>
                       </h3>
                       {statusBadge(acq.status)}
                     </div>
                     <p className="text-sm text-gray-500">
-                      Project: <span className="font-medium">{acq.project.title}</span>
+                      Project:{" "}
+                      <span className="font-medium">{acq.project.title}</span>
                       {" · "}
-                      NGO: <span className="font-medium">{acq.project.ngo.ngoInfo?.ngoName || acq.project.ngo.name || acq.project.ngo.email}</span>
+                      NGO:{" "}
+                      <span className="font-medium">
+                        {acq.project.ngo.ngoInfo?.ngoName ||
+                          acq.project.ngo.name ||
+                          acq.project.ngo.email}
+                      </span>
                     </p>
                   </div>
                   {acq.chat && (
@@ -134,15 +155,21 @@ export default function AdminAcquisitionsPage() {
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                   <div className="space-y-1">
                     <span className="text-gray-400">Category</span>
-                    <p className="font-medium text-on-surface">{acq.service.category}</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.service.category}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Package Cost</span>
-                    <p className="font-medium text-on-surface">€{acq.package.price.toFixed(2)}</p>
+                    <p className="font-medium text-on-surface">
+                      €{acq.package.price.toFixed(2)}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Provider</span>
-                    <p className="font-medium text-on-surface">{acq.service.provider.name || acq.service.provider.email}</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.service.provider.name || acq.service.provider.email}
+                    </p>
                   </div>
                 </div>
 

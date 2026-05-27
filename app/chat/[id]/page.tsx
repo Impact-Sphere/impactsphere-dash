@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/app/lib/auth-client";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { authClient } from "@/app/lib/auth-client";
 
 interface WorkroomData {
   id: string;
@@ -26,7 +26,11 @@ interface WorkroomData {
       id: string;
       title: string;
       ngoId: string;
-      ngo: { name: string | null; email: string; ngoInfo: { ngoName: string } | null };
+      ngo: {
+        name: string | null;
+        email: string;
+        ngoInfo: { ngoName: string } | null;
+      };
     };
     package: {
       name: string;
@@ -53,7 +57,11 @@ const STATUS_LABELS: Record<string, string> = {
   CANCELLED: "Cancelled",
 };
 
-export default function WorkroomPage({ params }: { params: Promise<{ id: string }> }) {
+export default function WorkroomPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const router = useRouter();
   const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
@@ -79,12 +87,18 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
   }, [params]);
 
   const acqStatus = workroom?.serviceAcquisition.status || "ACTIVE";
-  const isProvider = workroom?.serviceAcquisition.service.providerId === session?.user?.id;
-  const isNgo = workroom?.serviceAcquisition.project.ngoId === session?.user?.id;
+  const isProvider =
+    workroom?.serviceAcquisition.service.providerId === session?.user?.id;
+  const isNgo =
+    workroom?.serviceAcquisition.project.ngoId === session?.user?.id;
 
   const revisionsLeft = useMemo(() => {
     if (!workroom) return 0;
-    return Math.max(0, workroom.serviceAcquisition.package.revisions - workroom.serviceAcquisition.revisionsUsed);
+    return Math.max(
+      0,
+      workroom.serviceAcquisition.package.revisions -
+        workroom.serviceAcquisition.revisionsUsed,
+    );
   }, [workroom]);
 
   useEffect(() => {
@@ -134,7 +148,7 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length]);
+  }, []);
 
   const sendMessage = async () => {
     if (!chatId || !newMessage.trim()) return;
@@ -185,11 +199,14 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
     if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(`/api/services/${workroom.serviceAcquisition.id}/review`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
-    });
+    const res = await fetch(
+      `/api/services/${workroom.serviceAcquisition.id}/review`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ rating: reviewRating, comment: reviewComment }),
+      },
+    );
     setActionLoading(false);
 
     if (res.ok) {
@@ -214,7 +231,9 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
       CANCELLED: "bg-gray-100 text-gray-600",
     };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}
+      >
         {STATUS_LABELS[status] || status}
       </span>
     );
@@ -257,7 +276,10 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
           <div className="space-y-1">
             <h1 className="text-2xl font-bold text-on-surface">
               {acq.service.name}
-              <span className="text-primary text-lg font-normal"> — {acq.package.name}</span>
+              <span className="text-primary text-lg font-normal">
+                {" "}
+                — {acq.package.name}
+              </span>
             </h1>
             <p className="text-sm text-gray-500">
               Project: <span className="font-medium">{acq.project.title}</span>
@@ -271,7 +293,9 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
             {statusBadge(acqStatus)}
             <button
               type="button"
-              onClick={() => router.push(isProvider ? "/admin/acquisitions" : "/my-services")}
+              onClick={() =>
+                router.push(isProvider ? "/admin/acquisitions" : "/my-services")
+              }
               className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
             >
               Back
@@ -293,15 +317,17 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
 
               {/* Action Buttons */}
               <div className="flex flex-wrap gap-2 mt-3">
-                {isProvider && (acqStatus === "ACTIVE" || acqStatus === "REVISION_REQUESTED") && (
-                  <button
-                    type="button"
-                    onClick={() => setShowDeliverModal(true)}
-                    className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
-                  >
-                    📦 Deliver Work
-                  </button>
-                )}
+                {isProvider &&
+                  (acqStatus === "ACTIVE" ||
+                    acqStatus === "REVISION_REQUESTED") && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeliverModal(true)}
+                      className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
+                    >
+                      📦 Deliver Work
+                    </button>
+                  )}
                 {isNgo && acqStatus === "DELIVERED" && (
                   <>
                     <button
@@ -322,21 +348,26 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
                     </button>
                   </>
                 )}
-                {isNgo && acqStatus === "COMPLETED" && !acq.review && !showReviewForm && (
-                  <button
-                    type="button"
-                    onClick={() => setShowReviewForm(true)}
-                    className="px-3 py-1.5 border border-primary text-primary font-medium rounded-lg text-sm hover:bg-primary/5"
-                  >
-                    ⭐ Leave a Review
-                  </button>
-                )}
+                {isNgo &&
+                  acqStatus === "COMPLETED" &&
+                  !acq.review &&
+                  !showReviewForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewForm(true)}
+                      className="px-3 py-1.5 border border-primary text-primary font-medium rounded-lg text-sm hover:bg-primary/5"
+                    >
+                      ⭐ Leave a Review
+                    </button>
+                  )}
               </div>
 
               {/* Delivery Note */}
               {acqStatus === "DELIVERED" && acq.deliveryMessage && (
                 <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3">
-                  <p className="text-xs font-medium text-blue-800 mb-0.5">Provider&apos;s delivery note:</p>
+                  <p className="text-xs font-medium text-blue-800 mb-0.5">
+                    Provider&apos;s delivery note:
+                  </p>
                   <p className="text-sm text-blue-700">{acq.deliveryMessage}</p>
                 </div>
               )}
@@ -344,7 +375,9 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
               {/* Review Form */}
               {showReviewForm && (
                 <div className="mt-3 bg-violet-50 border border-violet-100 rounded-lg p-3 space-y-2">
-                  <p className="text-sm font-medium text-violet-800">Leave a review</p>
+                  <p className="text-sm font-medium text-violet-800">
+                    Leave a review
+                  </p>
                   <div className="flex gap-1">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button
@@ -375,7 +408,11 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
                     </button>
                     <button
                       type="button"
-                      onClick={() => { setShowReviewForm(false); setReviewRating(5); setReviewComment(""); }}
+                      onClick={() => {
+                        setShowReviewForm(false);
+                        setReviewRating(5);
+                        setReviewComment("");
+                      }}
                       className="px-4 py-2 border text-gray-600 rounded-lg text-sm"
                     >
                       Cancel
@@ -388,15 +425,24 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
               {acq.review && (
                 <div className="mt-3 bg-yellow-50 border border-yellow-100 rounded-lg p-3">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-on-surface">Review:</span>
+                    <span className="text-sm font-medium text-on-surface">
+                      Review:
+                    </span>
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <span key={star} className={`text-sm ${star <= acq.review!.rating ? "text-yellow-400" : "text-gray-300"}`}>★</span>
+                        <span
+                          key={star}
+                          className={`text-sm ${star <= (acq.review?.rating ?? 0) ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          ★
+                        </span>
                       ))}
                     </div>
                   </div>
                   {acq.review.comment && (
-                    <p className="text-sm text-gray-600 mt-1">{acq.review.comment}</p>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {acq.review.comment}
+                    </p>
                   )}
                 </div>
               )}
@@ -455,14 +501,20 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
           {/* Sidebar */}
           <aside className="w-80 border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-on-surface">Service Details</h3>
-              <p className="text-xs text-gray-500">Overview of this acquisition</p>
+              <h3 className="text-sm font-semibold text-on-surface">
+                Service Details
+              </h3>
+              <p className="text-xs text-gray-500">
+                Overview of this acquisition
+              </p>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Status</p>
-                <p className="text-sm font-semibold text-on-surface">{STATUS_LABELS[acqStatus] || acqStatus}</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {STATUS_LABELS[acqStatus] || acqStatus}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Revisions</p>
@@ -473,13 +525,17 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
               {acq.deliveredAt && (
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400">Delivered</p>
-                  <p className="text-sm font-semibold text-on-surface">{new Date(acq.deliveredAt).toLocaleDateString()}</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    {new Date(acq.deliveredAt).toLocaleDateString()}
+                  </p>
                 </div>
               )}
               {acq.completedAt && (
                 <div className="space-y-1">
                   <p className="text-xs text-gray-400">Completed</p>
-                  <p className="text-sm font-semibold text-on-surface">{new Date(acq.completedAt).toLocaleDateString()}</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    {new Date(acq.completedAt).toLocaleDateString()}
+                  </p>
                 </div>
               )}
             </div>
@@ -487,34 +543,48 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Package</p>
-                <p className="text-sm font-semibold text-on-surface">{acq.package.name}</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.package.name}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Price</p>
-                <p className="text-sm font-semibold text-on-surface">{format(acq.package.price)}</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {format(acq.package.price)}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Delivery Time</p>
-                <p className="text-sm font-semibold text-on-surface">{acq.package.deliveryDays} days</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.package.deliveryDays} days
+                </p>
               </div>
             </div>
 
             <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
               <div className="space-y-1">
-                <p className="text-xs text-gray-400">{isProvider ? "NGO" : "Provider"}</p>
+                <p className="text-xs text-gray-400">
+                  {isProvider ? "NGO" : "Provider"}
+                </p>
                 <p className="text-sm font-semibold text-on-surface">
                   {isProvider
-                    ? acq.project.ngo.ngoInfo?.ngoName || acq.project.ngo.name || acq.project.ngo.email
+                    ? acq.project.ngo.ngoInfo?.ngoName ||
+                      acq.project.ngo.name ||
+                      acq.project.ngo.email
                     : acq.service.provider.name || acq.service.provider.email}
                 </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Project</p>
-                <p className="text-sm font-semibold text-on-surface">{acq.project.title}</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.project.title}
+                </p>
               </div>
               <div className="space-y-1">
                 <p className="text-xs text-gray-400">Category</p>
-                <p className="text-sm font-semibold text-on-surface">{acq.service.category}</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.service.category}
+                </p>
               </div>
             </div>
           </aside>
@@ -526,7 +596,9 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-bold">Deliver Work</h3>
-            <p className="text-sm text-gray-500">Add a note describing what you&apos;ve completed.</p>
+            <p className="text-sm text-gray-500">
+              Add a note describing what you&apos;ve completed.
+            </p>
             <textarea
               value={deliveryMessage}
               onChange={(e) => setDeliveryMessage(e.target.value)}
@@ -535,7 +607,13 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
               placeholder="Describe what you've completed..."
             />
             <div className="flex gap-3">
-              <button type="button" onClick={() => setShowDeliverModal(false)} className="flex-1 py-2 border text-gray-600 rounded-lg">Cancel</button>
+              <button
+                type="button"
+                onClick={() => setShowDeliverModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
               <button
                 type="button"
                 onClick={() => handleAction("deliver", deliveryMessage)}
@@ -554,7 +632,9 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
             <h3 className="text-lg font-bold">Request Revision</h3>
-            <p className="text-sm text-gray-500">Describe what needs to be changed.</p>
+            <p className="text-sm text-gray-500">
+              Describe what needs to be changed.
+            </p>
             <textarea
               value={revisionMessage}
               onChange={(e) => setRevisionMessage(e.target.value)}
@@ -563,7 +643,13 @@ export default function WorkroomPage({ params }: { params: Promise<{ id: string 
               placeholder="What needs to be revised?"
             />
             <div className="flex gap-3">
-              <button type="button" onClick={() => setShowRevisionModal(false)} className="flex-1 py-2 border text-gray-600 rounded-lg">Cancel</button>
+              <button
+                type="button"
+                onClick={() => setShowRevisionModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
               <button
                 type="button"
                 onClick={() => handleAction("revision", revisionMessage)}

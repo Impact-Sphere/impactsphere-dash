@@ -1,13 +1,10 @@
 "use client";
 
+import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
-import { useCurrency } from "@/app/components/currency/currency-context";
-import {
-  getFundedPercent,
-  getProjectImage,
-} from "@/app/lib/project-utils";
+import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import { cn } from "@/app/lib/utils";
 import type { Project } from "@/app/types/project";
 

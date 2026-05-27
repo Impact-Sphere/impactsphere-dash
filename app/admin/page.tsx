@@ -2,8 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
-import { authClient } from "@/app/lib/auth-client";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { authClient } from "@/app/lib/auth-client";
 
 interface PendingUser {
   id: string;

@@ -4,8 +4,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  type CurrencyCode,
+  SUPPORTED_CURRENCIES,
+  useCurrency,
+} from "@/app/components/currency/currency-context";
 import { authClient } from "@/app/lib/auth-client";
-import { useCurrency, SUPPORTED_CURRENCIES, type CurrencyCode } from "@/app/components/currency/currency-context";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
 
@@ -13,7 +17,12 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
-  const { currency, setCurrency, symbol, loading: currencyLoading } = useCurrency();
+  const {
+    currency,
+    setCurrency,
+    symbol,
+    loading: currencyLoading,
+  } = useCurrency();
   const [userType, setUserType] = useState<string | null>(null);
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
@@ -129,9 +138,7 @@ export function Sidebar() {
               )}
             >
               <span className="material-symbols-outlined">handshake</span>
-              <span className="text-sm font-semibold font-inter">
-                Services
-              </span>
+              <span className="text-sm font-semibold font-inter">Services</span>
             </Link>
             <Link
               href="/my-services"
@@ -210,13 +217,15 @@ export function Sidebar() {
                   "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors",
                   currency === c.code
                     ? "bg-primary/10 text-primary font-semibold"
-                    : "text-slate-600 hover:bg-slate-50"
+                    : "text-slate-600 hover:bg-slate-50",
                 )}
               >
                 <span className="w-6 text-center">{c.symbol}</span>
                 <span>{c.name}</span>
                 {currency === c.code && (
-                  <span className="material-symbols-outlined text-base ml-auto text-primary">check</span>
+                  <span className="material-symbols-outlined text-base ml-auto text-primary">
+                    check
+                  </span>
                 )}
               </button>
             ))}

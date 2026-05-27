@@ -30,7 +30,10 @@ export async function POST(
   });
 
   if (!acquisition) {
-    return NextResponse.json({ error: "Acquisition not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Acquisition not found" },
+      { status: 404 },
+    );
   }
 
   const isProvider = acquisition.service.providerId === session.user.id;
@@ -43,10 +46,19 @@ export async function POST(
   // Provider delivers work
   if (action === "deliver") {
     if (!isProvider) {
-      return NextResponse.json({ error: "Only provider can deliver" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only provider can deliver" },
+        { status: 403 },
+      );
     }
-    if (acquisition.status !== "ACTIVE" && acquisition.status !== "REVISION_REQUESTED") {
-      return NextResponse.json({ error: "Cannot deliver in current status" }, { status: 400 });
+    if (
+      acquisition.status !== "ACTIVE" &&
+      acquisition.status !== "REVISION_REQUESTED"
+    ) {
+      return NextResponse.json(
+        { error: "Cannot deliver in current status" },
+        { status: 400 },
+      );
     }
     if (acquisition.project.currentAmount < acquisition.package.price) {
       return NextResponse.json(
@@ -82,10 +94,16 @@ export async function POST(
   // NGO accepts delivery
   if (action === "accept") {
     if (!isNgo) {
-      return NextResponse.json({ error: "Only NGO can accept" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only NGO can accept" },
+        { status: 403 },
+      );
     }
     if (acquisition.status !== "DELIVERED") {
-      return NextResponse.json({ error: "Can only accept delivered work" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Can only accept delivered work" },
+        { status: 400 },
+      );
     }
 
     await prisma.serviceAcquisition.update({
@@ -102,7 +120,8 @@ export async function POST(
           id: crypto.randomUUID(),
           chatId: acquisition.chat.id,
           senderId: session.user.id,
-          content: "✅ **Delivery accepted!** Thank you for the great work. You can now leave a review.",
+          content:
+            "✅ **Delivery accepted!** Thank you for the great work. You can now leave a review.",
         },
       });
     }
@@ -113,16 +132,24 @@ export async function POST(
   // NGO requests revision
   if (action === "revision") {
     if (!isNgo) {
-      return NextResponse.json({ error: "Only NGO can request revision" }, { status: 403 });
+      return NextResponse.json(
+        { error: "Only NGO can request revision" },
+        { status: 403 },
+      );
     }
     if (acquisition.status !== "DELIVERED") {
-      return NextResponse.json({ error: "Can only request revision on delivered work" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Can only request revision on delivered work" },
+        { status: 400 },
+      );
     }
 
     const maxRevisions = acquisition.package.revisions;
     if (acquisition.revisionsUsed >= maxRevisions) {
       return NextResponse.json(
-        { error: `No revisions remaining (${maxRevisions} included in your package)` },
+        {
+          error: `No revisions remaining (${maxRevisions} included in your package)`,
+        },
         { status: 400 },
       );
     }

@@ -2,10 +2,11 @@
 
 import { Elements } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
-import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { useParams, useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
+import { useCurrency } from "@/app/components/currency/currency-context";
+import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { authClient } from "@/app/lib/auth-client";
@@ -18,7 +19,6 @@ import {
   getStartMinTimeForDate,
   mergeContiguousSlots,
 } from "@/app/lib/meetings-utils";
-import { useCurrency } from "@/app/components/currency/currency-context";
 import {
   getFundedPercent,
   getNgoName,
@@ -128,7 +128,6 @@ export default function ProjectDetailPage() {
   };
 
   const handleInitiatePayment = async () => {
-
     if (!donateAmount || Number(donateAmount) <= 0) return;
     setDonating(true);
 
@@ -388,15 +387,21 @@ export default function ProjectDetailPage() {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-slate-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-gray-400">Total Donated</p>
-              <p className="text-xl font-bold text-on-surface">{format(project.currentAmount)}</p>
+              <p className="text-xl font-bold text-on-surface">
+                {format(project.currentAmount)}
+              </p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-gray-400">Spent on Services</p>
-              <p className="text-xl font-bold text-amber-600">{format(project.serviceSpent || 0)}</p>
+              <p className="text-xl font-bold text-amber-600">
+                {format(project.serviceSpent || 0)}
+              </p>
             </div>
             <div className="bg-emerald-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-emerald-600">Available for Services</p>
-              <p className="text-xl font-bold text-emerald-700">{format(availableBudget)}</p>
+              <p className="text-xl font-bold text-emerald-700">
+                {format(availableBudget)}
+              </p>
             </div>
           </div>
           {isOwner && availableBudget > 0 && (
@@ -410,56 +415,92 @@ export default function ProjectDetailPage() {
             </button>
           )}
           {isOwner && availableBudget <= 0 && (
-            <p className="text-sm text-gray-500">No available budget to buy services. Wait for more donations!</p>
+            <p className="text-sm text-gray-500">
+              No available budget to buy services. Wait for more donations!
+            </p>
           )}
         </div>
 
         {/* Services Bought */}
         {acquisitions.length > 0 && (
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
-            <h2 className="text-lg font-semibold text-on-surface">Services Bought</h2>
+            <h2 className="text-lg font-semibold text-on-surface">
+              Services Bought
+            </h2>
             <div className="space-y-3">
               {acquisitions.map((acq) => (
-                <div key={acq.id} className="flex items-start justify-between py-3 border-b border-gray-100 last:border-0">
+                <div
+                  key={acq.id}
+                  className="flex items-start justify-between py-3 border-b border-gray-100 last:border-0"
+                >
                   <div className="space-y-1">
                     <div className="flex items-center space-x-2">
-                      <span className="font-medium text-on-surface">{acq.service.name}</span>
-                      <span className="text-primary text-sm">— {acq.package.name}</span>
+                      <span className="font-medium text-on-surface">
+                        {acq.service.name}
+                      </span>
+                      <span className="text-primary text-sm">
+                        — {acq.package.name}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-3 text-xs text-gray-500">
-                      <span>Provider: {acq.service.provider.name || acq.service.provider.email}</span>
+                      <span>
+                        Provider:{" "}
+                        {acq.service.provider.name ||
+                          acq.service.provider.email}
+                      </span>
                       <span>·</span>
-                      <span className={`font-medium ${
-                        acq.status === "ACTIVE" ? "text-emerald-600" :
-                        acq.status === "DELIVERED" ? "text-blue-600" :
-                        acq.status === "REVISION_REQUESTED" ? "text-amber-600" :
-                        acq.status === "COMPLETED" ? "text-violet-600" :
-                        "text-gray-500"
-                      }`}>
-                        {acq.status === "ACTIVE" ? "In Progress" :
-                         acq.status === "DELIVERED" ? "Delivered" :
-                         acq.status === "REVISION_REQUESTED" ? "Revision Requested" :
-                         acq.status === "COMPLETED" ? "Completed" :
-                         acq.status}
+                      <span
+                        className={`font-medium ${
+                          acq.status === "ACTIVE"
+                            ? "text-emerald-600"
+                            : acq.status === "DELIVERED"
+                              ? "text-blue-600"
+                              : acq.status === "REVISION_REQUESTED"
+                                ? "text-amber-600"
+                                : acq.status === "COMPLETED"
+                                  ? "text-violet-600"
+                                  : "text-gray-500"
+                        }`}
+                      >
+                        {acq.status === "ACTIVE"
+                          ? "In Progress"
+                          : acq.status === "DELIVERED"
+                            ? "Delivered"
+                            : acq.status === "REVISION_REQUESTED"
+                              ? "Revision Requested"
+                              : acq.status === "COMPLETED"
+                                ? "Completed"
+                                : acq.status}
                       </span>
                     </div>
                     {acq.review && (
                       <div className="flex items-center gap-1 text-xs">
                         <span className="text-gray-400">Review:</span>
                         <div className="flex">
-                          {[1,2,3,4,5].map((s) => (
-                            <span key={s} className={s <= acq.review!.rating ? "text-yellow-400" : "text-gray-300"}>★</span>
+                          {[1, 2, 3, 4, 5].map((s) => (
+                            <span
+                              key={s}
+                              className={
+                                s <= (acq.review?.rating ?? 0)
+                                  ? "text-yellow-400"
+                                  : "text-gray-300"
+                              }
+                            >
+                              ★
+                            </span>
                           ))}
                         </div>
                       </div>
                     )}
                   </div>
                   <div className="flex items-center space-x-3">
-                    <span className="text-sm font-bold text-on-surface">{format(acq.package.price)}</span>
+                    <span className="text-sm font-bold text-on-surface">
+                      {format(acq.package.price)}
+                    </span>
                     {acq.chat && (
                       <button
                         type="button"
-                        onClick={() => router.push(`/chat/${acq.chat!.id}`)}
+                        onClick={() => router.push(`/chat/${acq.chat?.id}`)}
                         className="px-3 py-1.5 bg-primary text-white text-xs font-medium rounded-lg hover:bg-primary/90 transition-colors"
                       >
                         Open Workroom

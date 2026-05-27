@@ -29,10 +29,7 @@ export async function POST(request: Request) {
   });
 
   if (!project || project.ngoId !== session.user.id) {
-    return NextResponse.json(
-      { error: "Unauthorized" },
-      { status: 403 },
-    );
+    return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
   }
 
   const service = await prisma.service.findUnique({
@@ -41,25 +38,21 @@ export async function POST(request: Request) {
   });
 
   if (!service || !service.active) {
-    return NextResponse.json(
-      { error: "Service not found" },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: "Service not found" }, { status: 404 });
   }
 
   const pkg = service.packages.find((p) => p.id === packageId);
   if (!pkg) {
-    return NextResponse.json(
-      { error: "Package not found" },
-      { status: 404 },
-    );
+    return NextResponse.json({ error: "Package not found" }, { status: 404 });
   }
 
   // Check budget
   const availableBudget = project.currentAmount - project.serviceSpent;
   if (availableBudget < pkg.price) {
     return NextResponse.json(
-      { error: `Insufficient funds. Available: €${availableBudget.toFixed(2)}, needed: €${pkg.price.toFixed(2)}` },
+      {
+        error: `Insufficient funds. Available: €${availableBudget.toFixed(2)}, needed: €${pkg.price.toFixed(2)}`,
+      },
       { status: 400 },
     );
   }

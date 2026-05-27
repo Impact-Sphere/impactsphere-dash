@@ -38,10 +38,20 @@ export async function GET(
       serviceAcquisitions: {
         include: {
           service: {
-            select: { id: true, name: true, category: true, provider: { select: { name: true, email: true } } },
+            select: {
+              id: true,
+              name: true,
+              category: true,
+              provider: { select: { name: true, email: true } },
+            },
           },
           package: {
-            select: { name: true, price: true, deliveryDays: true, revisions: true },
+            select: {
+              name: true,
+              price: true,
+              deliveryDays: true,
+              revisions: true,
+            },
           },
           chat: { select: { id: true } },
           review: { select: { id: true, rating: true, comment: true } },

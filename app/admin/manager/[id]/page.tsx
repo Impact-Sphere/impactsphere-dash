@@ -1,9 +1,9 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { authClient } from "@/app/lib/auth-client";
+import { useEffect, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { authClient } from "@/app/lib/auth-client";
 
 interface Workroom {
   id: string;
@@ -21,7 +21,11 @@ interface Workroom {
     project: {
       title: string;
       ngoId: string;
-      ngo: { name: string | null; email: string; ngoInfo: { ngoName: string } | null };
+      ngo: {
+        name: string | null;
+        email: string;
+        ngoInfo: { ngoName: string } | null;
+      };
     };
     package: {
       name: string;
@@ -150,14 +154,11 @@ export default function AdminWorkroomPage({
     if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(
-      `/api/services/${workroom.serviceAcquisition.id}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "deliver", message: deliveryMessage }),
-      },
-    );
+    const res = await fetch(`/api/services/${workroom.serviceAcquisition.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "deliver", message: deliveryMessage }),
+    });
     setActionLoading(false);
 
     if (res.ok) {
@@ -173,14 +174,11 @@ export default function AdminWorkroomPage({
     if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(
-      `/api/services/${workroom.serviceAcquisition.id}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "accept" }),
-      },
-    );
+    const res = await fetch(`/api/services/${workroom.serviceAcquisition.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "accept" }),
+    });
     setActionLoading(false);
 
     if (!res.ok) {
@@ -193,14 +191,11 @@ export default function AdminWorkroomPage({
     if (!workroom) return;
 
     setActionLoading(true);
-    const res = await fetch(
-      `/api/services/${workroom.serviceAcquisition.id}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ action: "revision", message: revisionMessage }),
-      },
-    );
+    const res = await fetch(`/api/services/${workroom.serviceAcquisition.id}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "revision", message: revisionMessage }),
+    });
     setActionLoading(false);
 
     if (res.ok) {
@@ -247,9 +242,7 @@ export default function AdminWorkroomPage({
   const canMessage = isProvider || isNgo;
   const acqStatus = acq.status || "ACTIVE";
   const statusLabel = STATUS_LABELS[acqStatus] || acqStatus;
-  const revisionsLeft = useMemo(() => {
-    return Math.max(0, acq.package.revisions - acq.revisionsUsed);
-  }, [acq.package.revisions, acq.revisionsUsed]);
+  const revisionsLeft = Math.max(0, acq.package.revisions - acq.revisionsUsed);
   const spendLabel =
     acqStatus === "DELIVERED" || acqStatus === "COMPLETED"
       ? "Spent from donations"
@@ -282,7 +275,8 @@ export default function AdminWorkroomPage({
                   <h3 className="font-semibold text-on-surface">
                     {acq.service.name}
                     <span className="text-primary text-sm font-normal">
-                      {" "}- {acq.package.name}
+                      {" "}
+                      - {acq.package.name}
                     </span>
                   </h3>
                   <p className="text-xs text-gray-500">

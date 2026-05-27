@@ -1,7 +1,12 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { formatCurrencySync, getCurrencySymbol, SUPPORTED_CURRENCIES, type CurrencyCode } from "@/app/lib/currency";
+import {
+  type CurrencyCode,
+  formatCurrencySync,
+  getCurrencySymbol,
+  SUPPORTED_CURRENCIES,
+} from "@/app/lib/currency";
 
 interface CurrencyContextValue {
   currency: CurrencyCode;
@@ -37,7 +42,9 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
       .catch(() => {});
 
     // Fetch rates
-    fetch("https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json")
+    fetch(
+      "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/eur.json",
+    )
       .then((r) => r.json())
       .then((data) => {
         setRates(data.eur || {});
@@ -55,11 +62,14 @@ export function CurrencyProvider({ children }: { children: React.ReactNode }) {
     });
   };
 
-  const format = (amountEur: number) => formatCurrencySync(amountEur, currency, rates);
+  const format = (amountEur: number) =>
+    formatCurrencySync(amountEur, currency, rates);
   const symbol = getCurrencySymbol(currency);
 
   return (
-    <CurrencyContext.Provider value={{ currency, rates, loading, setCurrency, format, symbol }}>
+    <CurrencyContext.Provider
+      value={{ currency, rates, loading, setCurrency, format, symbol }}
+    >
       {children}
     </CurrencyContext.Provider>
   );

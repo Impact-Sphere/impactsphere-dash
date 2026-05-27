@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
 
 interface AcquiredService {
@@ -41,10 +41,12 @@ export default function MyServicesPage() {
   const [showReviewModal, setShowReviewModal] = useState<string | null>(null);
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
-  const [showRevisionModal, setShowRevisionModal] = useState<string | null>(null);
+  const [showRevisionModal, setShowRevisionModal] = useState<string | null>(
+    null,
+  );
   const [revisionMessage, setRevisionMessage] = useState("");
 
-  const loadAcquisitions = () => {
+  const loadAcquisitions = useCallback(() => {
     fetch("/api/services/acquired")
       .then((r) => r.json())
       .then((data) => {
@@ -52,7 +54,7 @@ export default function MyServicesPage() {
         setLoading(false);
       })
       .catch(() => setLoading(false));
-  };
+  }, []);
 
   useEffect(() => {
     if (isPending) return;
@@ -61,9 +63,13 @@ export default function MyServicesPage() {
       return;
     }
     loadAcquisitions();
-  }, [session, isPending, router]);
+  }, [session, isPending, router, loadAcquisitions]);
 
-  const handleAction = async (acquisitionId: string, action: string, message?: string) => {
+  const handleAction = async (
+    acquisitionId: string,
+    action: string,
+    message?: string,
+  ) => {
     setActionLoading(acquisitionId);
     const res = await fetch(`/api/services/${acquisitionId}`, {
       method: "POST",
@@ -120,7 +126,9 @@ export default function MyServicesPage() {
       CANCELLED: "Cancelled",
     };
     return (
-      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}>
+      <span
+        className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${styles[status] || "bg-gray-100 text-gray-600"}`}
+      >
         {labels[status] || status}
       </span>
     );
@@ -138,35 +146,54 @@ export default function MyServicesPage() {
     <main className="min-h-screen bg-surface py-12 px-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-on-surface">My Acquired Services</h1>
-          <p className="text-gray-500">Track deliveries, accept work, and leave reviews</p>
+          <h1 className="text-3xl font-bold text-on-surface">
+            My Acquired Services
+          </h1>
+          <p className="text-gray-500">
+            Track deliveries, accept work, and leave reviews
+          </p>
         </div>
 
         <div className="space-y-4">
           {acquisitions.length === 0 ? (
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500 space-y-4">
               <p>You haven&apos;t acquired any services yet.</p>
-              <Link href="/services" className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors">
+              <Link
+                href="/services"
+                className="inline-block px-6 py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              >
                 Browse Services Catalog
               </Link>
             </div>
           ) : (
             acquisitions.map((acq) => (
-              <div key={acq.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+              <div
+                key={acq.id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+              >
                 <div className="flex items-start justify-between">
                   <div className="space-y-1">
                     <div className="flex items-center space-x-3 flex-wrap gap-y-1">
                       <h3 className="text-lg font-semibold text-on-surface">
                         {acq.service.name}
-                        <span className="text-primary font-medium"> — {acq.package.name}</span>
-                        <span className="text-gray-400 font-normal"> — {acq.project.title}</span>
+                        <span className="text-primary font-medium">
+                          {" "}
+                          — {acq.package.name}
+                        </span>
+                        <span className="text-gray-400 font-normal">
+                          {" "}
+                          — {acq.project.title}
+                        </span>
                       </h3>
                       {statusBadge(acq.status)}
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     {acq.chat && (
-                      <Link href={`/chat/${acq.chat.id}`} className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm">
+                      <Link
+                        href={`/chat/${acq.chat.id}`}
+                        className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                      >
                         Open Chat
                       </Link>
                     )}
@@ -176,8 +203,12 @@ export default function MyServicesPage() {
                 {/* Delivery message */}
                 {acq.status === "DELIVERED" && acq.deliveryMessage && (
                   <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
-                    <p className="text-sm font-medium text-blue-800 mb-1">Provider&apos;s delivery note:</p>
-                    <p className="text-sm text-blue-700">{acq.deliveryMessage}</p>
+                    <p className="text-sm font-medium text-blue-800 mb-1">
+                      Provider&apos;s delivery note:
+                    </p>
+                    <p className="text-sm text-blue-700">
+                      {acq.deliveryMessage}
+                    </p>
                   </div>
                 )}
 
@@ -195,10 +226,14 @@ export default function MyServicesPage() {
                     <button
                       type="button"
                       onClick={() => setShowRevisionModal(acq.id)}
-                      disabled={actionLoading === acq.id || acq.revisionsUsed >= acq.package.revisions}
+                      disabled={
+                        actionLoading === acq.id ||
+                        acq.revisionsUsed >= acq.package.revisions
+                      }
                       className="px-4 py-2 border border-amber-300 text-amber-700 font-medium rounded-lg hover:bg-amber-50 transition-colors text-sm disabled:opacity-50"
                     >
-                      🔄 Request Revision ({acq.package.revisions - acq.revisionsUsed} left)
+                      🔄 Request Revision (
+                      {acq.package.revisions - acq.revisionsUsed} left)
                     </button>
                   </div>
                 )}
@@ -206,7 +241,9 @@ export default function MyServicesPage() {
                 {/* Revision modal */}
                 {showRevisionModal === acq.id && (
                   <div className="bg-amber-50 border border-amber-100 rounded-lg p-4 space-y-3">
-                    <p className="text-sm font-medium text-amber-800">What needs to be revised?</p>
+                    <p className="text-sm font-medium text-amber-800">
+                      What needs to be revised?
+                    </p>
                     <textarea
                       value={revisionMessage}
                       onChange={(e) => setRevisionMessage(e.target.value)}
@@ -217,14 +254,19 @@ export default function MyServicesPage() {
                     <div className="flex gap-2">
                       <button
                         type="button"
-                        onClick={() => handleAction(acq.id, "revision", revisionMessage)}
+                        onClick={() =>
+                          handleAction(acq.id, "revision", revisionMessage)
+                        }
                         className="px-4 py-2 bg-amber-600 text-white font-medium rounded-lg text-sm"
                       >
                         Submit Revision Request
                       </button>
                       <button
                         type="button"
-                        onClick={() => { setShowRevisionModal(null); setRevisionMessage(""); }}
+                        onClick={() => {
+                          setShowRevisionModal(null);
+                          setRevisionMessage("");
+                        }}
                         className="px-4 py-2 border text-gray-600 rounded-lg text-sm"
                       >
                         Cancel
@@ -238,7 +280,9 @@ export default function MyServicesPage() {
                   <div className="pt-2 border-t border-gray-100">
                     {showReviewModal === acq.id ? (
                       <div className="space-y-3">
-                        <p className="text-sm font-medium text-on-surface">Leave a review</p>
+                        <p className="text-sm font-medium text-on-surface">
+                          Leave a review
+                        </p>
                         <div className="flex gap-1">
                           {[1, 2, 3, 4, 5].map((star) => (
                             <button
@@ -292,15 +336,24 @@ export default function MyServicesPage() {
                 {acq.review && (
                   <div className="pt-2 border-t border-gray-100">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-on-surface">Your review:</span>
+                      <span className="text-sm font-medium text-on-surface">
+                        Your review:
+                      </span>
                       <div className="flex">
                         {[1, 2, 3, 4, 5].map((star) => (
-                          <span key={star} className={`text-sm ${star <= acq.review!.rating ? "text-yellow-400" : "text-gray-200"}`}>★</span>
+                          <span
+                            key={star}
+                            className={`text-sm ${star <= (acq.review?.rating ?? 0) ? "text-yellow-400" : "text-gray-200"}`}
+                          >
+                            ★
+                          </span>
                         ))}
                       </div>
                     </div>
                     {acq.review.comment && (
-                      <p className="text-sm text-gray-600 mt-1">{acq.review.comment}</p>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {acq.review.comment}
+                      </p>
                     )}
                   </div>
                 )}
@@ -308,15 +361,21 @@ export default function MyServicesPage() {
                 <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
                   <div className="space-y-1">
                     <span className="text-gray-400">Category</span>
-                    <p className="font-medium text-on-surface">{acq.service.category}</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.service.category}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Package</span>
-                    <p className="font-medium text-on-surface">{acq.package.name}</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.package.name}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Cost</span>
-                    <p className="font-medium text-on-surface">€{acq.package.price.toFixed(2)}</p>
+                    <p className="font-medium text-on-surface">
+                      €{acq.package.price.toFixed(2)}
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Donation spend</span>
@@ -331,19 +390,40 @@ export default function MyServicesPage() {
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Delivery</span>
-                    <p className="font-medium text-on-surface">{acq.package.deliveryDays} days</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.package.deliveryDays} days
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Provider</span>
-                    <p className="font-medium text-on-surface">{acq.service.provider.name || acq.service.provider.email}</p>
+                    <p className="font-medium text-on-surface">
+                      {acq.service.provider.name || acq.service.provider.email}
+                    </p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-4 text-xs text-gray-400">
-                  <span>Acquired: {new Date(acq.createdAt).toLocaleDateString()}</span>
-                  {acq.deliveredAt && <span>Delivered: {new Date(acq.deliveredAt).toLocaleDateString()}</span>}
-                  {acq.completedAt && <span>Completed: {new Date(acq.completedAt).toLocaleDateString()}</span>}
-                  {acq.revisionsUsed > 0 && <span>Revisions used: {acq.revisionsUsed}/{acq.package.revisions}</span>}
+                  <span>
+                    Acquired: {new Date(acq.createdAt).toLocaleDateString()}
+                  </span>
+                  {acq.deliveredAt && (
+                    <span>
+                      Delivered:{" "}
+                      {new Date(acq.deliveredAt).toLocaleDateString()}
+                    </span>
+                  )}
+                  {acq.completedAt && (
+                    <span>
+                      Completed:{" "}
+                      {new Date(acq.completedAt).toLocaleDateString()}
+                    </span>
+                  )}
+                  {acq.revisionsUsed > 0 && (
+                    <span>
+                      Revisions used: {acq.revisionsUsed}/
+                      {acq.package.revisions}
+                    </span>
+                  )}
                 </div>
               </div>
             ))

@@ -27,10 +27,7 @@ async function requireAdmin() {
 export async function GET() {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const services = await prisma.service.findMany({
@@ -52,10 +49,7 @@ export async function GET() {
 export async function POST(request: Request) {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const body = await request.json();
@@ -71,7 +65,14 @@ export async function POST(request: Request) {
     packages,
   } = body;
 
-  if (!name || !description || !category || !providerId || !packages || packages.length === 0) {
+  if (
+    !name ||
+    !description ||
+    !category ||
+    !providerId ||
+    !packages ||
+    packages.length === 0
+  ) {
     return NextResponse.json(
       { error: "Missing required fields" },
       { status: 400 },
@@ -112,20 +113,14 @@ export async function POST(request: Request) {
 export async function PATCH(request: Request) {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const body = await request.json();
   const { id, ...updateData } = body;
 
   if (!id) {
-    return NextResponse.json(
-      { error: "Missing service ID" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Missing service ID" }, { status: 400 });
   }
 
   // Handle package updates separately
@@ -163,20 +158,14 @@ export async function PATCH(request: Request) {
 export async function DELETE(request: Request) {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const { searchParams } = new URL(request.url);
   const id = searchParams.get("id");
 
   if (!id) {
-    return NextResponse.json(
-      { error: "Missing service ID" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Missing service ID" }, { status: 400 });
   }
 
   await prisma.service.delete({

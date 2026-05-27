@@ -25,7 +25,8 @@ async function canAccessChat(chatId: string, userId: string) {
   if (user?.userType === "ADMIN") return true;
 
   const isProjectOwner = chat.serviceAcquisition.project.ngoId === userId;
-  const isServiceProvider = chat.serviceAcquisition.service.providerId === userId;
+  const isServiceProvider =
+    chat.serviceAcquisition.service.providerId === userId;
 
   return isProjectOwner || isServiceProvider;
 }
@@ -87,8 +88,10 @@ export async function POST(
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
-  const isProjectOwner = chat.serviceAcquisition.project.ngoId === session.user.id;
-  const isServiceProvider = chat.serviceAcquisition.service.providerId === session.user.id;
+  const isProjectOwner =
+    chat.serviceAcquisition.project.ngoId === session.user.id;
+  const isServiceProvider =
+    chat.serviceAcquisition.service.providerId === session.user.id;
 
   if (!isProjectOwner && !isServiceProvider) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
@@ -98,10 +101,7 @@ export async function POST(
   const { content } = body;
 
   if (!content || content.trim().length === 0) {
-    return NextResponse.json(
-      { error: "Content is required" },
-      { status: 400 },
-    );
+    return NextResponse.json({ error: "Content is required" }, { status: 400 });
   }
 
   const message = await prisma.message.create({

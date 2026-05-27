@@ -503,68 +503,187 @@ async function seedDonations(_projectIds: string[], companyIds: string[]) {
 const SERVICES = [
   {
     name: "Social Media Management",
-    description: "Full social media strategy and management including content planning, posting, engagement, and analytics reporting across all major platforms.",
+    description:
+      "Full social media strategy and management including content planning, posting, engagement, and analytics reporting across all major platforms.",
     category: "Social Media",
     tags: ["social media", "content", "management", "strategy"],
     packages: [
-      { name: "Basic", description: "1 platform, 8 posts/month, basic analytics", price: 1200, deliveryDays: 30, revisions: 1 },
-      { name: "Standard", description: "3 platforms, 20 posts/month, full analytics, engagement", price: 2500, deliveryDays: 30, revisions: 2 },
-      { name: "Premium", description: "All platforms, unlimited posts, full analytics, engagement, monthly strategy call", price: 4000, deliveryDays: 30, revisions: 3 },
+      {
+        name: "Basic",
+        description: "1 platform, 8 posts/month, basic analytics",
+        price: 1200,
+        deliveryDays: 30,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "3 platforms, 20 posts/month, full analytics, engagement",
+        price: 2500,
+        deliveryDays: 30,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "All platforms, unlimited posts, full analytics, engagement, monthly strategy call",
+        price: 4000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
     ],
   },
   {
     name: "Content Production",
-    description: "Professional photo and video content creation for campaigns, events, and ongoing storytelling.",
+    description:
+      "Professional photo and video content creation for campaigns, events, and ongoing storytelling.",
     category: "Social Media",
     tags: ["content", "video", "photo", "production"],
     packages: [
-      { name: "Basic", description: "10 photos, basic editing", price: 800, deliveryDays: 7, revisions: 1 },
-      { name: "Standard", description: "20 photos + 2 short videos, pro editing", price: 1800, deliveryDays: 10, revisions: 2 },
-      { name: "Premium", description: "40 photos + 5 videos, pro editing, motion graphics", price: 3500, deliveryDays: 14, revisions: 3 },
+      {
+        name: "Basic",
+        description: "10 photos, basic editing",
+        price: 800,
+        deliveryDays: 7,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "20 photos + 2 short videos, pro editing",
+        price: 1800,
+        deliveryDays: 10,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description: "40 photos + 5 videos, pro editing, motion graphics",
+        price: 3500,
+        deliveryDays: 14,
+        revisions: 3,
+      },
     ],
   },
   {
     name: "Event Organization",
-    description: "End-to-end event planning and execution including venue sourcing, logistics, vendor coordination, and on-site support.",
+    description:
+      "End-to-end event planning and execution including venue sourcing, logistics, vendor coordination, and on-site support.",
     category: "Events",
     tags: ["events", "planning", "logistics", "coordination"],
     packages: [
-      { name: "Basic", description: "Small event up to 50 people, venue + basic logistics", price: 2500, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "Medium event up to 200 people, full logistics, catering coordination", price: 5000, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "Large event 500+ people, full production, AV, entertainment, VIP management", price: 10000, deliveryDays: 30, revisions: 3 },
+      {
+        name: "Basic",
+        description: "Small event up to 50 people, venue + basic logistics",
+        price: 2500,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description:
+          "Medium event up to 200 people, full logistics, catering coordination",
+        price: 5000,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "Large event 500+ people, full production, AV, entertainment, VIP management",
+        price: 10000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
     ],
   },
   {
     name: "Communication Strategy",
-    description: "Develop a comprehensive communication plan including messaging framework, target audience analysis, and channel strategy.",
+    description:
+      "Develop a comprehensive communication plan including messaging framework, target audience analysis, and channel strategy.",
     category: "Communication",
     tags: ["strategy", "communication", "planning", "messaging"],
     packages: [
-      { name: "Basic", description: "1-page strategy doc, 1 channel recommendation", price: 1500, deliveryDays: 7, revisions: 1 },
-      { name: "Standard", description: "Full strategy doc, 3 channels, content calendar template", price: 3500, deliveryDays: 14, revisions: 2 },
-      { name: "Premium", description: "Complete strategy, all channels, 3-month content calendar, KPI framework", price: 6000, deliveryDays: 21, revisions: 3 },
+      {
+        name: "Basic",
+        description: "1-page strategy doc, 1 channel recommendation",
+        price: 1500,
+        deliveryDays: 7,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "Full strategy doc, 3 channels, content calendar template",
+        price: 3500,
+        deliveryDays: 14,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "Complete strategy, all channels, 3-month content calendar, KPI framework",
+        price: 6000,
+        deliveryDays: 21,
+        revisions: 3,
+      },
     ],
   },
   {
     name: "External Relations & Partnerships",
-    description: "Identify and establish partnerships with corporations, media outlets, and influencers.",
+    description:
+      "Identify and establish partnerships with corporations, media outlets, and influencers.",
     category: "Partnerships",
     tags: ["partnerships", "relations", "outreach", "networking"],
     packages: [
-      { name: "Basic", description: "5 partner prospects, initial outreach templates", price: 2000, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "15 prospects, personalized outreach, 2 intro meetings", price: 4000, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "30 prospects, full campaign, 5 meetings, partnership agreements", price: 7500, deliveryDays: 30, revisions: 3 },
+      {
+        name: "Basic",
+        description: "5 partner prospects, initial outreach templates",
+        price: 2000,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "15 prospects, personalized outreach, 2 intro meetings",
+        price: 4000,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "30 prospects, full campaign, 5 meetings, partnership agreements",
+        price: 7500,
+        deliveryDays: 30,
+        revisions: 3,
+      },
     ],
   },
   {
     name: "Merchandise Design & Production",
-    description: "Design and produce branded merchandise including t-shirts, tote bags, stickers, and promotional materials.",
+    description:
+      "Design and produce branded merchandise including t-shirts, tote bags, stickers, and promotional materials.",
     category: "Events",
     tags: ["merchandise", "design", "branding", "production"],
     packages: [
-      { name: "Basic", description: "1 item design, 50 units production", price: 1000, deliveryDays: 14, revisions: 1 },
-      { name: "Standard", description: "3 item designs, 200 units, packaging", price: 2500, deliveryDays: 21, revisions: 2 },
-      { name: "Premium", description: "5 item designs, 500 units, premium packaging, shipping", price: 5000, deliveryDays: 30, revisions: 3 },
+      {
+        name: "Basic",
+        description: "1 item design, 50 units production",
+        price: 1000,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "3 item designs, 200 units, packaging",
+        price: 2500,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description: "5 item designs, 500 units, premium packaging, shipping",
+        price: 5000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
     ],
   },
 ];
@@ -616,13 +735,21 @@ async function seedServices() {
       });
     }
 
-    console.log(`Service created: ${svc.name} with ${svc.packages.length} packages`);
+    console.log(
+      `Service created: ${svc.name} with ${svc.packages.length} packages`,
+    );
   }
 
   // Create a test acquisition for demo purposes
-  const testService = await prisma.service.findFirst({ where: { name: "Social Media Management" } });
-  const testNgo = await prisma.user.findFirst({ where: { email: "ngo1@demo.local" } });
-  const testProject = await prisma.project.findFirst({ where: { ngoId: testNgo?.id } });
+  const testService = await prisma.service.findFirst({
+    where: { name: "Social Media Management" },
+  });
+  const testNgo = await prisma.user.findFirst({
+    where: { email: "ngo1@demo.local" },
+  });
+  const testProject = await prisma.project.findFirst({
+    where: { ngoId: testNgo?.id },
+  });
 
   if (testService && testNgo && testProject && admin) {
     const existingAcq = await prisma.serviceAcquisition.findFirst({
@@ -653,7 +780,9 @@ async function seedServices() {
           },
         });
 
-        console.log(`Test acquisition created: ${testService.name} for ${testProject.title}`);
+        console.log(
+          `Test acquisition created: ${testService.name} for ${testProject.title}`,
+        );
       }
     }
   }

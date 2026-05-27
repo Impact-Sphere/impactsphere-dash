@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
 import { authClient } from "@/app/lib/auth-client";
-import { cn } from "@/app/lib/utils";
 import { SUPPORTED_CURRENCIES } from "@/app/lib/currency";
+import { cn } from "@/app/lib/utils";
 import { Meetings } from "./project-meetings";
 import { UserProjects } from "./user-projects";
 
@@ -205,11 +205,23 @@ export function ProfileForm() {
 
   const approvalStatusConfig =
     profile.approvalStatus === "APPROVED"
-      ? { label: "Approved", color: "bg-emerald-100 text-emerald-700", icon: "check_circle" }
+      ? {
+          label: "Approved",
+          color: "bg-emerald-100 text-emerald-700",
+          icon: "check_circle",
+        }
       : profile.approvalStatus === "REJECTED"
-        ? { label: "Rejected", color: "bg-red-100 text-red-700", icon: "cancel" }
+        ? {
+            label: "Rejected",
+            color: "bg-red-100 text-red-700",
+            icon: "cancel",
+          }
         : profile.approvalStatus === "PENDING"
-          ? { label: "Pending", color: "bg-amber-100 text-amber-700", icon: "hourglass_empty" }
+          ? {
+              label: "Pending",
+              color: "bg-amber-100 text-amber-700",
+              icon: "hourglass_empty",
+            }
           : null;
 
   const avatarUrl = profile.image || undefined;
@@ -404,7 +416,16 @@ export function ProfileForm() {
                 </select>
               ) : (
                 <p className="text-gray-700">
-                  {SUPPORTED_CURRENCIES.find((c) => c.code === (profile.preferredCurrency || "EUR"))?.symbol} {SUPPORTED_CURRENCIES.find((c) => c.code === (profile.preferredCurrency || "EUR"))?.name}
+                  {
+                    SUPPORTED_CURRENCIES.find(
+                      (c) => c.code === (profile.preferredCurrency || "EUR"),
+                    )?.symbol
+                  }{" "}
+                  {
+                    SUPPORTED_CURRENCIES.find(
+                      (c) => c.code === (profile.preferredCurrency || "EUR"),
+                    )?.name
+                  }
                 </p>
               )}
             </div>

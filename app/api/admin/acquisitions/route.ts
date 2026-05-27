@@ -27,10 +27,7 @@ async function requireAdmin() {
 export async function GET() {
   const admin = await requireAdmin();
   if ("error" in admin) {
-    return NextResponse.json(
-      { error: admin.error },
-      { status: admin.status },
-    );
+    return NextResponse.json({ error: admin.error }, { status: admin.status });
   }
 
   const acquisitions = await prisma.serviceAcquisition.findMany({
@@ -48,7 +45,13 @@ export async function GET() {
       project: {
         select: {
           title: true,
-          ngo: { select: { name: true, email: true, ngoInfo: { select: { ngoName: true } } } },
+          ngo: {
+            select: {
+              name: true,
+              email: true,
+              ngoInfo: { select: { ngoName: true } },
+            },
+          },
         },
       },
       chat: {

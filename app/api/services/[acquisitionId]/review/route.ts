@@ -33,19 +33,31 @@ export async function POST(
   });
 
   if (!acquisition) {
-    return NextResponse.json({ error: "Acquisition not found" }, { status: 404 });
+    return NextResponse.json(
+      { error: "Acquisition not found" },
+      { status: 404 },
+    );
   }
 
   if (acquisition.project.ngoId !== session.user.id) {
-    return NextResponse.json({ error: "Only the NGO can leave a review" }, { status: 403 });
+    return NextResponse.json(
+      { error: "Only the NGO can leave a review" },
+      { status: 403 },
+    );
   }
 
   if (acquisition.status !== "COMPLETED") {
-    return NextResponse.json({ error: "Can only review completed services" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Can only review completed services" },
+      { status: 400 },
+    );
   }
 
   if (acquisition.review) {
-    return NextResponse.json({ error: "Review already submitted" }, { status: 400 });
+    return NextResponse.json(
+      { error: "Review already submitted" },
+      { status: 400 },
+    );
   }
 
   await prisma.serviceReview.create({
@@ -65,7 +77,8 @@ export async function POST(
     select: { rating: true },
   });
 
-  const avgRating = allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
+  const avgRating =
+    allReviews.reduce((sum, r) => sum + r.rating, 0) / allReviews.length;
 
   await prisma.service.update({
     where: { id: acquisition.serviceId },
