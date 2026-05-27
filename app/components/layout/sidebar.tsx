@@ -4,6 +4,11 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import {
+  type CurrencyCode,
+  SUPPORTED_CURRENCIES,
+  useCurrency,
+} from "@/app/components/currency/currency-context";
 import { authClient } from "@/app/lib/auth-client";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
@@ -12,8 +17,15 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const {
+    currency,
+    setCurrency,
+    symbol,
+    loading: currencyLoading,
+  } = useCurrency();
   const [userType, setUserType] = useState<string | null>(null);
   const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
+  const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -78,23 +90,72 @@ export function Sidebar() {
           );
         })}
         {isAdmin && (
-          <Link
-            href="/admin"
-            className={cn(
-              "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
-              "hover:translate-x-1",
-              pathname === "/admin"
-                ? "bg-white text-violet-700 shadow-sm"
-                : "text-slate-500 hover:bg-slate-200/50",
-            )}
-          >
-            <span className="material-symbols-outlined">
-              admin_panel_settings
-            </span>
-            <span className="text-sm font-semibold font-inter">
-              Admin Dashboard
-            </span>
-          </Link>
+          <>
+            <Link
+              href="/admin"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/admin"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">
+                admin_panel_settings
+              </span>
+              <span className="text-sm font-semibold font-inter">
+                Admin Dashboard
+              </span>
+            </Link>
+            <Link
+              href="/admin/acquisitions"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/admin/acquisitions"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">workspaces</span>
+              <span className="text-sm font-semibold font-inter">
+                Service Workrooms
+              </span>
+            </Link>
+          </>
+        )}
+        {isApprovedNgo && (
+          <>
+            <Link
+              href="/services"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/services"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">handshake</span>
+              <span className="text-sm font-semibold font-inter">Services</span>
+            </Link>
+            <Link
+              href="/my-services"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/my-services"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">inventory_2</span>
+              <span className="text-sm font-semibold font-inter">
+                My Services
+              </span>
+            </Link>
+          </>
         )}
       </nav>
 
@@ -124,6 +185,52 @@ export function Sidebar() {
             </span>
           </Link>
         ))}
+      </div>
+
+      {/* Currency Picker */}
+      <div className="pt-4 border-t border-outline-variant/10 relative">
+        <button
+          type="button"
+          onClick={() => setShowCurrencyPicker((s) => !s)}
+          disabled={currencyLoading}
+          className="w-full flex items-center space-x-3 px-4 py-3 rounded-xl text-slate-500 hover:bg-slate-200/50 transition-colors"
+        >
+          <span className="material-symbols-outlined">currency_exchange</span>
+          <span className="text-sm font-semibold font-inter">
+            {currencyLoading ? "Loading..." : `${symbol} ${currency}`}
+          </span>
+          <span className="material-symbols-outlined text-base ml-auto">
+            {showCurrencyPicker ? "expand_less" : "expand_more"}
+          </span>
+        </button>
+        {showCurrencyPicker && (
+          <div className="absolute bottom-full left-0 right-0 mb-1 bg-white rounded-xl shadow-lg border border-gray-100 max-h-60 overflow-y-auto p-1 z-50">
+            {SUPPORTED_CURRENCIES.map((c) => (
+              <button
+                key={c.code}
+                type="button"
+                onClick={() => {
+                  setCurrency(c.code as CurrencyCode);
+                  setShowCurrencyPicker(false);
+                }}
+                className={cn(
+                  "w-full flex items-center space-x-3 px-3 py-2 rounded-lg text-sm transition-colors",
+                  currency === c.code
+                    ? "bg-primary/10 text-primary font-semibold"
+                    : "text-slate-600 hover:bg-slate-50",
+                )}
+              >
+                <span className="w-6 text-center">{c.symbol}</span>
+                <span>{c.name}</span>
+                {currency === c.code && (
+                  <span className="material-symbols-outlined text-base ml-auto text-primary">
+                    check
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Auth Section */}

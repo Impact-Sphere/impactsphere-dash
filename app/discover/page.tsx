@@ -163,7 +163,8 @@ function DiscoverContent() {
               ))}
 
               {/* Impact Pulse Widget */}
-              {!isSearching && <ImpactPulse percentage={64} amount="$24.8k" />}
+
+              {!isSearching && <ImpactPulse percentage={64} amount="€24.8k" />}
             </div>
 
             {/* Pagination */}

@@ -40,6 +40,7 @@ export async function PUT(request: Request) {
   const {
     name,
     image,
+    preferredCurrency,
     organizationName,
     taxIdentificationNumber,
     contactInfo,
@@ -62,6 +63,7 @@ export async function PUT(request: Request) {
     data: {
       ...(name !== undefined && { name }),
       ...(image !== undefined && { image }),
+      ...(preferredCurrency !== undefined && { preferredCurrency }),
     },
   });
 

@@ -3,7 +3,6 @@ import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
-import type { Project } from "@/app/types/project";
 
 export async function GET(request: Request) {
   const session = await auth.api.getSession({
@@ -85,12 +84,13 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
       });
       const seen = new Set<string>();
-      const projects: Project[] = [];
+      const projects: (typeof donations)[number]["project"][] = [];
+
       for (const donation of donations) {
         const p = donation.project;
         if (!seen.has(p.id)) {
           seen.add(p.id);
-          projects.push(p as unknown as Project);
+          projects.push(p);
         }
       }
       return NextResponse.json(projects);

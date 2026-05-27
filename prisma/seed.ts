@@ -23,6 +23,10 @@ const NGOS = [
       "Reforest 10,000 hectares of degraded land across the Amazon basin by 2030. Empower indigenous communities with sustainable livelihoods and environmental monitoring tools.",
     challenges:
       "Limited funding for long-term maintenance, illegal logging activities in buffer zones, and climate variability affecting sapling survival rates.",
+    legalRepName: "Maria Silva",
+    verificationTier: "FORMAL_REGISTRATION" as const,
+    statutesUrl: "https://example.com/greenearth-statutes.pdf",
+    activityReportUrl: "https://example.com/greenearth-report-2024.pdf",
   },
   {
     name: "Code for Kids",
@@ -35,6 +39,10 @@ const NGOS = [
       "Bring computer science education to 500 rural schools in developing nations. Provide hardware, curriculum, and trained educators.",
     challenges:
       "Unreliable electricity in remote areas, lack of local tech talent for sustained programs, and high shipping costs for equipment.",
+    legalRepName: "James Chen",
+    verificationTier: "FORMAL_REGISTRATION" as const,
+    statutesUrl: "https://example.com/cfk-statutes.pdf",
+    activityReportUrl: "https://example.com/cfk-report-2024.pdf",
   },
   {
     name: "HealthReach",
@@ -47,6 +55,10 @@ const NGOS = [
       "Deploy mobile medical clinics to serve 200,000 people in underserved regions. Focus on maternal health, vaccinations, and disease prevention.",
     challenges:
       "Supply chain disruptions for vaccines, difficulty retaining trained medical staff in remote postings, and infrastructure gaps.",
+    legalRepName: "Dr. Aisha Patel",
+    verificationTier: "FORMAL_REGISTRATION" as const,
+    statutesUrl: "https://example.com/healthreach-statutes.pdf",
+    activityReportUrl: "https://example.com/healthreach-report-2024.pdf",
   },
 ];
 
@@ -60,6 +72,8 @@ const COMPANIES = [
     contact: "csr@techcorp.demo | +1 555-0201",
     causes:
       "Education equity, climate tech innovation, digital accessibility for disabled communities, and STEM scholarships for underrepresented groups.",
+    representativeName: "Sarah Johnson",
+    representativePosition: "CSR Director",
   },
   {
     name: "Summit Ventures",
@@ -70,6 +84,8 @@ const COMPANIES = [
     contact: "impact@summit.demo | +1 555-0202",
     causes:
       "Clean energy transition, sustainable agriculture, ocean conservation, and affordable housing initiatives.",
+    representativeName: "Michael Torres",
+    representativePosition: "Impact Investment Lead",
   },
 ];
 
@@ -328,6 +344,10 @@ async function seedNgos() {
             contactInfo: ngo.contact,
             mainGoals: ngo.goals,
             challenges: ngo.challenges,
+            legalRepName: ngo.legalRepName,
+            verificationTier: ngo.verificationTier,
+            statutesUrl: ngo.statutesUrl || null,
+            activityReportUrl: ngo.activityReportUrl || null,
           },
         },
       },
@@ -384,6 +404,8 @@ async function seedCompanies() {
             taxIdentificationNumber: corp.taxId,
             contactInfo: corp.contact,
             causesSupported: corp.causes,
+            representativeName: corp.representativeName,
+            representativePosition: corp.representativePosition,
           },
         },
       },
@@ -478,12 +500,301 @@ async function seedDonations(_projectIds: string[], companyIds: string[]) {
   }
 }
 
+const SERVICES = [
+  {
+    name: "Social Media Management",
+    description:
+      "Full social media strategy and management including content planning, posting, engagement, and analytics reporting across all major platforms.",
+    category: "Social Media",
+    tags: ["social media", "content", "management", "strategy"],
+    packages: [
+      {
+        name: "Basic",
+        description: "1 platform, 8 posts/month, basic analytics",
+        price: 1200,
+        deliveryDays: 30,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "3 platforms, 20 posts/month, full analytics, engagement",
+        price: 2500,
+        deliveryDays: 30,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "All platforms, unlimited posts, full analytics, engagement, monthly strategy call",
+        price: 4000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
+    ],
+  },
+  {
+    name: "Content Production",
+    description:
+      "Professional photo and video content creation for campaigns, events, and ongoing storytelling.",
+    category: "Social Media",
+    tags: ["content", "video", "photo", "production"],
+    packages: [
+      {
+        name: "Basic",
+        description: "10 photos, basic editing",
+        price: 800,
+        deliveryDays: 7,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "20 photos + 2 short videos, pro editing",
+        price: 1800,
+        deliveryDays: 10,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description: "40 photos + 5 videos, pro editing, motion graphics",
+        price: 3500,
+        deliveryDays: 14,
+        revisions: 3,
+      },
+    ],
+  },
+  {
+    name: "Event Organization",
+    description:
+      "End-to-end event planning and execution including venue sourcing, logistics, vendor coordination, and on-site support.",
+    category: "Events",
+    tags: ["events", "planning", "logistics", "coordination"],
+    packages: [
+      {
+        name: "Basic",
+        description: "Small event up to 50 people, venue + basic logistics",
+        price: 2500,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description:
+          "Medium event up to 200 people, full logistics, catering coordination",
+        price: 5000,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "Large event 500+ people, full production, AV, entertainment, VIP management",
+        price: 10000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
+    ],
+  },
+  {
+    name: "Communication Strategy",
+    description:
+      "Develop a comprehensive communication plan including messaging framework, target audience analysis, and channel strategy.",
+    category: "Communication",
+    tags: ["strategy", "communication", "planning", "messaging"],
+    packages: [
+      {
+        name: "Basic",
+        description: "1-page strategy doc, 1 channel recommendation",
+        price: 1500,
+        deliveryDays: 7,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "Full strategy doc, 3 channels, content calendar template",
+        price: 3500,
+        deliveryDays: 14,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "Complete strategy, all channels, 3-month content calendar, KPI framework",
+        price: 6000,
+        deliveryDays: 21,
+        revisions: 3,
+      },
+    ],
+  },
+  {
+    name: "External Relations & Partnerships",
+    description:
+      "Identify and establish partnerships with corporations, media outlets, and influencers.",
+    category: "Partnerships",
+    tags: ["partnerships", "relations", "outreach", "networking"],
+    packages: [
+      {
+        name: "Basic",
+        description: "5 partner prospects, initial outreach templates",
+        price: 2000,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "15 prospects, personalized outreach, 2 intro meetings",
+        price: 4000,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description:
+          "30 prospects, full campaign, 5 meetings, partnership agreements",
+        price: 7500,
+        deliveryDays: 30,
+        revisions: 3,
+      },
+    ],
+  },
+  {
+    name: "Merchandise Design & Production",
+    description:
+      "Design and produce branded merchandise including t-shirts, tote bags, stickers, and promotional materials.",
+    category: "Events",
+    tags: ["merchandise", "design", "branding", "production"],
+    packages: [
+      {
+        name: "Basic",
+        description: "1 item design, 50 units production",
+        price: 1000,
+        deliveryDays: 14,
+        revisions: 1,
+      },
+      {
+        name: "Standard",
+        description: "3 item designs, 200 units, packaging",
+        price: 2500,
+        deliveryDays: 21,
+        revisions: 2,
+      },
+      {
+        name: "Premium",
+        description: "5 item designs, 500 units, premium packaging, shipping",
+        price: 5000,
+        deliveryDays: 30,
+        revisions: 3,
+      },
+    ],
+  },
+];
+
+async function seedServices() {
+  const admin = await prisma.user.findFirst({
+    where: { userType: "ADMIN" },
+  });
+
+  if (!admin) {
+    console.log("No admin user found. Skipping services seed.");
+    return;
+  }
+
+  for (const svc of SERVICES) {
+    const existing = await prisma.service.findFirst({
+      where: { name: svc.name },
+    });
+
+    if (existing) {
+      console.log(`Service "${svc.name}" already exists. Skipping.`);
+      continue;
+    }
+
+    const service = await prisma.service.create({
+      data: {
+        id: crypto.randomUUID(),
+        name: svc.name,
+        description: svc.description,
+        category: svc.category,
+        tags: svc.tags,
+        providerId: admin.id,
+        active: true,
+        featured: Math.random() > 0.5,
+      },
+    });
+
+    for (const pkg of svc.packages) {
+      await prisma.servicePackage.create({
+        data: {
+          id: crypto.randomUUID(),
+          serviceId: service.id,
+          name: pkg.name,
+          description: pkg.description,
+          price: pkg.price,
+          deliveryDays: pkg.deliveryDays,
+          revisions: pkg.revisions,
+        },
+      });
+    }
+
+    console.log(
+      `Service created: ${svc.name} with ${svc.packages.length} packages`,
+    );
+  }
+
+  // Create a test acquisition for demo purposes
+  const testService = await prisma.service.findFirst({
+    where: { name: "Social Media Management" },
+  });
+  const testNgo = await prisma.user.findFirst({
+    where: { email: "ngo1@demo.local" },
+  });
+  const testProject = await prisma.project.findFirst({
+    where: { ngoId: testNgo?.id },
+  });
+
+  if (testService && testNgo && testProject && admin) {
+    const existingAcq = await prisma.serviceAcquisition.findFirst({
+      where: { projectId: testProject.id, serviceId: testService.id },
+    });
+
+    if (!existingAcq) {
+      const standardPkg = await prisma.servicePackage.findFirst({
+        where: { serviceId: testService.id, name: "Standard" },
+      });
+
+      if (standardPkg) {
+        const acquisition = await prisma.serviceAcquisition.create({
+          data: {
+            id: crypto.randomUUID(),
+            projectId: testProject.id,
+            serviceId: testService.id,
+            packageId: standardPkg.id,
+            status: "ACTIVE",
+            startDate: new Date(),
+          },
+        });
+
+        await prisma.chat.create({
+          data: {
+            id: crypto.randomUUID(),
+            serviceAcquisitionId: acquisition.id,
+          },
+        });
+
+        console.log(
+          `Test acquisition created: ${testService.name} for ${testProject.title}`,
+        );
+      }
+    }
+  }
+}
+
 async function main() {
   await seedAdmin();
   const ngoIds = await seedNgos();
   const companyIds = await seedCompanies();
   await seedProjects(ngoIds);
   await seedDonations([], companyIds);
+  await seedServices();
 
   console.log("\n=== DEMO ACCOUNTS ===");
   console.log("NGOs:");

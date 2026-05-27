@@ -1,11 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {
-  formatCurrency,
-  getFundedPercent,
-  getProjectImage,
-} from "@/app/lib/project-utils";
+import { useCurrency } from "@/app/components/currency/currency-context";
+import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import type { Project } from "@/app/types/project";
 
 export function UserProjects({
@@ -17,6 +14,7 @@ export function UserProjects({
   userId?: string;
   isPublic?: boolean;
 }) {
+  const { format } = useCurrency();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -113,8 +111,8 @@ export function UserProjects({
                 <div className="flex items-center space-x-2 text-xs">
                   <span className="text-primary font-bold">{funded}%</span>
                   <span className="text-gray-400">
-                    {formatCurrency(project.currentAmount)} /{" "}
-                    {formatCurrency(project.targetBudget)}
+                    {format(project.currentAmount)} /{" "}
+                    {format(project.targetBudget)}
                   </span>
                 </div>
                 <div className="w-full h-1.5 bg-surface-container-high rounded-full overflow-hidden">
