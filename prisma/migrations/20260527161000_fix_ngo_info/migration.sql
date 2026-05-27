@@ -1,0 +1,9 @@
+-- Add missing columns to ngo_info
+ALTER TABLE "ngo_info" 
+ADD COLUMN IF NOT EXISTS "legalRepName" TEXT,
+ADD COLUMN IF NOT EXISTS "legalRepIdUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "statutesUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "activityReportUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "partnerLetterUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "socialMediaLinks" TEXT,
+ADD COLUMN IF NOT EXISTS "verificationTier" TEXT NOT NULL DEFAULT 'PENDING_DOCUMENTS';
