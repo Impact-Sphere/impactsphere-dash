@@ -27,6 +27,15 @@ export default function LoginPage() {
             Sign up
           </Link>
         </div>
+        <div className="text-center text-sm text-gray-500">
+          Lost your password?{" "}
+          <Link
+            href="/login/recover"
+            className="font-medium text-primary hover:underline"
+          >
+            Recover
+          </Link>
+        </div>
       </div>
     </div>
   );
