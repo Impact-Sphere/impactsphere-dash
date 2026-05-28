@@ -28,6 +28,7 @@ import {
 import type { MeetingRequest, TimeSlot } from "@/app/types/meeting";
 import type { Project } from "@/app/types/project";
 import "react-datepicker/dist/react-datepicker.css";
+import { FaRegStar, FaStar } from "react-icons/fa";
 
 const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
@@ -61,11 +62,26 @@ export default function ProjectDetailPage() {
   );
   const [loadingRequest, setLoadingRequest] = useState(false);
 
+  const [isFavorited, setIsFavoritedLocal] = useState(false);
+  const onFavoriteToggle = async () => {
+    if (!project)
+      return;
+    const res = await fetch("/api/projects/favorites", {
+      method: isFavorited ? "DELETE" : "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({projectId: project.id}),
+    });
+    if (!res.ok)
+      throw Error("Failed to toggle favorite");
+    setIsFavoritedLocal(!isFavorited);
+  }
+
   const fetchProject = useCallback(async () => {
     const res = await fetch(`/api/projects/${id}`);
     if (res.ok) {
       const data = await res.json();
       setProject(data);
+      setIsFavoritedLocal(!!data.isFavorited);
     }
     setLoading(false);
   }, [id]);
@@ -336,6 +352,30 @@ export default function ProjectDetailPage() {
               {getNgoName(project)}
             </a>
           </p>
+
+          {/* Favorite Button */}
+          {session?.user && <button
+            onClick={onFavoriteToggle}
+            className="
+              bg-white/80 backdrop-blur
+              p-3 rounded
+              text-xl
+              shadow-md
+              transition-opacity
+              hover:scale-110
+              flex flex-row items-center gap-2
+            "
+          >
+            {isFavorited ? (
+              <FaStar className="text-yellow-500 text-xl" />
+            ) : (
+              <FaRegStar className="text-gray-600 text-xl" />
+            )}
+
+            <span>
+              {isFavorited ? "Remove from" : "Add to "} Favorites
+            </span>
+          </button>}
         </div>
 
         {/* Funding bar */}
