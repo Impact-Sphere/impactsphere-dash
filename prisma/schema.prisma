@@ -41,6 +41,7 @@ model User {
   donations       Donation[]
   meetingRequests MeetingRequest[]
   services        Service[]
+  favoriteProjects FavoriteProject[]
 
   @@unique([email])
   @@map("user")
@@ -149,6 +150,7 @@ model Project {
   donations        Donation[]
   meetingRequests  MeetingRequest[]
   serviceAcquisitions ServiceAcquisition[]
+  usersWhoFavorited FavoriteProject[]
 
   @@map("project")
 }
@@ -359,5 +361,16 @@ model Message {
   @@index([senderId])
 
   @@map("message")
+}
+
+model FavoriteProject {
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, projectId])
+
+  @@map("favorite_project")
 }
 

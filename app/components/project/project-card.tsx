@@ -6,7 +6,11 @@ import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import { cn } from "@/app/lib/utils";
+import { useState } from "react";
+import { FaRegStar, FaStar } from "react-icons/fa";
 import type { Project } from "@/app/types/project";
+import { authClient } from "@/app/lib/auth-client";
+import { prisma } from "@/app/lib/db";
 
 interface ProjectCardProps {
   project: Project;
@@ -15,6 +19,20 @@ interface ProjectCardProps {
 
 export function ProjectCard({ project, className }: ProjectCardProps) {
   const { format } = useCurrency();
+  const { data: session } = authClient.useSession();
+
+  const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
+
+  const onFavoriteToggle = async () => {
+      const res = await fetch("/api/projects/favorites", {
+      method: isFavorited ? "DELETE" : "PUT",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({projectId: project.id}),
+    });
+    if (!res.ok)
+      throw Error("Failed to toggle favorite");
+    setIsFavoritedLocal(!isFavorited);
+  }
 
   const getBadgeVariant = (category: string) => {
     switch (category) {
@@ -38,13 +56,31 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
         className,
       )}
     >
-      <div className="h-48 w-full rounded-xl overflow-hidden mb-6 relative">
+      <div className="h-48 w-full rounded-xl overflow-hidden mb-6 relative group">
         {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
         <img
           src={getProjectImage(project.image)}
           alt={project.title}
           className="w-full h-full object-cover"
         />
+        {session?.user && <button
+          onClick={onFavoriteToggle}
+          className="
+            absolute top-3 right-3
+            bg-white/80 backdrop-blur
+            p-3 rounded-full
+            shadow-md
+            opacity-0 group-hover:opacity-100
+            transition-opacity
+            hover:scale-110
+          "
+        >
+          {isFavorited ? (
+            <FaStar className="text-yellow-500" />
+          ) : (
+            <FaRegStar className="text-gray-600" />
+          )}
+        </button>}
       </div>
       <div className="flex items-center space-x-2">
         <Badge variant={getBadgeVariant(project.category)}>

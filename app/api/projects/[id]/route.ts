@@ -9,7 +9,7 @@ export async function GET(
 ) {
   const { id } = await params;
 
-  const project = await prisma.project.findUnique({
+  const proj = await prisma.project.findUnique({
     where: { id },
     include: {
       ngo: {
@@ -61,16 +61,21 @@ export async function GET(
     },
   });
 
-  if (!project) {
+  if (!proj) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  const project = {...proj, isFavorited: session?.user && !!(await prisma.favoriteProject.findUnique({where: {userId_projectId: {
+    userId: session.user.id,
+    projectId: proj.id,
+  }}}))}
+
   // If project is not approved, only allow admin or the owner NGO to view it
   if (project.approvalStatus !== "APPROVED") {
-    const session = await auth.api.getSession({
-      headers: await headers(),
-    });
-
     const isOwner = session?.user?.id === project.ngoId;
     const isAdmin =
       session &&
