@@ -10,14 +10,14 @@ import { useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import type { Project } from "@/app/types/project";
 import { authClient } from "@/app/lib/auth-client";
-import { prisma } from "@/app/lib/db";
 
 interface ProjectCardProps {
   project: Project;
   className?: string;
+  transparentWhenNotFavorite?: boolean;
 }
 
-export function ProjectCard({ project, className }: ProjectCardProps) {
+export function ProjectCard({ project, className, transparentWhenNotFavorite = false }: ProjectCardProps) {
   const { format } = useCurrency();
   const { data: session } = authClient.useSession();
 
@@ -55,6 +55,10 @@ export function ProjectCard({ project, className }: ProjectCardProps) {
         "bg-surface-container-lowest rounded-xl p-8 flex flex-col hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.08)] transition-all",
         className,
       )}
+      style={{
+        opacity: transparentWhenNotFavorite && !isFavorited ? .35 : 1,
+        transition: "opacity 0.2s ease",
+      }}
     >
       <div className="h-48 w-full rounded-xl overflow-hidden mb-6 relative group">
         {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}

@@ -33,7 +33,7 @@ export function Header({
         </p>
       </div>
       <div className="flex items-center space-x-6">
-        <SearchInput
+        {onSearchChange && <SearchInput
           placeholder={searchPlaceholder}
           className="w-80"
           value={searchValue}
@@ -41,8 +41,8 @@ export function Header({
           onKeyDown={(e) => {
             if (e.key === "Enter") onSearchSubmit?.();
           }}
-        />
-        <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
+        />}
+        {onTabChange && <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
           <button
             type="button"
             onClick={() => onTabChange?.("all")}
@@ -67,7 +67,7 @@ export function Header({
           >
             Recent
           </button>
-        </div>
+        </div>}
       </div>
     </header>
   );

@@ -99,7 +99,7 @@ export async function DELETE(request: Request) {
 
 
 export async function GET(request: Request) {
-    const session = await auth.api.getSession({
+  const session = await auth.api.getSession({
     headers: await headers(),
   });
 
@@ -112,14 +112,29 @@ export async function GET(request: Request) {
     select: { userType: true, approvalStatus: true },
   });
 
-  const favorites = (await prisma.favoriteProject.findMany({
+  let favorites = (await prisma.favoriteProject.findMany({
     where: {
         userId: session.user.id,
+        project: {
+            approvalStatus: "APPROVED",
+        }
     },
     include: {
-        project: true,
-    }
+        project: {
+            include: {
+                ngo: { select: { name: true, image: true, ngoInfo: true } },
+                _count: { select: { donations: true } },
+            }
+        },
+    },
+    orderBy: { project: { createdAt: "desc"}},
   })).map(f => f.project)
+
+  // fun
+  favorites = await Promise.all(favorites.map(async (proj) => {return {...proj, isFavorited: session?.user && !!await prisma.favoriteProject.findUnique({where: {userId_projectId: {
+    userId: session.user.id,
+    projectId: proj.id,
+  }}})}}));
 
   return NextResponse.json(favorites, { status: 200 });
 }
