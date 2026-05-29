@@ -62,6 +62,7 @@ export interface Project {
   donations?: DonationItem[];
   serviceAcquisitions?: ServiceAcquisitionItem[];
   featured?: boolean;
+  isFavorited?: boolean;
 }
 
 export interface DonationItem {

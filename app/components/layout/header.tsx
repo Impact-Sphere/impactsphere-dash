@@ -33,41 +33,45 @@ export function Header({
         </p>
       </div>
       <div className="flex items-center space-x-6">
-        <SearchInput
-          placeholder={searchPlaceholder}
-          className="w-80"
-          value={searchValue}
-          onChange={(e) => onSearchChange?.(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") onSearchSubmit?.();
-          }}
-        />
-        <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
-          <button
-            type="button"
-            onClick={() => onTabChange?.("all")}
-            className={cn(
-              "px-4 py-2 text-xs font-bold rounded-full transition-all",
-              activeTab === "all"
-                ? "bg-white shadow-sm text-primary"
-                : "text-on-surface-variant hover:text-primary",
-            )}
-          >
-            All Projects
-          </button>
-          <button
-            type="button"
-            onClick={() => onTabChange?.("recent")}
-            className={cn(
-              "px-4 py-2 text-xs font-bold rounded-full transition-all",
-              activeTab === "recent"
-                ? "bg-white shadow-sm text-primary"
-                : "text-on-surface-variant hover:text-primary",
-            )}
-          >
-            Recent
-          </button>
-        </div>
+        {onSearchChange && (
+          <SearchInput
+            placeholder={searchPlaceholder}
+            className="w-80"
+            value={searchValue}
+            onChange={(e) => onSearchChange?.(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") onSearchSubmit?.();
+            }}
+          />
+        )}
+        {onTabChange && (
+          <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
+            <button
+              type="button"
+              onClick={() => onTabChange?.("all")}
+              className={cn(
+                "px-4 py-2 text-xs font-bold rounded-full transition-all",
+                activeTab === "all"
+                  ? "bg-white shadow-sm text-primary"
+                  : "text-on-surface-variant hover:text-primary",
+              )}
+            >
+              All Projects
+            </button>
+            <button
+              type="button"
+              onClick={() => onTabChange?.("recent")}
+              className={cn(
+                "px-4 py-2 text-xs font-bold rounded-full transition-all",
+                activeTab === "recent"
+                  ? "bg-white shadow-sm text-primary"
+                  : "text-on-surface-variant hover:text-primary",
+              )}
+            >
+              Recent
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

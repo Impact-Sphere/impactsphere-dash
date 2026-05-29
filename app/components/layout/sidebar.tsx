@@ -89,6 +89,23 @@ export function Sidebar() {
             </Link>
           );
         })}
+        {session?.user && (
+          <Link
+            href="/projects/favorites"
+            className={cn(
+              "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+              "hover:translate-x-1",
+              pathname === "/projects/favorites"
+                ? "bg-white text-violet-700 shadow-sm"
+                : "text-slate-500 hover:bg-slate-200/50",
+            )}
+          >
+            <span className="material-symbols-outlined">star</span>
+            <span className="text-sm font-semibold font-inter">
+              Favorite Projects
+            </span>
+          </Link>
+        )}
         {isAdmin && (
           <>
             <Link

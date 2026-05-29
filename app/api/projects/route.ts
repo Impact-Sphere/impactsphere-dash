@@ -42,6 +42,8 @@ export async function GET(request: Request) {
     return NextResponse.json(projects);
   }
 
+  let projects = [];
+
   if (mine === "true" && session) {
     const user = await prisma.user.findUnique({
       where: { id: session.user.id },
@@ -49,7 +51,7 @@ export async function GET(request: Request) {
     });
 
     if (user?.userType === "NGO") {
-      const projects = await prisma.project.findMany({
+      projects = await prisma.project.findMany({
         where: { ngoId: session.user.id },
         include: {
           ngo: { select: { name: true, image: true, ngoInfo: true } },
@@ -58,11 +60,8 @@ export async function GET(request: Request) {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(projects);
-    }
-
-    if (user?.userType === "ADMIN") {
-      const projects = await prisma.project.findMany({
+    } else if (user?.userType === "ADMIN") {
+      projects = await prisma.project.findMany({
         include: {
           ngo: { select: { name: true, image: true, ngoInfo: true } },
           projectDocuments: true,
@@ -70,10 +69,7 @@ export async function GET(request: Request) {
         },
         orderBy: { createdAt: "desc" },
       });
-      return NextResponse.json(projects);
-    }
-
-    if (user?.userType === "COMPANY") {
+    } else if (user?.userType === "COMPANY") {
       const donations = await prisma.donation.findMany({
         where: { companyId: session.user.id },
         include: {
@@ -88,8 +84,8 @@ export async function GET(request: Request) {
         orderBy: { createdAt: "desc" },
       });
       const seen = new Set<string>();
-      const projects: (typeof donations)[number]["project"][] = [];
-      
+      // const projects: (typeof donations)[number]["project"][] = [];
+
       for (const donation of donations) {
         const p = donation.project;
         if (!seen.has(p.id)) {
@@ -97,10 +93,28 @@ export async function GET(request: Request) {
           projects.push(p);
         }
       }
-      return NextResponse.json(projects);
     }
 
-    return NextResponse.json([]);
+    // fun
+    projects = await Promise.all(
+      projects.map(async (proj) => {
+        return {
+          ...proj,
+          isFavorited:
+            session?.user &&
+            !!(await prisma.favoriteProject.findUnique({
+              where: {
+                userId_projectId: {
+                  userId: session.user.id,
+                  projectId: proj.id,
+                },
+              },
+            })),
+        };
+      }),
+    );
+
+    return NextResponse.json(projects);
   }
 
   // Full-text search overrides everything else on the discovery list
@@ -163,7 +177,7 @@ export async function GET(request: Request) {
     where.createdAt = { gte: thirtyDaysAgo };
   }
 
-  const projects = await prisma.project.findMany({
+  projects = await prisma.project.findMany({
     where,
     include: {
       ngo: { select: { name: true, image: true, ngoInfo: true } },
@@ -172,6 +186,25 @@ export async function GET(request: Request) {
     },
     orderBy: { createdAt: "desc" },
   });
+
+  // fun
+  projects = await Promise.all(
+    projects.map(async (proj) => {
+      return {
+        ...proj,
+        isFavorited:
+          session?.user &&
+          !!(await prisma.favoriteProject.findUnique({
+            where: {
+              userId_projectId: {
+                userId: session.user.id,
+                projectId: proj.id,
+              },
+            },
+          })),
+      };
+    }),
+  );
 
   return NextResponse.json(projects);
 }
