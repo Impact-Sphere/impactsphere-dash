@@ -315,16 +315,69 @@ async function seedNgos() {
   for (const ngo of NGOS) {
     const existing = await prisma.user.findUnique({
       where: { email: ngo.email },
+      include: { ngoInfo: { include: { registrationDocuments: true } } },
     });
     if (existing) {
       created.push(existing.id);
       console.log(`NGO ${ngo.email} already exists.`);
+
+      // Ensure existing seed NGO has required onboarding fields
+      const info = existing.ngoInfo;
+      const needsRegDoc = !info?.registrationDocuments?.length;
+      const needsIdUrl = !info?.representativeIdDocumentUrl;
+
+      if (needsRegDoc || needsIdUrl) {
+        let regDocId: string | undefined;
+        if (needsRegDoc) {
+          const regDoc = await prisma.uploadedFile.create({
+            data: {
+              id: crypto.randomUUID(),
+              url: "https://example.com/demo-registration-doc.pdf",
+              fileName: "demo-registration-doc.pdf",
+              mimeType: "application/pdf",
+              size: 1024,
+            },
+          });
+          regDocId = regDoc.id;
+        }
+
+        await prisma.ngoInfo.update({
+          where: { userId: existing.id },
+          data: {
+            ...(regDocId
+              ? {
+                  registrationDocuments: {
+                    connect: { id: regDocId },
+                  },
+                }
+              : {}),
+            ...(needsIdUrl
+              ? {
+                  representativeIdDocumentUrl:
+                    "https://example.com/demo-id-doc.pdf",
+                }
+              : {}),
+          },
+        });
+        console.log(`  -> Fixed missing onboarding fields for ${ngo.email}`);
+      }
       continue;
     }
 
     const id = crypto.randomUUID();
     const now = new Date();
     const hashedPassword = await hashPassword(ngo.password);
+
+    // Create a dummy registration document so onboarding passes
+    const regDoc = await prisma.uploadedFile.create({
+      data: {
+        id: crypto.randomUUID(),
+        url: "https://example.com/demo-registration-doc.pdf",
+        fileName: "demo-registration-doc.pdf",
+        mimeType: "application/pdf",
+        size: 1024,
+      },
+    });
 
     await prisma.user.create({
       data: {
@@ -351,12 +404,12 @@ async function seedNgos() {
             phoneNumber: "",
             website: "",
             registrationNumber: "not applicable",
-            registrationDocuments: undefined,
+            registrationDocuments: { connect: { id: regDoc.id } },
             representativeFullName: "Seed Representative",
             representativeRole: "Director",
             representativeIdType: "Passport",
             representativeIdNumber: "seed-000",
-            representativeIdDocumentUrl: "",
+            representativeIdDocumentUrl: "https://example.com/demo-id-doc.pdf",
             activityProofUrls: undefined,
             activityProofLink: "",
             declarationConfirmed: true,
@@ -396,16 +449,69 @@ async function seedCompanies() {
   for (const corp of COMPANIES) {
     const existing = await prisma.user.findUnique({
       where: { email: corp.email },
+      include: { companyInfo: { include: { registrationDocuments: true } } },
     });
     if (existing) {
       created.push(existing.id);
       console.log(`Company ${corp.email} already exists.`);
+
+      // Ensure existing seed company has required onboarding fields
+      const info = existing.companyInfo;
+      const needsRegDoc = !info?.registrationDocuments?.length;
+      const needsIdUrl = !info?.representativeIdDocumentUrl;
+
+      if (needsRegDoc || needsIdUrl) {
+        let regDocId: string | undefined;
+        if (needsRegDoc) {
+          const regDoc = await prisma.uploadedFile.create({
+            data: {
+              id: crypto.randomUUID(),
+              url: "https://example.com/demo-registration-doc.pdf",
+              fileName: "demo-registration-doc.pdf",
+              mimeType: "application/pdf",
+              size: 1024,
+            },
+          });
+          regDocId = regDoc.id;
+        }
+
+        await prisma.companyInfo.update({
+          where: { userId: existing.id },
+          data: {
+            ...(regDocId
+              ? {
+                  registrationDocuments: {
+                    connect: { id: regDocId },
+                  },
+                }
+              : {}),
+            ...(needsIdUrl
+              ? {
+                  representativeIdDocumentUrl:
+                    "https://example.com/demo-id-doc.pdf",
+                }
+              : {}),
+          },
+        });
+        console.log(`  -> Fixed missing onboarding fields for ${corp.email}`);
+      }
       continue;
     }
 
     const id = crypto.randomUUID();
     const now = new Date();
     const hashedPassword = await hashPassword(corp.password);
+
+    // Create a dummy registration document so onboarding passes
+    const regDoc = await prisma.uploadedFile.create({
+      data: {
+        id: crypto.randomUUID(),
+        url: "https://example.com/demo-registration-doc.pdf",
+        fileName: "demo-registration-doc.pdf",
+        mimeType: "application/pdf",
+        size: 1024,
+      },
+    });
 
     await prisma.user.create({
       data: {
@@ -427,7 +533,7 @@ async function seedCompanies() {
             yearFounded: 2000,
             registrationNumber: "seed-registration",
             taxVatNumber: "",
-            registrationDocuments: undefined,
+            registrationDocuments: { connect: { id: regDoc.id } },
             contactEmail: corp.email,
             website: "",
             phoneNumber: "",
@@ -436,7 +542,7 @@ async function seedCompanies() {
             representativeJobTitle: "CEO",
             representativeIdType: "Passport",
             representativeIdNumber: "seed-000",
-            representativeIdDocumentUrl: "",
+            representativeIdDocumentUrl: "https://example.com/demo-id-doc.pdf",
             declarationConfirmed: true,
             taxIdentificationNumber: corp.taxId,
             contactInfo: corp.contact,

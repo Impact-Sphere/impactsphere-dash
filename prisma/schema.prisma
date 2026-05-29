@@ -205,7 +205,9 @@ model Project {
   meetingRequests  MeetingRequest[]
   serviceAcquisitions ServiceAcquisition[]
   projectDocuments UploadedFile[] @relation("ProjectDocuments")
+  searchVector        Unsupported("tsvector")? @default(dbgenerated("to_tsvector('english'::regconfig, ((((COALESCE(title, ''::text) || ' '::text) || COALESCE(description, ''::text)) || ' '::text) || COALESCE(category, ''::text)))"))
 
+  @@index([searchVector], type: Gin)
   @@map("project")
 }
 
