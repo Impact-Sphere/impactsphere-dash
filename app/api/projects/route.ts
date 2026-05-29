@@ -34,6 +34,7 @@ export async function GET(request: Request) {
       },
       include: {
         ngo: { select: { name: true, image: true, ngoInfo: true } },
+        projectDocuments: true,
         _count: { select: { donations: true } },
       },
       orderBy: { createdAt: "desc" },
@@ -54,6 +55,7 @@ export async function GET(request: Request) {
         where: { ngoId: session.user.id },
         include: {
           ngo: { select: { name: true, image: true, ngoInfo: true } },
+          projectDocuments: true,
           _count: { select: { donations: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -64,6 +66,7 @@ export async function GET(request: Request) {
       projects = await prisma.project.findMany({
         include: {
           ngo: { select: { name: true, image: true, ngoInfo: true } },
+          projectDocuments: true,
           _count: { select: { donations: true } },
         },
         orderBy: { createdAt: "desc" },
@@ -77,6 +80,7 @@ export async function GET(request: Request) {
           project: {
             include: {
               ngo: { select: { name: true, image: true, ngoInfo: true } },
+              projectDocuments: true,
               _count: { select: { donations: true } },
             },
           },
@@ -168,6 +172,7 @@ export async function GET(request: Request) {
     where,
     include: {
       ngo: { select: { name: true, image: true, ngoInfo: true } },
+      projectDocuments: true,
       _count: { select: { donations: true } },
     },
     orderBy: { createdAt: "desc" },
@@ -214,7 +219,14 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { title, description, category, image, targetBudget } = body;
+  const {
+    title,
+    description,
+    category,
+    image,
+    targetBudget,
+    projectDocuments,
+  } = body;
 
   if (!title || !description || !category || !targetBudget) {
     return NextResponse.json(
@@ -232,6 +244,9 @@ export async function POST(request: Request) {
       targetBudget: Number(targetBudget),
       approvalStatus: "PENDING",
       ngoId: session.user.id,
+      projectDocuments: projectDocuments?.length
+        ? { connect: projectDocuments.map((id: string) => ({ id })) }
+        : undefined,
     },
   });
 

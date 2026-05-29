@@ -5,6 +5,14 @@ import { useCallback, useEffect, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { authClient } from "@/app/lib/auth-client";
 
+type UploadedFile = {
+  id: string;
+  url: string;
+  fileName: string;
+  mimeType?: string;
+  size?: number;
+};
+
 interface PendingUser {
   id: string;
   name: string | null;
@@ -13,16 +21,53 @@ interface PendingUser {
   createdAt: string;
   ngoInfo?: {
     ngoName: string;
-    taxIdentificationNumber: string;
-    contactInfo: string;
-    mainGoals: string;
-    challenges: string;
+    country?: string | null;
+    cityRegion?: string | null;
+    ngoType?: string | null;
+    yearFounded?: number | null;
+    missionStatement?: string | null;
+    activitiesDescription?: string | null;
+    currentOrPastProjects?: string | null;
+    contactEmail?: string | null;
+    phoneNumber?: string | null;
+    website?: string | null;
+    registrationNumber?: string | null;
+    registrationDocuments?: UploadedFile[];
+    representativeFullName?: string | null;
+    representativeRole?: string | null;
+    representativeIdType?: string | null;
+    representativeIdNumber?: string | null;
+    representativeIdDocumentUrl?: string | null;
+    activityProofUrls?: UploadedFile[];
+    activityProofLink?: string | null;
+    declarationConfirmed?: boolean;
+    taxIdentificationNumber?: string | null;
+    contactInfo?: string | null;
+    mainGoals?: string | null;
+    challenges?: string | null;
   } | null;
   companyInfo?: {
     companyName: string;
-    taxIdentificationNumber: string;
-    contactInfo: string;
-    causesSupported: string;
+    country?: string | null;
+    industryType?: string | null;
+    businessDescription?: string | null;
+    yearFounded?: number | null;
+    registrationNumber?: string | null;
+    taxVatNumber?: string | null;
+    registrationDocuments?: UploadedFile[];
+    contactEmail?: string | null;
+    website?: string | null;
+    phoneNumber?: string | null;
+    registeredAddress?: string | null;
+    representativeFullName?: string | null;
+    representativeJobTitle?: string | null;
+    representativeIdType?: string | null;
+    representativeIdNumber?: string | null;
+    representativeIdDocumentUrl?: string | null;
+    declarationConfirmed?: boolean;
+    taxIdentificationNumber?: string | null;
+    contactInfo?: string | null;
+    causesSupported?: string | null;
   } | null;
 }
 
@@ -38,6 +83,7 @@ interface PendingProject {
     name: string | null;
     ngoInfo?: { ngoName: string } | null;
   };
+  projectDocuments?: UploadedFile[];
 }
 
 export default function AdminDashboardPage() {
@@ -227,48 +273,339 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                    <div className="space-y-1">
-                      <span className="text-gray-400">Tax ID</span>
-                      <p className="font-medium text-on-surface">
-                        {user.ngoInfo?.taxIdentificationNumber ||
-                          user.companyInfo?.taxIdentificationNumber ||
-                          "N/A"}
-                      </p>
-                    </div>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
                     <div className="space-y-1">
                       <span className="text-gray-400">Contact</span>
-                      <p className="font-medium text-on-surface">
+                      <p>
                         {user.ngoInfo?.contactInfo ||
                           user.companyInfo?.contactInfo ||
+                          user.email ||
+                          "N/A"}
+                      </p>
+
+                      <p>
+                        {user.ngoInfo?.phoneNumber ||
+                          user.companyInfo?.phoneNumber ||
+                          "No phone number"}
+                      </p>
+                    </div>
+                    <div className="space-y-1">
+                      <span className="text-gray-400">Website</span>
+                      <p className="font-medium text-on-surface">
+                        {user.ngoInfo?.website ||
+                          user.companyInfo?.website ||
                           "N/A"}
                       </p>
                     </div>
+
                     {user.userType === "NGO" && user.ngoInfo && (
                       <>
                         <div className="space-y-1">
-                          <span className="text-gray-400">Main Goals</span>
+                          <span className="text-gray-400">
+                            Organization type
+                          </span>
                           <p className="font-medium text-on-surface">
-                            {user.ngoInfo.mainGoals}
+                            {user.ngoInfo.ngoType || "N/A"}
                           </p>
                         </div>
                         <div className="space-y-1">
-                          <span className="text-gray-400">Challenges</span>
+                          <span className="text-gray-400">
+                            Country / region
+                          </span>
                           <p className="font-medium text-on-surface">
-                            {user.ngoInfo.challenges}
+                            {user.ngoInfo.country || "N/A"}
+                            {user.ngoInfo.cityRegion
+                              ? ` · ${user.ngoInfo.cityRegion}`
+                              : ""}
                           </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-400">
+                            Registration number
+                          </span>
+                          <p className="font-medium text-on-surface">
+                            {user.ngoInfo.registrationNumber || "N/A"}
+                          </p>
+                        </div>
+                        <div className="md:col-span-3 w-full space-y-2">
+                          <div className="space-y-1">
+                            <span className="text-gray-400">
+                              Registration docs
+                            </span>
+                            <p className="font-medium text-on-surface">
+                              {user.ngoInfo.registrationDocuments?.length ?? 0}{" "}
+                              uploaded
+                            </p>
+                            {user.ngoInfo.registrationDocuments?.length ? (
+                              <div className="space-y-2 mt-2">
+                                {user.ngoInfo.registrationDocuments.map(
+                                  (file) => (
+                                    <div
+                                      key={file.id}
+                                      className="rounded-2xl bg-gray-50 p-3 text-xs"
+                                    >
+                                      <div className="truncate text-gray-700">
+                                        {file.fileName}
+                                      </div>
+                                      <div className="mt-1 flex gap-2">
+                                        <a
+                                          href={file.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-primary underline"
+                                        >
+                                          Open
+                                        </a>
+                                        <a
+                                          href={file.url}
+                                          download
+                                          className="text-primary underline"
+                                        >
+                                          Download
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
                         </div>
                       </>
                     )}
+
                     {user.userType === "COMPANY" && user.companyInfo && (
-                      <div className="col-span-1 md:col-span-2 space-y-1">
-                        <span className="text-gray-400">Causes Supported</span>
-                        <p className="font-medium text-on-surface">
-                          {user.companyInfo.causesSupported}
-                        </p>
-                      </div>
+                      <>
+                        <div className="space-y-1">
+                          <span className="text-gray-400">Industry</span>
+                          <p className="font-medium text-on-surface">
+                            {user.companyInfo.industryType || "N/A"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-400">Country</span>
+                          <p className="font-medium text-on-surface">
+                            {user.companyInfo.country || "N/A"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-400">
+                            Registered address
+                          </span>
+                          <p className="font-medium text-on-surface">
+                            {user.companyInfo.registeredAddress || "N/A"}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <span className="text-gray-400">Tax ID</span>
+                          <p className="font-medium text-on-surface">
+                            {user.companyInfo?.taxIdentificationNumber ||
+                              user.companyInfo?.taxVatNumber ||
+                              "N/A"}
+                          </p>
+                        </div>
+                        <div className="md:col-span-3 w-full space-y-2">
+                          <div className="space-y-1">
+                            <span className="text-gray-400">
+                              Registration docs
+                            </span>
+                            <p className="font-medium text-on-surface">
+                              {user.companyInfo.registrationDocuments?.length ??
+                                0}{" "}
+                              uploaded
+                            </p>
+                            {user.companyInfo.registrationDocuments?.length ? (
+                              <div className="space-y-2 mt-2">
+                                {user.companyInfo.registrationDocuments.map(
+                                  (file) => (
+                                    <div
+                                      key={file.id}
+                                      className="rounded-2xl bg-gray-50 p-3 text-xs"
+                                    >
+                                      <div className="truncate text-gray-700">
+                                        {file.fileName}
+                                      </div>
+                                      <div className="mt-1 flex gap-2">
+                                        <a
+                                          href={file.url}
+                                          target="_blank"
+                                          rel="noreferrer"
+                                          className="text-primary underline"
+                                        >
+                                          Open
+                                        </a>
+                                        <a
+                                          href={file.url}
+                                          download
+                                          className="text-primary underline"
+                                        >
+                                          Download
+                                        </a>
+                                      </div>
+                                    </div>
+                                  ),
+                                )}
+                              </div>
+                            ) : null}
+                          </div>
+                        </div>
+                      </>
                     )}
                   </div>
+                  <div className="border-t border-gray-200 my-4" />
+
+                  {user.userType === "NGO" && user.ngoInfo && (
+                    <div className="grid grid-cols-1 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Mission statement</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.missionStatement || "N/A"}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Activities</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.activitiesDescription || "N/A"}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Project history</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.currentOrPastProjects || "N/A"}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-gray-200 my-4" />
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Proof link</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.activityProofLink ? (
+                            <a
+                              href={user.ngoInfo.activityProofLink}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="underline text-primary"
+                            >
+                              {user.ngoInfo.activityProofLink}
+                            </a>
+                          ) : (
+                            "N/A"
+                          )}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Proof files</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.activityProofUrls?.length ?? 0} uploaded
+                        </p>
+                      </div>
+
+                      {user.ngoInfo.activityProofUrls?.length ? (
+                        <div className="space-y-2">
+                          {user.ngoInfo.activityProofUrls.map((file) => (
+                            <div
+                              key={file.id}
+                              className="rounded-2xl bg-gray-50 p-3 text-xs"
+                            >
+                              <div className="truncate text-gray-700">
+                                {file.fileName}
+                              </div>
+                              <div className="mt-1 flex gap-2">
+                                <a
+                                  href={file.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="text-primary underline"
+                                >
+                                  Open
+                                </a>
+                                <a
+                                  href={file.url}
+                                  download
+                                  className="text-primary underline"
+                                >
+                                  Download
+                                </a>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : null}
+
+                      <div className="border-t border-gray-200 my-4" />
+                      <div className="space-y-1 mt-2">
+                        <span className="text-gray-400">Rep & ID</span>
+                        <p className="font-medium text-on-surface">
+                          {user.ngoInfo.representativeFullName || "N/A"}
+                          {user.ngoInfo.representativeRole
+                            ? ` · ${user.ngoInfo.representativeRole}`
+                            : ""}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {user.ngoInfo.representativeIdType || ""}{" "}
+                          {user.ngoInfo.representativeIdNumber || ""}
+                        </p>
+                        {user.ngoInfo.representativeIdDocumentUrl ? (
+                          <p className="text-xs text-primary hover:underline">
+                            <a
+                              href={user.ngoInfo.representativeIdDocumentUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View document
+                            </a>
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
+
+                  {user.userType === "COMPANY" && user.companyInfo && (
+                    <div className="grid grid-cols-1 gap-4 text-sm">
+                      <div className="space-y-1">
+                        <span className="text-gray-400">
+                          Business description
+                        </span>
+                        <p className="font-medium text-on-surface">
+                          {user.companyInfo.businessDescription || "N/A"}
+                        </p>
+                      </div>
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Causes supported</span>
+                        <p className="font-medium text-on-surface">
+                          {user.companyInfo.causesSupported || "N/A"}
+                        </p>
+                      </div>
+
+                      <div className="border-t border-gray-200 my-4" />
+                      <div className="space-y-1">
+                        <span className="text-gray-400">Rep & ID</span>
+                        <p className="font-medium text-on-surface">
+                          {user.companyInfo.representativeFullName || "N/A"}
+                          {user.companyInfo.representativeJobTitle
+                            ? ` · ${user.companyInfo.representativeJobTitle}`
+                            : ""}
+                        </p>
+                        <p className="text-gray-500 text-xs">
+                          {user.companyInfo.representativeIdType || ""}{" "}
+                          {user.companyInfo.representativeIdNumber || ""}
+                        </p>
+                        {user.companyInfo.representativeIdDocumentUrl ? (
+                          <p className="text-xs text-primary hover:underline">
+                            <a
+                              href={
+                                user.companyInfo.representativeIdDocumentUrl
+                              }
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View representative ID document
+                            </a>
+                          </p>
+                        ) : null}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))
             )}
@@ -337,6 +674,47 @@ export default function AdminDashboardPage() {
                         {new Date(project.createdAt).toLocaleDateString()}
                       </p>
                     </div>
+                  </div>
+
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <span className="text-gray-400">Project documents</span>
+                      <p className="font-medium text-on-surface">
+                        {project.projectDocuments?.length ?? 0} uploaded
+                      </p>
+                    </div>
+
+                    {project.projectDocuments?.length ? (
+                      <div className="space-y-2">
+                        {project.projectDocuments.map((file) => (
+                          <div
+                            key={file.id}
+                            className="rounded-2xl bg-gray-50 p-3 text-xs"
+                          >
+                            <div className="truncate text-gray-700">
+                              {file.fileName}
+                            </div>
+                            <div className="mt-1 flex gap-2">
+                              <a
+                                href={file.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-primary underline"
+                              >
+                                Open
+                              </a>
+                              <a
+                                href={file.url}
+                                download
+                                className="text-primary underline"
+                              >
+                                Download
+                              </a>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               ))
