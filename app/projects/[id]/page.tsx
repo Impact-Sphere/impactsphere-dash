@@ -63,17 +63,15 @@ export default function ProjectDetailPage() {
 
   const [isFavorited, setIsFavoritedLocal] = useState(false);
   const onFavoriteToggle = async () => {
-    if (!project)
-      return;
+    if (!project) return;
     const res = await fetch("/api/projects/favorites", {
       method: isFavorited ? "DELETE" : "PUT",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({projectId: project.id}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: project.id }),
     });
-    if (!res.ok)
-      throw Error("Failed to toggle favorite");
+    if (!res.ok) throw Error("Failed to toggle favorite");
     setIsFavoritedLocal(!isFavorited);
-  }
+  };
 
   const fetchProject = useCallback(async () => {
     const res = await fetch(`/api/projects/${id}`);
@@ -353,9 +351,11 @@ export default function ProjectDetailPage() {
           </p>
 
           {/* Favorite Button */}
-          {session?.user && <button
-            onClick={onFavoriteToggle}
-            className="
+          {session?.user && (
+            <button
+              type="button"
+              onClick={onFavoriteToggle}
+              className="
               bg-white/80 backdrop-blur
               p-3 rounded
               text-xl
@@ -364,17 +364,16 @@ export default function ProjectDetailPage() {
               hover:scale-110
               flex flex-row items-center gap-2
             "
-          >
-            {isFavorited ? (
-              <FaStar className="text-yellow-500 text-xl" />
-            ) : (
-              <FaRegStar className="text-gray-600 text-xl" />
-            )}
+            >
+              {isFavorited ? (
+                <FaStar className="text-yellow-500 text-xl" />
+              ) : (
+                <FaRegStar className="text-gray-600 text-xl" />
+              )}
 
-            <span>
-              {isFavorited ? "Remove from" : "Add to "} Favorites
-            </span>
-          </button>}
+              <span>{isFavorited ? "Remove from" : "Add to "} Favorites</span>
+            </button>
+          )}
         </div>
 
         {/* Funding bar */}

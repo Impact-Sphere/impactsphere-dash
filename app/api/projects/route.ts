@@ -60,9 +60,7 @@ export async function GET(request: Request) {
         },
         orderBy: { createdAt: "desc" },
       });
-    }
-
-    else if (user?.userType === "ADMIN") {
+    } else if (user?.userType === "ADMIN") {
       projects = await prisma.project.findMany({
         include: {
           ngo: { select: { name: true, image: true, ngoInfo: true } },
@@ -71,9 +69,7 @@ export async function GET(request: Request) {
         },
         orderBy: { createdAt: "desc" },
       });
-    }
-
-    else if (user?.userType === "COMPANY") {
+    } else if (user?.userType === "COMPANY") {
       const donations = await prisma.donation.findMany({
         where: { companyId: session.user.id },
         include: {
@@ -100,10 +96,23 @@ export async function GET(request: Request) {
     }
 
     // fun
-    projects = await Promise.all(projects.map(async (proj) => {return {...proj, isFavorited: session?.user && !!await prisma.favoriteProject.findUnique({where: {userId_projectId: {
-      userId: session.user.id,
-      projectId: proj.id,
-    }}})}}));
+    projects = await Promise.all(
+      projects.map(async (proj) => {
+        return {
+          ...proj,
+          isFavorited:
+            session?.user &&
+            !!(await prisma.favoriteProject.findUnique({
+              where: {
+                userId_projectId: {
+                  userId: session.user.id,
+                  projectId: proj.id,
+                },
+              },
+            })),
+        };
+      }),
+    );
 
     return NextResponse.json(projects);
   }
@@ -179,10 +188,23 @@ export async function GET(request: Request) {
   });
 
   // fun
-  projects = await Promise.all(projects.map(async (proj) => {return {...proj, isFavorited: session?.user && !!await prisma.favoriteProject.findUnique({where: {userId_projectId: {
-    userId: session.user.id,
-    projectId: proj.id,
-  }}})}}));
+  projects = await Promise.all(
+    projects.map(async (proj) => {
+      return {
+        ...proj,
+        isFavorited:
+          session?.user &&
+          !!(await prisma.favoriteProject.findUnique({
+            where: {
+              userId_projectId: {
+                userId: session.user.id,
+                projectId: proj.id,
+              },
+            },
+          })),
+      };
+    }),
+  );
 
   return NextResponse.json(projects);
 }

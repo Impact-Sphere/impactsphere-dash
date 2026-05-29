@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
@@ -28,12 +27,9 @@ export async function PUT(request: Request) {
     );
   }
 
-  const project = await prisma.project.findUnique({where: {id: projectId}});
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) {
-    return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 },
-    );
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
   const newFavorite = {
@@ -43,16 +39,14 @@ export async function PUT(request: Request) {
   // insert or ignore
   await prisma.favoriteProject.upsert({
     where: {
-        userId_projectId: newFavorite
+      userId_projectId: newFavorite,
     },
     update: {},
     create: newFavorite,
   });
 
-  return NextResponse.json({msg: "Added to favorites"}, { status: 201 });
+  return NextResponse.json({ msg: "Added to favorites" }, { status: 201 });
 }
-
-
 
 export async function DELETE(request: Request) {
   const session = await auth.api.getSession({
@@ -78,27 +72,22 @@ export async function DELETE(request: Request) {
     );
   }
 
-  const project = await prisma.project.findUnique({where: {id: projectId}});
+  const project = await prisma.project.findUnique({ where: { id: projectId } });
   if (!project) {
-    return NextResponse.json(
-        { error: "Project not found" },
-        { status: 404 },
-    );
+    return NextResponse.json({ error: "Project not found" }, { status: 404 });
   }
 
   await prisma.favoriteProject.deleteMany({
     where: {
-        userId: session.user.id,
-        projectId: projectId,
-    }
+      userId: session.user.id,
+      projectId: projectId,
+    },
   });
 
-  return NextResponse.json({msg: "Removed from favorites"}, { status: 201 });
+  return NextResponse.json({ msg: "Removed from favorites" }, { status: 201 });
 }
 
-
-
-export async function GET(request: Request) {
+export async function GET(_request: Request) {
   const session = await auth.api.getSession({
     headers: await headers(),
   });
@@ -112,29 +101,44 @@ export async function GET(request: Request) {
     select: { userType: true, approvalStatus: true },
   });
 
-  let favorites = (await prisma.favoriteProject.findMany({
-    where: {
+  let favorites = (
+    await prisma.favoriteProject.findMany({
+      where: {
         userId: session.user.id,
         project: {
-            approvalStatus: "APPROVED",
-        }
-    },
-    include: {
-        project: {
-            include: {
-                ngo: { select: { name: true, image: true, ngoInfo: true } },
-                _count: { select: { donations: true } },
-            }
+          approvalStatus: "APPROVED",
         },
-    },
-    orderBy: { project: { createdAt: "desc"}},
-  })).map(f => f.project)
+      },
+      include: {
+        project: {
+          include: {
+            ngo: { select: { name: true, image: true, ngoInfo: true } },
+            _count: { select: { donations: true } },
+          },
+        },
+      },
+      orderBy: { project: { createdAt: "desc" } },
+    })
+  ).map((f) => f.project);
 
   // fun
-  favorites = await Promise.all(favorites.map(async (proj) => {return {...proj, isFavorited: session?.user && !!await prisma.favoriteProject.findUnique({where: {userId_projectId: {
-    userId: session.user.id,
-    projectId: proj.id,
-  }}})}}));
+  favorites = await Promise.all(
+    favorites.map(async (proj) => {
+      return {
+        ...proj,
+        isFavorited:
+          session?.user &&
+          !!(await prisma.favoriteProject.findUnique({
+            where: {
+              userId_projectId: {
+                userId: session.user.id,
+                projectId: proj.id,
+              },
+            },
+          })),
+      };
+    }),
+  );
 
   return NextResponse.json(favorites, { status: 200 });
 }

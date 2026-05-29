@@ -1,15 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { FaRegStar, FaStar } from "react-icons/fa";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { authClient } from "@/app/lib/auth-client";
 import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import { cn } from "@/app/lib/utils";
 import type { Project } from "@/app/types/project";
-import { useState } from "react";
-import { FaRegStar, FaStar } from "react-icons/fa";
-import { authClient } from "@/app/lib/auth-client";
 
 interface FeaturedProjectCardProps {
   project: Project;
@@ -25,17 +25,16 @@ export function FeaturedProjectCard({
   const funded = getFundedPercent(project.currentAmount, project.targetBudget);
 
   const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
-  
+
   const onFavoriteToggle = async () => {
-      const res = await fetch("/api/projects/favorites", {
+    const res = await fetch("/api/projects/favorites", {
       method: isFavorited ? "DELETE" : "PUT",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({projectId: project.id}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: project.id }),
     });
-    if (!res.ok)
-      throw Error("Failed to toggle favorite");
+    if (!res.ok) throw Error("Failed to toggle favorite");
     setIsFavoritedLocal(!isFavorited);
-  }
+  };
 
   return (
     <article
@@ -91,9 +90,11 @@ export function FeaturedProjectCard({
             </a>
           </div>
         </div>
-        {session?.user && <button
-          onClick={onFavoriteToggle}
-          className="
+        {session?.user && (
+          <button
+            type="button"
+            onClick={onFavoriteToggle}
+            className="
             absolute top-3 right-3
             bg-white/80 backdrop-blur
             p-3 rounded-full
@@ -102,13 +103,14 @@ export function FeaturedProjectCard({
             transition-opacity
             hover:scale-110
           "
-        >
-          {isFavorited ? (
-            <FaStar className="text-yellow-500" />
-          ) : (
-            <FaRegStar className="text-gray-600" />
-          )}
-        </button>}
+          >
+            {isFavorited ? (
+              <FaStar className="text-yellow-500" />
+            ) : (
+              <FaRegStar className="text-gray-600" />
+            )}
+          </button>
+        )}
       </div>
     </article>
   );

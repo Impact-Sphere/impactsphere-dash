@@ -11,12 +11,14 @@ export default function RecoverPage() {
     <div className="min-h-screen flex items-center justify-center bg-surface">
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
-          <h1 className="text-2xl font-bold text-on-surface">Password Recovery</h1>
+          <h1 className="text-2xl font-bold text-on-surface">
+            Password Recovery
+          </h1>
           <p className="text-sm text-gray-500">
             Gain access back to your account
           </p>
         </div>
-        <RecoverForm/>
+        <RecoverForm />
       </div>
     </div>
   );

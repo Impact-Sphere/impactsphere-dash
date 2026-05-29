@@ -1,12 +1,12 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { authClient } from "@/app/lib/auth-client";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { authClient } from "@/app/lib/auth-client";
 
 export default function ResetPasswordForm() {
-  const router = useRouter();
+  const _router = useRouter();
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
@@ -18,7 +18,9 @@ export default function ResetPasswordForm() {
   useEffect(() => {
     setToken(new URLSearchParams(window.location.search).get("token") || "");
     if (!token)
-      setTokenError(new URLSearchParams(window.location.search).get("error") || "");
+      setTokenError(
+        new URLSearchParams(window.location.search).get("error") || "",
+      );
   });
 
   const handleSubmit = async (e: React.SubmitEvent) => {
@@ -27,7 +29,7 @@ export default function ResetPasswordForm() {
       setError("");
       setLoading(true);
 
-      if (password != confirmPassword) {
+      if (password !== confirmPassword) {
         setError("Passwords don't match");
         setLoading(false);
         return;
@@ -48,9 +50,8 @@ export default function ResetPasswordForm() {
     }
   };
 
-  return (
-    token ?
-    !isPasswordReset ?
+  return token ? (
+    !isPasswordReset ? (
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
           <label
@@ -104,14 +105,21 @@ export default function ResetPasswordForm() {
           </div>
         )}
       </form>
-    :
+    ) : (
       <div className="text-center">
         <p>Password has been reset.</p>
-        <Link href="/login" className="font-bold underline">Go to login page</Link>
+        <Link href="/login" className="font-bold underline">
+          Go to login page
+        </Link>
       </div>
-    :
-      <p className="text-center">
-        Error: {tokenError === "INVALID_TOKEN" ? "Token is invalid or expired." : "Something went wrong."} Try generating a new password reset token/URL.
-      </p>
+    )
+  ) : (
+    <p className="text-center">
+      Error:{" "}
+      {tokenError === "INVALID_TOKEN"
+        ? "Token is invalid or expired."
+        : "Something went wrong."}{" "}
+      Try generating a new password reset token/URL.
+    </p>
   );
 }

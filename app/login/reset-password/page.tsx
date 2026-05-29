@@ -12,11 +12,9 @@ export default function ResetPassword() {
       <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-on-surface">Reset Password</h1>
-          <p className="text-sm text-gray-500">
-            Set new account password
-          </p>
+          <p className="text-sm text-gray-500">Set new account password</p>
         </div>
-        <ResetPasswordForm/>
+        <ResetPasswordForm />
       </div>
     </div>
   );

@@ -70,10 +70,19 @@ export async function GET(
     headers: await headers(),
   });
 
-  const project = {...proj, isFavorited: session?.user && !!(await prisma.favoriteProject.findUnique({where: {userId_projectId: {
-    userId: session.user.id,
-    projectId: proj.id,
-  }}}))}
+  const project = {
+    ...proj,
+    isFavorited:
+      session?.user &&
+      !!(await prisma.favoriteProject.findUnique({
+        where: {
+          userId_projectId: {
+            userId: session.user.id,
+            projectId: proj.id,
+          },
+        },
+      })),
+  };
 
   // If project is not approved, only allow admin or the owner NGO to view it
   if (project.approvalStatus !== "APPROVED") {

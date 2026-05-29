@@ -1,15 +1,15 @@
 "use client";
 
+import { useState } from "react";
+import { FaRegStar, FaStar } from "react-icons/fa";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { authClient } from "@/app/lib/auth-client";
 import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import { cn } from "@/app/lib/utils";
-import { useState } from "react";
-import { FaRegStar, FaStar } from "react-icons/fa";
 import type { Project } from "@/app/types/project";
-import { authClient } from "@/app/lib/auth-client";
 
 interface ProjectCardProps {
   project: Project;
@@ -17,22 +17,25 @@ interface ProjectCardProps {
   transparentWhenNotFavorite?: boolean;
 }
 
-export function ProjectCard({ project, className, transparentWhenNotFavorite = false }: ProjectCardProps) {
+export function ProjectCard({
+  project,
+  className,
+  transparentWhenNotFavorite = false,
+}: ProjectCardProps) {
   const { format } = useCurrency();
   const { data: session } = authClient.useSession();
 
   const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
 
   const onFavoriteToggle = async () => {
-      const res = await fetch("/api/projects/favorites", {
+    const res = await fetch("/api/projects/favorites", {
       method: isFavorited ? "DELETE" : "PUT",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify({projectId: project.id}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: project.id }),
     });
-    if (!res.ok)
-      throw Error("Failed to toggle favorite");
+    if (!res.ok) throw Error("Failed to toggle favorite");
     setIsFavoritedLocal(!isFavorited);
-  }
+  };
 
   const getBadgeVariant = (category: string) => {
     switch (category) {
@@ -56,7 +59,7 @@ export function ProjectCard({ project, className, transparentWhenNotFavorite = f
         className,
       )}
       style={{
-        opacity: transparentWhenNotFavorite && !isFavorited ? .35 : 1,
+        opacity: transparentWhenNotFavorite && !isFavorited ? 0.35 : 1,
         transition: "opacity 0.2s ease",
       }}
     >
@@ -67,9 +70,11 @@ export function ProjectCard({ project, className, transparentWhenNotFavorite = f
           alt={project.title}
           className="w-full h-full object-cover"
         />
-        {session?.user && <button
-          onClick={onFavoriteToggle}
-          className="
+        {session?.user && (
+          <button
+            type="button"
+            onClick={onFavoriteToggle}
+            className="
             absolute top-3 right-3
             bg-white/80 backdrop-blur
             p-3 rounded-full
@@ -78,13 +83,14 @@ export function ProjectCard({ project, className, transparentWhenNotFavorite = f
             transition-opacity
             hover:scale-110
           "
-        >
-          {isFavorited ? (
-            <FaStar className="text-yellow-500" />
-          ) : (
-            <FaRegStar className="text-gray-600" />
-          )}
-        </button>}
+          >
+            {isFavorited ? (
+              <FaStar className="text-yellow-500" />
+            ) : (
+              <FaRegStar className="text-gray-600" />
+            )}
+          </button>
+        )}
       </div>
       <div className="flex items-center space-x-2">
         <Badge variant={getBadgeVariant(project.category)}>

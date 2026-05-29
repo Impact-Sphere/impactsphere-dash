@@ -1,17 +1,17 @@
 "use client";
 
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useCallback, useEffect, useState } from "react";
 import { Header } from "@/app/components/layout/header";
 import { ProjectCard } from "@/app/components/project/project-card";
 import { ProjectCardSkeleton } from "@/app/components/project/project-card-skeleton";
 import { categories } from "@/app/lib/data";
 import type { Project } from "@/app/types/project";
-import Link from "next/link";
 
 function DiscoverContent() {
   const router = useRouter();
-  const searchPathname = "/discover"
+  const searchPathname = "/discover";
   const searchParams = useSearchParams();
 
   // const q = searchParams.get("q") || "";
@@ -25,7 +25,7 @@ function DiscoverContent() {
   //   setInputValue(q);
   // }, [q]);
 
-  const updateUrl = useCallback(
+  const _updateUrl = useCallback(
     (updates: Record<string, string | null>) => {
       const params = new URLSearchParams(searchParams.toString());
       for (const [key, value] of Object.entries(updates)) {
@@ -35,14 +35,14 @@ function DiscoverContent() {
       const query = params.toString();
       router.replace(query ? `${searchPathname}?${query}` : searchPathname);
     },
-    [searchPathname, router, searchParams],
+    [router, searchParams],
   );
 
   // Fetch projects whenever URL params change
   useEffect(() => {
     const doFetch = async () => {
       setLoading(true);
-      const params = new URLSearchParams();
+      const _params = new URLSearchParams();
       // if (q) params.set("q", q);
       const res = await fetch(`/api/projects/favorites`);
       if (res.ok) {
@@ -98,7 +98,14 @@ function DiscoverContent() {
               No favorites found
             </h3>
             <p className="text-sm text-on-surface-variant mb-6 max-w-md">
-              It seems you don't have any favorites. Try browsing the <Link href="/discover" className="font-bold underline cursor-pointer">discovery</Link> page!
+              It seems you don't have any favorites. Try browsing the{" "}
+              <Link
+                href="/discover"
+                className="font-bold underline cursor-pointer"
+              >
+                discovery
+              </Link>{" "}
+              page!
             </p>
           </div>
         ) : (
