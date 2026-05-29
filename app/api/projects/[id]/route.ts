@@ -34,6 +34,7 @@ export async function GET(
         },
         orderBy: { createdAt: "desc" },
       },
+      projectDocuments: true,
       _count: { select: { donations: true } },
       serviceAcquisitions: {
         include: {

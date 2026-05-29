@@ -5,6 +5,13 @@ export type ProjectCategory =
   | "Tech Equity"
   | "Disaster Relief";
 
+export interface ProjectDocument {
+  id: string;
+  url: string;
+  fileName: string;
+  mimeType?: string | null;
+  size?: number | null;
+}
 export interface ServiceAcquisitionItem {
   id: string;
   status: string;
@@ -50,6 +57,7 @@ export interface Project {
     image: string | null;
     ngoInfo?: { ngoName: string } | null;
   };
+  projectDocuments?: ProjectDocument[];
   _count?: { donations: number };
   donations?: DonationItem[];
   serviceAcquisitions?: ServiceAcquisitionItem[];

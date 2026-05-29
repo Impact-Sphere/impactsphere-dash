@@ -42,6 +42,7 @@ export async function GET() {
           ngoInfo: true,
         },
       },
+      projectDocuments: true,
       _count: { select: { donations: true } },
     },
     orderBy: { createdAt: "desc" },

@@ -20,7 +20,7 @@ enum ApprovalStatus {
 }
 
 model User {
-  id              String          @id
+  id              String           @id
   name            String?
   email           String
   emailVerified   Boolean
@@ -46,15 +46,53 @@ model User {
   @@map("user")
 }
 
+model UploadedFile {
+  id        String   @id @default(uuid())
+
+  url       String
+  fileName  String
+  mimeType  String?
+  size      Int?
+
+  createdAt DateTime @default(now())
+
+  ngoRegistrationDocuments NgoInfo[] @relation("NgoRegistrationDocs")
+  ngoActivityProofs        NgoInfo[] @relation("NgoActivityProofs")
+  companyRegistrationDocs  CompanyInfo[] @relation("CompanyRegistrationDocs")
+  projectDocuments         Project[] @relation("ProjectDocuments")
+
+  @@map("uploaded_file")
+}
+
 model NgoInfo {
-  id                      String           @id
-  userId                  String           @unique
-  user                    User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  ngoName                 String
-  taxIdentificationNumber String
-  contactInfo             String
-  mainGoals               String
-  challenges              String
+  id                          String   @id
+  userId                      String   @unique
+  user                        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ngoName                     String
+  country                     String?
+  cityRegion                  String?
+  ngoType                     String?
+  yearFounded                 Int?
+  missionStatement            String?
+  activitiesDescription       String?
+  currentOrPastProjects       String?
+  contactEmail                String?
+  phoneNumber                 String?
+  website                     String?
+  registrationNumber          String?
+  registrationDocuments       UploadedFile[] @relation("NgoRegistrationDocs")
+  representativeFullName      String?
+  representativeRole          String?
+  representativeIdType        String?
+  representativeIdNumber      String?
+  representativeIdDocumentUrl String?
+  activityProofUrls           UploadedFile[] @relation("NgoActivityProofs")
+  activityProofLink           String?
+  declarationConfirmed        Boolean?
+  taxIdentificationNumber     String?
+  contactInfo                 String?
+  mainGoals                   String?
+  challenges                  String?
   legalRepName            String?
   legalRepIdUrl           String?
   statutesUrl             String?
@@ -67,13 +105,30 @@ model NgoInfo {
 }
 
 model CompanyInfo {
-  id                      String @id
-  userId                  String @unique
-  user                    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  companyName             String
-  taxIdentificationNumber String
-  contactInfo             String
-  causesSupported         String
+  id                          String   @id
+  userId                      String   @unique
+  user                        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  companyName                 String
+  country                     String?
+  industryType                String?
+  businessDescription         String?
+  yearFounded                 Int?
+  registrationNumber          String?
+  taxVatNumber                String?
+  registrationDocuments       UploadedFile[] @relation("CompanyRegistrationDocs")  
+  contactEmail                String?
+  website                     String?
+  phoneNumber                 String?
+  registeredAddress           String?
+  representativeFullName      String?
+  representativeJobTitle      String?
+  representativeIdType        String?
+  representativeIdNumber      String?
+  representativeIdDocumentUrl String?
+  declarationConfirmed        Boolean?
+  taxIdentificationNumber     String?
+  contactInfo                 String?
+  causesSupported             String?
   representativeName      String?
   representativePosition  String?
 
@@ -149,6 +204,7 @@ model Project {
   donations        Donation[]
   meetingRequests  MeetingRequest[]
   serviceAcquisitions ServiceAcquisition[]
+  projectDocuments UploadedFile[] @relation("ProjectDocuments")
 
   @@map("project")
 }
@@ -160,16 +216,16 @@ enum DonationStatus {
 }
 
 model Donation {
-  id                      String          @id @default(uuid())
-  amount                  Int
-  projectId               String
-  project                 Project         @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  companyId               String
-  company                 User            @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  stripePaymentIntentId   String?         @unique
-  status                  DonationStatus  @default(PENDING)
-  createdAt               DateTime        @default(now())
-  updatedAt               DateTime?       @updatedAt
+  id                    String         @id @default(uuid())
+  amount                Int
+  projectId             String
+  project               Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  companyId             String
+  company               User           @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  stripePaymentIntentId String?        @unique
+  status                DonationStatus @default(PENDING)
+  createdAt             DateTime       @default(now())
+  updatedAt             DateTime?      @updatedAt
 
   @@map("donation")
 }
@@ -195,43 +251,42 @@ enum VerificationTier {
 }
 
 model MeetingTimeSlot {
-  id        String   @id @default(uuid())
+  id String @id @default(uuid())
 
   meetingId String
   meeting   MeetingRequest @relation(fields: [meetingId], references: [id], onDelete: Cascade)
 
-  start     DateTime
-  end       DateTime
+  start DateTime
+  end   DateTime
 
   @@index([meetingId])
   @@map("meeting_time_slot")
 }
 
 model MeetingRequest {
-  id            String               @id @default(uuid())
+  id String @id @default(uuid())
 
-  projectId     String
-  project       Project              @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+  project   Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
 
-  companyId     String
-  company       User                 @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  companyId String
+  company   User   @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
-  requestedAt   DateTime             @default(now())
+  requestedAt DateTime @default(now())
 
-  status        MeetingRequestStatus @default(PENDING)
+  status MeetingRequestStatus @default(PENDING)
 
   proposedTimes MeetingTimeSlot[]
   selectedTime  DateTime?
 
-  notes         String?
+  notes String?
 
-  createdAt     DateTime             @default(now())
-  updatedAt     DateTime             @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([companyId])
   @@index([projectId])
   @@index([status])
-
   @@map("meeting_request")
 }
 
