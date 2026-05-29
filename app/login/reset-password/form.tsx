@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { authClient } from "@/app/lib/auth-client";
+import Link from "next/link";
 
 export default function ResetPasswordForm() {
   const router = useRouter();
@@ -11,6 +12,14 @@ export default function ResetPasswordForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
+  const [token, setToken] = useState("DUMMY_TOKEN"); // make password form appear by default and only disappear if token invalid
+  const [tokenError, setTokenError] = useState("");
+
+  useEffect(() => {
+    setToken(new URLSearchParams(window.location.search).get("token") || "");
+    if (!token)
+      setTokenError(new URLSearchParams(window.location.search).get("error") || "");
+  });
 
   const handleSubmit = async (e: React.SubmitEvent) => {
     try {
@@ -24,7 +33,6 @@ export default function ResetPasswordForm() {
         return;
       }
 
-      const token = new URLSearchParams(window.location.search).get("token")!;
       const { error } = await authClient.resetPassword({
         newPassword: password,
         token,
@@ -41,6 +49,7 @@ export default function ResetPasswordForm() {
   };
 
   return (
+    token ?
     !isPasswordReset ?
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -96,6 +105,13 @@ export default function ResetPasswordForm() {
         )}
       </form>
     :
-      <p className="text-center">Password has been reset.</p>
+      <div className="text-center">
+        <p>Password has been reset.</p>
+        <Link href="/login" className="font-bold underline">Go to login page</Link>
+      </div>
+    :
+      <p className="text-center">
+        Error: {tokenError === "INVALID_TOKEN" ? "Token is invalid or expired." : "Something went wrong."} Try generating a new password reset token/URL.
+      </p>
   );
 }
