@@ -44,6 +44,7 @@ model User {
   meetingRequests MeetingRequest[]
   verificationMeetings    VerificationMeetingRequest[] @relation("VerificationMeetings")
   adminVerificationMeetings VerificationMeetingRequest[] @relation("AdminVerificationMeetings")
+  supportChats    SupportChat[]
   services        Service[]
   favoriteProjects FavoriteProject[]
 
@@ -471,5 +472,40 @@ model FavoriteProject {
   @@unique([userId, projectId])
 
   @@map("favorite_project")
+}
+
+enum SupportChatStatus {
+  OPEN
+  CLOSED
+}
+
+model SupportChat {
+  id        String            @id @default(uuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    SupportChatStatus @default(OPEN)
+  subject   String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  messages  SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_chat")
+}
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      SupportChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+
+  @@map("support_message")
 }
 
