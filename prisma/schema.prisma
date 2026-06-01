@@ -15,6 +15,8 @@ enum UserType {
 
 enum ApprovalStatus {
   PENDING
+  MORE_INFO_REQUESTED
+  MEETING_REQUESTED
   APPROVED
   REJECTED
 }
@@ -40,6 +42,8 @@ model User {
   projects        Project[]
   donations       Donation[]
   meetingRequests MeetingRequest[]
+  verificationMeetings    VerificationMeetingRequest[] @relation("VerificationMeetings")
+  adminVerificationMeetings VerificationMeetingRequest[] @relation("AdminVerificationMeetings")
   services        Service[]
   favoriteProjects FavoriteProject[]
 
@@ -292,6 +296,44 @@ model MeetingRequest {
   @@index([projectId])
   @@index([status])
   @@map("meeting_request")
+}
+
+model VerificationMeetingTimeSlot {
+  id String @id @default(uuid())
+
+  meetingId String
+  meeting   VerificationMeetingRequest @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  start DateTime
+  end   DateTime
+
+  @@index([meetingId])
+  @@map("verification_meeting_time_slot")
+}
+
+model VerificationMeetingRequest {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation("VerificationMeetings", fields: [userId], references: [id], onDelete: Cascade)
+
+  adminId String
+  admin   User   @relation("AdminVerificationMeetings", fields: [adminId], references: [id], onDelete: Cascade)
+
+  status MeetingRequestStatus @default(PENDING)
+
+  proposedTimes VerificationMeetingTimeSlot[]
+  selectedTime  DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([status])
+  @@map("verification_meeting_request")
 }
 
 enum ServiceAcquisitionStatus {

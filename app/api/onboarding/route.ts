@@ -269,7 +269,7 @@ export async function POST(request: Request) {
           contactInfo: contactEmail,
 
           registrationDocuments: {
-            connect: regDocs.map((id: string) => ({ id })),
+            set: regDocs.map((id: string) => ({ id })),
           },
         },
       });
@@ -358,11 +358,11 @@ export async function POST(request: Request) {
           challenges: activitiesDescription,
 
           registrationDocuments: {
-            connect: regDocs.map((id: string) => ({ id })),
+            set: regDocs.map((id: string) => ({ id })),
           },
 
           activityProofUrls: {
-            connect: isValidIdArray(proofDocs)
+            set: isValidIdArray(proofDocs)
               ? proofDocs.map((id) => ({ id }))
               : [],
           },

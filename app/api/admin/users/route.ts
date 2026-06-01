@@ -33,7 +33,9 @@ export async function GET() {
   const users = await prisma.user.findMany({
     where: {
       userType: { in: ["NGO", "COMPANY"] },
-      approvalStatus: "PENDING",
+      approvalStatus: {
+        in: ["PENDING", "MORE_INFO_REQUESTED", "MEETING_REQUESTED", "REJECTED"],
+      },
     },
     include: {
       ngoInfo: {
@@ -61,9 +63,14 @@ export async function POST(request: Request) {
   }
 
   const body = await request.json();
-  const { userId, action } = body;
+  const { userId, action, adminNotes } = body;
 
-  if (!userId || !["approve", "reject"].includes(action)) {
+  if (
+    !userId ||
+    !["approve", "reject", "request_more_info", "request_meeting"].includes(
+      action,
+    )
+  ) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
@@ -76,11 +83,35 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "User not found" }, { status: 404 });
   }
 
-  const newStatus = action === "approve" ? "APPROVED" : "REJECTED";
+  let newStatus:
+    | "PENDING"
+    | "MORE_INFO_REQUESTED"
+    | "MEETING_REQUESTED"
+    | "APPROVED"
+    | "REJECTED";
+  switch (action) {
+    case "approve":
+      newStatus = "APPROVED";
+      break;
+    case "reject":
+      newStatus = "REJECTED";
+      break;
+    case "request_more_info":
+      newStatus = "MORE_INFO_REQUESTED";
+      break;
+    case "request_meeting":
+      newStatus = "MEETING_REQUESTED";
+      break;
+    default:
+      newStatus = "PENDING";
+  }
 
   await prisma.user.update({
     where: { id: userId },
-    data: { approvalStatus: newStatus },
+    data: {
+      approvalStatus: newStatus,
+      ...(adminNotes !== undefined && { adminNotes }),
+    },
   });
 
   return NextResponse.json({ success: true, status: newStatus });
