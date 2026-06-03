@@ -2,6 +2,8 @@
 
 ImpactSphere is a Next.js web platform that connects NGOs with companies for funding and partnerships. NGOs can publish impact projects and seek donations, while companies can browse initiatives, filter by category, and sponsor projects aligned with their CSR goals. An admin dashboard handles account and project approvals.
 
+**Live Site:** [https://dash.impactsphere.org](https://dash.impactsphere.org)
+
 ## Tech Stack
 
 - **Framework**: [Next.js 16](https://nextjs.org) (App Router)
