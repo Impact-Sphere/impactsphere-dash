@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface AcquiredService {
@@ -45,6 +46,10 @@ export default function MyServicesPage() {
     null,
   );
   const [revisionMessage, setRevisionMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const loadAcquisitions = useCallback(() => {
     fetch("/api/services/acquired")
@@ -83,9 +88,16 @@ export default function MyServicesPage() {
       loadAcquisitions();
       setShowRevisionModal(null);
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Action completed successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Action failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Action failed",
+      });
     }
   };
 
@@ -104,9 +116,16 @@ export default function MyServicesPage() {
       setReviewRating(5);
       setReviewComment("");
       loadAcquisitions();
+      setToastMessage({
+        type: "success",
+        message: "Review submitted successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to submit review");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Failed to submit review",
+      });
     }
   };
 
@@ -143,6 +162,15 @@ export default function MyServicesPage() {
   }
 
   return (
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
     <main className="min-h-screen bg-surface py-12 px-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <div className="space-y-2">
@@ -431,5 +459,6 @@ export default function MyServicesPage() {
         </div>
       </div>
     </main>
+  </>
   );
 }

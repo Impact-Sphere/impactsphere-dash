@@ -3,6 +3,7 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 import { SUPPORTED_CURRENCIES } from "@/app/lib/currency";
 import { cn } from "@/app/lib/utils";
@@ -44,6 +45,10 @@ export function ProfileForm() {
   >("projects");
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const [name, setName] = useState("");
   const [image, setImage] = useState("");
@@ -106,6 +111,7 @@ export function ProfileForm() {
 
   const handleSave = async () => {
     if (!profile) return;
+    setStatusMessage(null);
     setSaving(true);
 
     const payload: Record<string, string | undefined> = {
@@ -135,10 +141,16 @@ export function ProfileForm() {
     if (res.ok) {
       setIsEditing(false);
       await fetchProfile();
-      router.refresh();
+      setStatusMessage({
+        type: "success",
+        message: "Profile saved successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to save profile.");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to save profile.",
+      });
     }
   };
 
@@ -351,6 +363,14 @@ export function ProfileForm() {
           )}
         </div>
       </div>
+
+      {statusMessage && (
+        <StatusMessage
+          type={statusMessage.type}
+          message={statusMessage.message}
+          onClose={() => setStatusMessage(null)}
+        />
+      )}
 
       {/* Tabs */}
       <div className="flex items-center space-x-2">

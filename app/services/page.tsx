@@ -2,6 +2,7 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { authClient } from "@/app/lib/auth-client";
 
@@ -54,6 +55,10 @@ function ServicesCatalogContent() {
   const [selectedPackage, setSelectedPackage] = useState<string>("");
   const [showAcquireModal, setShowAcquireModal] = useState(false);
   const [activeService, setActiveService] = useState<Service | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const activeProject = projects.find((p) => p.id === selectedProject);
   const availableBudget = activeProject
@@ -123,7 +128,10 @@ function ServicesCatalogContent() {
       router.push("/chat");
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to acquire service");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to acquire service",
+      });
     }
   };
 
@@ -174,6 +182,13 @@ function ServicesCatalogContent() {
                 {format(availableBudget)} available
               </span>
             </div>
+          )}
+          {statusMessage && (
+            <StatusMessage
+              type={statusMessage.type}
+              message={statusMessage.message}
+              onClose={() => setStatusMessage(null)}
+            />
           )}
         </div>
 

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 const CATEGORY_OPTIONS = [
@@ -33,6 +34,10 @@ export default function NewProjectPage() {
   const [targetBudget, setTargetBudget] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (isPending) return;
@@ -54,19 +59,24 @@ export default function NewProjectPage() {
   }, [session, isPending, router]);
 
   const handleUploadDocuments = async (files: FileList | null) => {
+    setStatusMessage(null);
     if (!files?.length) return;
 
     const countLeft = 5 - projectDocuments.length;
     if (countLeft <= 0) {
-      alert("You can only upload up to 5 documents.");
+      setStatusMessage({
+        type: "error",
+        message: "You can only upload up to 5 documents.",
+      });
       return;
     }
 
     const selectedFiles = Array.from(files).slice(0, countLeft);
     if (files.length > countLeft) {
-      alert(
-        `Only ${countLeft} more document${countLeft === 1 ? "" : "s"} can be added.`,
-      );
+      setStatusMessage({
+        type: "info",
+        message: `Only ${countLeft} more document${countLeft === 1 ? "" : "s"} can be added.`,
+      });
     }
 
     const uploaded: typeof projectDocuments = [];
@@ -90,7 +100,10 @@ export default function NewProjectPage() {
         const error = await res
           .json()
           .catch(() => ({ error: "Upload failed" }));
-        alert(error.error || "Unable to upload document.");
+        setStatusMessage({
+          type: "error",
+          message: error.error || "Unable to upload document.",
+        });
       }
     }
 
@@ -103,6 +116,7 @@ export default function NewProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatusMessage(null);
     setSubmitting(true);
 
     const res = await fetch("/api/projects", {
@@ -125,7 +139,10 @@ export default function NewProjectPage() {
       router.push(`/projects/${project.id}`);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to create project.");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to create project.",
+      });
     }
   };
 
@@ -222,6 +239,13 @@ export default function NewProjectPage() {
                 disabled={projectDocuments.length >= 5}
                 className="w-full text-sm text-gray-500 file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 file:rounded-lg file:hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
               />
+              {statusMessage && (
+                <StatusMessage
+                  type={statusMessage.type}
+                  message={statusMessage.message}
+                  onClose={() => setStatusMessage(null)}
+                />
+              )}
               {projectDocuments.length ? (
                 <div className="flex flex-wrap gap-3 mt-3">
                   {projectDocuments.map((doc) => (
