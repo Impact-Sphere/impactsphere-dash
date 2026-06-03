@@ -1,8 +1,13 @@
 # ImpactSphere
 
+<p align="center">
+    <a href="https://status.henriquesf.me/"><img alt="Status" src="https://uptime.henriquesf.me/api/badge/7/uptime?labelColor=D3A8D1&labelValueColor=3E2A8A&color=3E2A8A"></a>
+</p>
+
 ImpactSphere is a Next.js web platform that connects NGOs with companies for funding and partnerships. NGOs can publish impact projects and seek donations, while companies can browse initiatives, filter by category, and sponsor projects aligned with their CSR goals. An admin dashboard handles account and project approvals.
 
 **Live Site:** [https://dash.impactsphere.org](https://dash.impactsphere.org)
+
 
 ## Tech Stack
 
@@ -200,7 +205,3 @@ See `prisma/schema.prisma` for the full schema.
 2. Opens a project detail page
 3. Clicks "Donate" and enters an amount
 4. Donation is recorded and project funding progress updates
-
-## License
-
-This project is private and not open source.
