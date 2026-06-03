@@ -21,8 +21,6 @@ RUN --mount=type=cache,target=/root/.npm \
     echo "No lockfile found." && exit 1; \
   fi
 
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
-
 FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /app
@@ -60,12 +58,9 @@ RUN chown node:node .next
 
 COPY --from=builder --chown=node:node /app/.next/standalone ./
 COPY --from=builder --chown=node:node /app/.next/static ./.next/static
-COPY --from=dependencies --chown=node:node /app/node_modules/.bin ./node_modules/.bin
-COPY --from=dependencies --chown=node:node /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder --chown=node:node /app/prisma ./prisma
 
 USER node
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "./node_modules/.bin/prisma migrate deploy && node server.js"]
+CMD ["node", "server.js"]
