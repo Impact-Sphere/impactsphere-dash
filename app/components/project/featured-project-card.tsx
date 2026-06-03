@@ -1,7 +1,13 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { FaRegStar, FaStar } from "react-icons/fa";
+import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { authClient } from "@/app/lib/auth-client";
+import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
 import { cn } from "@/app/lib/utils";
 import type { Project } from "@/app/types/project";
 
@@ -14,6 +20,22 @@ export function FeaturedProjectCard({
   project,
   className,
 }: FeaturedProjectCardProps) {
+  const { data: session } = authClient.useSession();
+  const { format } = useCurrency();
+  const funded = getFundedPercent(project.currentAmount, project.targetBudget);
+
+  const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
+
+  const onFavoriteToggle = async () => {
+    const res = await fetch("/api/projects/favorites", {
+      method: isFavorited ? "DELETE" : "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ projectId: project.id }),
+    });
+    if (!res.ok) throw Error("Failed to toggle favorite");
+    setIsFavoritedLocal(!isFavorited);
+  };
+
   return (
     <article
       className={cn(
@@ -21,15 +43,13 @@ export function FeaturedProjectCard({
         className,
       )}
     >
-      <div className="flex flex-col md:flex-row h-full">
+      <div className="flex flex-col md:flex-row h-full group">
         <div className="md:w-1/2 overflow-hidden relative min-h-[300px] md:min-h-0">
-          <Image
-            src={project.image}
+          {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
+          <img
+            src={getProjectImage(project.image)}
             alt={project.title}
-            fill
-            className="object-cover transition-transform duration-700 group-hover:scale-110"
-            sizes="(max-width: 768px) 100vw, 50vw"
-            priority
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </div>
         <div className="md:w-1/2 p-10 flex flex-col justify-between">
@@ -46,28 +66,51 @@ export function FeaturedProjectCard({
             <div className="space-y-2">
               <div className="flex justify-between items-end">
                 <span className="text-2xl font-black text-primary">
-                  {project.funded}%{" "}
+                  {funded}%{" "}
                   <span className="text-sm font-medium text-on-surface-variant">
                     funded
                   </span>
                 </span>
                 <span className="text-sm font-bold">
-                  {project.raised}{" "}
+                  {format(project.currentAmount)}{" "}
                   <span className="text-on-surface-variant font-normal">
-                    of {project.goal}
+                    of {format(project.targetBudget)}
                   </span>
                 </span>
               </div>
-              <ProgressBar value={project.funded} size="md" />
+              <ProgressBar value={funded} size="md" />
             </div>
-            <Button
-              size="lg"
-              className="shadow-xl shadow-primary/20 hover:translate-y-[-2px]"
-            >
-              Fund Now
-            </Button>
+            <a href={`/projects/${project.id}`}>
+              <Button
+                size="lg"
+                className="shadow-xl shadow-primary/20 hover:translate-y-[-2px]"
+              >
+                Fund Now
+              </Button>
+            </a>
           </div>
         </div>
+        {session?.user && (
+          <button
+            type="button"
+            onClick={onFavoriteToggle}
+            className="
+            absolute top-3 right-3
+            bg-white/80 backdrop-blur
+            p-3 rounded-full
+            shadow-md
+            opacity-0 group-hover:opacity-100
+            transition-opacity
+            hover:scale-110
+          "
+          >
+            {isFavorited ? (
+              <FaStar className="text-yellow-500" />
+            ) : (
+              <FaRegStar className="text-gray-600" />
+            )}
+          </button>
+        )}
       </div>
     </article>
   );

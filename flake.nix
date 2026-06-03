@@ -16,6 +16,9 @@
           buildInputs = with pkgs; [
             nodejs_24
             pnpm
+            openssl
+            prisma-engines
+            stripe-cli
           ];
 
           shellHook = ''

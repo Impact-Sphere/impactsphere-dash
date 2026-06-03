@@ -5,6 +5,8 @@ FROM node:${NODE_VERSION} AS dependencies
 WORKDIR /app
 
 COPY package.json yarn.lock* package-lock.json* pnpm-lock.yaml* .npmrc* ./
+COPY prisma ./prisma
+COPY prisma.config.ts ./
 
 RUN --mount=type=cache,target=/root/.npm \
     --mount=type=cache,target=/usr/local/share/.cache/yarn \
@@ -18,6 +20,8 @@ RUN --mount=type=cache,target=/root/.npm \
   else \
     echo "No lockfile found." && exit 1; \
   fi
+
+RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
 
 FROM node:${NODE_VERSION} AS builder
 
@@ -62,4 +66,3 @@ USER node
 EXPOSE 3000
 
 CMD ["node", "server.js"]
-

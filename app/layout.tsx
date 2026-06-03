@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
+import { CurrencyProvider } from "./components/currency/currency-context";
 import { Sidebar } from "./components/layout/sidebar";
 
 const inter = Inter({
@@ -38,8 +39,10 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full bg-surface text-on-surface">
-        <Sidebar />
-        {children}
+        <CurrencyProvider>
+          <Sidebar />
+          {children}
+        </CurrencyProvider>
       </body>
     </html>
   );
