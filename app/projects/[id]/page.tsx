@@ -7,9 +7,9 @@ import { useCallback, useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
-import { StatusMessage } from "@/app/components/ui/status-message";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 import {
   createDefaultSlot,

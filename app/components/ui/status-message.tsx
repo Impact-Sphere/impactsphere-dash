@@ -50,15 +50,14 @@ export function StatusMessage({
     setIsVisible(true);
 
     const timer = window.setTimeout(() => {
-        if (onClose) {
-            onClose();
-        }
-        setIsVisible(false);
-      
+      if (onClose) {
+        onClose();
+      }
+      setIsVisible(false);
     }, duration);
 
     return () => window.clearTimeout(timer);
-  }, [toast, duration, onClose, message]);
+  }, [toast, duration, onClose]);
 
   if (!isVisible) return null;
 
