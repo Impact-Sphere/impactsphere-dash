@@ -28,6 +28,34 @@ jobs:
           tags: |
             registry.henriquesf.me/impact-sphere-dash:${{ github.sha }}
             registry.henriquesf.me/impact-sphere-dash:latest
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24.13.0' 
+          cache: 'npm'
+      - name: Install Dependencies
+        run: |
+          if [ -f package-lock.json ]; then npm ci;
+          elif [ -f pnpm-lock.yaml ]; then corepack enable pnpm && pnpm install --frozen-lockfile;
+          elif [ -f yarn.lock ]; then corepack enable yarn && yarn install --frozen-lockfile;
+          else npm install; fi
+      - name: Start SSH Tunnel
+        run: |
+          eval $(ssh-agent -s)
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" | tr -d '\r' | ssh-add -
+          
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          
+          ssh-keyscan -H 194.242.57.139 >> ~/.ssh/known_hosts
+          
+          ssh -f -N -L 5433:localhost:8091 ricky@194.242.57.139
+
+      - name: Run Prisma Migrations
+        env:
+          DATABASE_URL: ${{ secrets.PROD_DATABASE_URL }}
+        run: npx prisma migrate deploy
+
       - name: Update NixOS Config
         run: |
           git config --global user.email "nix-bot@henriquesf.me"
