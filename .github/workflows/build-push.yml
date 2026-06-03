@@ -28,6 +28,9 @@ jobs:
           tags: |
             registry.henriquesf.me/impact-sphere-dash:${{ github.sha }}
             registry.henriquesf.me/impact-sphere-dash:latest
+          build-args: |
+            NEXT_PUBLIC_BETTER_AUTH_URL=${{ secrets.NEXT_PUBLIC_BETTER_AUTH_URL }}
+            NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
