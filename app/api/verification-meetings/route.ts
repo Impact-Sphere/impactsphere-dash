@@ -29,7 +29,11 @@ export async function POST(request: NextRequest) {
     };
     const { userId, proposedTimes, notes } = body;
 
-    if (!userId || !Array.isArray(proposedTimes) || proposedTimes.length === 0) {
+    if (
+      !userId ||
+      !Array.isArray(proposedTimes) ||
+      proposedTimes.length === 0
+    ) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -108,7 +112,7 @@ export async function GET(request: NextRequest) {
     const { searchParams } = new URL(request.url);
     const targetUserId = searchParams.get("userId");
 
-    let where: { userId?: string; adminId?: string } = {};
+    const where: { userId?: string; adminId?: string } = {};
 
     if (user.userType === "ADMIN") {
       if (targetUserId) {

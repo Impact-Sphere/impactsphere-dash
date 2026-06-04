@@ -8,13 +8,13 @@ import { authClient } from "@/app/lib/auth-client";
 import {
   createDefaultSlot,
   getEndMinTimeForDate,
-  getMinEndDate,
   getNextHalfHourStart,
   getSlotValidation,
   getStartMinTimeForDate,
   mergeContiguousSlots,
 } from "@/app/lib/meetings-utils";
 import type { TimeSlot } from "@/app/types/meeting";
+import type { Project } from "@/app/types/project";
 import "react-datepicker/dist/react-datepicker.css";
 
 type UploadedFile = {
@@ -100,6 +100,24 @@ interface PendingProject {
   projectDocuments?: UploadedFile[];
 }
 
+interface MatchingRequest {
+  id: string;
+  status: string;
+  createdAt: string;
+  adminNotes: string | null;
+  description: string | null;
+  budgetRange: string | null;
+  location: string | null;
+  timeline: string | null;
+  causeAreas: string[];
+  recommendedProjectIds: string[];
+  company?: {
+    name: string | null;
+    email: string;
+    companyInfo?: { companyName: string } | null;
+  };
+}
+
 function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     PENDING: "bg-gray-100 text-gray-700",
@@ -128,11 +146,15 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
-  const [activeTab, setActiveTab] = useState<"users" | "projects" | "matching">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "projects" | "matching">(
+    "users",
+  );
   const [users, setUsers] = useState<PendingUser[]>([]);
   const [projects, setProjects] = useState<PendingProject[]>([]);
-  const [matchingRequests, setMatchingRequests] = useState<unknown[]>([]);
-  const [allProjects, setAllProjects] = useState<unknown[]>([]);
+  const [matchingRequests, setMatchingRequests] = useState<MatchingRequest[]>(
+    [],
+  );
+  const [allProjects, setAllProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -144,19 +166,22 @@ export default function AdminDashboardPage() {
   const [modalTimes, setModalTimes] = useState<TimeSlot[]>([]);
   const [modalSaving, setModalSaving] = useState(false);
   const [recommendModalOpen, setRecommendModalOpen] = useState(false);
-  const [recommendRequestId, setRecommendRequestId] = useState<string | null>(null);
+  const [recommendRequestId, setRecommendRequestId] = useState<string | null>(
+    null,
+  );
   const [recommendNotes, setRecommendNotes] = useState("");
   const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
   const [recommendSaving, setRecommendSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [usersRes, projectsRes, matchingRes, allProjectsRes] = await Promise.all([
-      fetch("/api/admin/users"),
-      fetch("/api/admin/projects"),
-      fetch("/api/matching-requests"),
-      fetch("/api/projects"),
-    ]);
+    const [usersRes, projectsRes, matchingRes, allProjectsRes] =
+      await Promise.all([
+        fetch("/api/admin/users"),
+        fetch("/api/admin/projects"),
+        fetch("/api/matching-requests"),
+        fetch("/api/projects"),
+      ]);
 
     if (usersRes.ok) {
       setUsers(await usersRes.json());
@@ -257,7 +282,11 @@ export default function AdminDashboardPage() {
         setUsers((prev) =>
           prev.map((u) =>
             u.id === modalUserId
-              ? { ...u, approvalStatus: data.status || "MEETING_REQUESTED", adminNotes: modalNotes }
+              ? {
+                  ...u,
+                  approvalStatus: data.status || "MEETING_REQUESTED",
+                  adminNotes: modalNotes,
+                }
               : u,
           ),
         );
@@ -366,7 +395,9 @@ export default function AdminDashboardPage() {
     if (res.ok) {
       const updated = await res.json();
       setMatchingRequests((prev) =>
-        prev.map((r: any) => (r.id === recommendRequestId ? { ...r, ...updated } : r)),
+        prev.map((r) =>
+          r.id === recommendRequestId ? { ...r, ...updated } : r,
+        ),
       );
       setRecommendModalOpen(false);
       setRecommendRequestId(null);
@@ -504,9 +535,7 @@ export default function AdminDashboardPage() {
                       )}
                       <button
                         type="button"
-                        onClick={() =>
-                          openModal(user.id, "request_more_info")
-                        }
+                        onClick={() => openModal(user.id, "request_more_info")}
                         className="px-3 py-1.5 border border-amber-200 text-amber-700 font-medium rounded-lg hover:bg-amber-50 transition-colors text-sm"
                       >
                         Request More Info
@@ -541,7 +570,9 @@ export default function AdminDashboardPage() {
 
                   {user.approvalStatus === "REJECTED" && (
                     <div className="rounded-xl bg-red-50 border border-red-200 p-3 text-sm text-red-700">
-                      <span className="font-semibold">Previously rejected. </span>
+                      <span className="font-semibold">
+                        Previously rejected.{" "}
+                      </span>
                       <span>
                         The applicant can resubmit with updated information, or
                         you can re-approve them directly.
@@ -1005,7 +1036,7 @@ export default function AdminDashboardPage() {
                 No matching requests yet.
               </div>
             ) : (
-              matchingRequests.map((req: any) => (
+              matchingRequests.map((req) => (
                 <div
                   key={req.id}
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
@@ -1046,7 +1077,9 @@ export default function AdminDashboardPage() {
                         onClick={() => {
                           setRecommendRequestId(req.id);
                           setRecommendNotes(req.adminNotes || "");
-                          setSelectedProjectIds(req.recommendedProjectIds || []);
+                          setSelectedProjectIds(
+                            req.recommendedProjectIds || [],
+                          );
                           setRecommendModalOpen(true);
                         }}
                         className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
@@ -1172,7 +1205,7 @@ export default function AdminDashboardPage() {
 
                   return (
                     <div
-                      key={index}
+                      key={`${slot.start}-${slot.end}`}
                       className={`rounded-xl border p-3 space-y-2 text-sm ${
                         isInvalid
                           ? "border-red-200 bg-red-50"
@@ -1204,10 +1237,14 @@ export default function AdminDashboardPage() {
 
                       <div className="grid grid-cols-2 gap-2">
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">
+                          <label
+                            htmlFor={`modal-start-${index}`}
+                            className="text-xs text-gray-500 block mb-1"
+                          >
                             Start
                           </label>
                           <DatePicker
+                            id={`modal-start-${index}`}
                             selected={new Date(slot.start)}
                             onChange={(date: Date | null) =>
                               date && updateModalSlotStart(index, date)
@@ -1220,17 +1257,21 @@ export default function AdminDashboardPage() {
                             minTime={getStartMinTimeForDate(
                               new Date(slot.start),
                             )}
-                            maxTime={new Date(
-                              new Date(slot.start).setHours(23, 30),
-                            )}
+                            maxTime={
+                              new Date(new Date(slot.start).setHours(23, 30))
+                            }
                             className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
                           />
                         </div>
                         <div>
-                          <label className="text-xs text-gray-500 block mb-1">
+                          <label
+                            htmlFor={`modal-end-${index}`}
+                            className="text-xs text-gray-500 block mb-1"
+                          >
                             End
                           </label>
                           <DatePicker
+                            id={`modal-end-${index}`}
                             selected={new Date(slot.end)}
                             onChange={(date: Date | null) =>
                               date && updateModalSlotEnd(index, date)
@@ -1244,9 +1285,9 @@ export default function AdminDashboardPage() {
                               new Date(slot.end),
                               slot,
                             )}
-                            maxTime={new Date(
-                              new Date(slot.end).setHours(23, 59),
-                            )}
+                            maxTime={
+                              new Date(new Date(slot.end).setHours(23, 59))
+                            }
                             className="w-full px-2 py-1.5 border border-gray-200 rounded text-sm"
                           />
                         </div>
@@ -1315,7 +1356,7 @@ export default function AdminDashboardPage() {
                 Select projects to recommend:
               </p>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
-                {allProjects.map((project: any) => {
+                {allProjects.map((project) => {
                   const selected = selectedProjectIds.includes(project.id);
                   return (
                     <button

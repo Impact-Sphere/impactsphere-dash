@@ -85,8 +85,10 @@ export default function SupportPage() {
   }, [activeChat]);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages]);
+    if (messages.length > 0) {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    }
+  }, [messages.length]);
 
   const sendMessage = async () => {
     if (!activeChat || !newMessage.trim()) return;
@@ -131,7 +133,7 @@ export default function SupportPage() {
 
     if (res.ok) {
       const chat = await res.json();
-      if (chat && chat.id) {
+      if (chat?.id) {
         setChats((prev) => [chat, ...prev]);
         setActiveChat(chat.id);
       }
@@ -173,45 +175,43 @@ export default function SupportPage() {
                 )}
               </div>
             ) : (
-              <>
-                {chats.map((chat) => (
-                  <button
-                    key={chat.id}
-                    type="button"
-                    onClick={() => setActiveChat(chat.id)}
-                    className={`w-full p-4 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${
-                      activeChat === chat.id ? "bg-violet-50" : ""
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <p className="font-medium text-sm text-on-surface">
-                        {isAdmin
-                          ? chat.user?.name || chat.user?.email || "Unknown"
-                          : chat.subject || "Support Chat"}
-                      </p>
-                      <span
-                        className={`text-xs px-1.5 py-0.5 rounded-full ${
-                          chat.status === "OPEN"
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-gray-100 text-gray-600"
-                        }`}
-                      >
-                        {chat.status}
-                      </span>
-                    </div>
-                    {isAdmin && (
-                      <p className="text-xs text-gray-500 mt-0.5">
-                        {chat.user?.email}
-                      </p>
-                    )}
-                    {chat.messages?.[0] && (
-                      <p className="text-xs text-gray-400 mt-1 truncate">
-                        {chat.messages[0].content}
-                      </p>
-                    )}
-                  </button>
-                ))}
-              </>
+              chats.map((chat) => (
+                <button
+                  key={chat.id}
+                  type="button"
+                  onClick={() => setActiveChat(chat.id)}
+                  className={`w-full p-4 text-left border-b border-gray-50 hover:bg-gray-50 transition-colors ${
+                    activeChat === chat.id ? "bg-violet-50" : ""
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <p className="font-medium text-sm text-on-surface">
+                      {isAdmin
+                        ? chat.user?.name || chat.user?.email || "Unknown"
+                        : chat.subject || "Support Chat"}
+                    </p>
+                    <span
+                      className={`text-xs px-1.5 py-0.5 rounded-full ${
+                        chat.status === "OPEN"
+                          ? "bg-emerald-100 text-emerald-700"
+                          : "bg-gray-100 text-gray-600"
+                      }`}
+                    >
+                      {chat.status}
+                    </span>
+                  </div>
+                  {isAdmin && (
+                    <p className="text-xs text-gray-500 mt-0.5">
+                      {chat.user?.email}
+                    </p>
+                  )}
+                  {chat.messages?.[0] && (
+                    <p className="text-xs text-gray-400 mt-1 truncate">
+                      {chat.messages[0].content}
+                    </p>
+                  )}
+                </button>
+              ))
             )}
           </div>
         </div>
@@ -224,12 +224,15 @@ export default function SupportPage() {
                 <div>
                   <h3 className="font-semibold text-on-surface">
                     {isAdmin
-                      ? activeChatData.user?.name || activeChatData.user?.email || "Support Chat"
+                      ? activeChatData.user?.name ||
+                        activeChatData.user?.email ||
+                        "Support Chat"
                       : activeChatData.subject || "ImpactSphere Support"}
                   </h3>
                   {isAdmin && activeChatData.user && (
                     <p className="text-xs text-gray-500">
-                      {activeChatData.user.userType} · {activeChatData.user.email}
+                      {activeChatData.user.userType} ·{" "}
+                      {activeChatData.user.email}
                     </p>
                   )}
                 </div>

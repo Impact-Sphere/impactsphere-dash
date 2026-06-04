@@ -38,7 +38,11 @@ export async function GET(
 
     const { id } = await params;
 
-    const hasAccess = await canAccessChat(id, session.user.id, user.userType || "");
+    const hasAccess = await canAccessChat(
+      id,
+      session.user.id,
+      user.userType || "",
+    );
     if (!hasAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }
@@ -82,7 +86,11 @@ export async function POST(
 
     const { id } = await params;
 
-    const hasAccess = await canAccessChat(id, session.user.id, user.userType || "");
+    const hasAccess = await canAccessChat(
+      id,
+      session.user.id,
+      user.userType || "",
+    );
     if (!hasAccess) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 });
     }

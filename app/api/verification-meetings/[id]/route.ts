@@ -68,7 +68,10 @@ export async function PUT(
 
     // Admin can update status and notes
     if (isAdmin) {
-      if (status && VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])) {
+      if (
+        status &&
+        VALID_STATUSES.includes(status as (typeof VALID_STATUSES)[number])
+      ) {
         updateData.status = status as (typeof VALID_STATUSES)[number];
       }
       if (notes !== undefined) {

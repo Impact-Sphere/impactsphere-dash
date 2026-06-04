@@ -87,11 +87,14 @@ export function PendingApprovalContent() {
   const handleScheduleMeeting = async () => {
     if (!verificationMeeting || !selectedSlot) return;
     setScheduling(true);
-    const res = await fetch(`/api/verification-meetings/${verificationMeeting.id}`, {
-      method: "PUT",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ selectedTime: selectedSlot }),
-    });
+    const res = await fetch(
+      `/api/verification-meetings/${verificationMeeting.id}`,
+      {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ selectedTime: selectedSlot }),
+      },
+    );
     setScheduling(false);
     if (res.ok) {
       const data = await res.json();
@@ -287,60 +290,61 @@ export function PendingApprovalContent() {
             </div>
           ) : (
             <>
-              {verificationMeeting && verificationMeeting.proposedTimes.length > 0 && (
-                <div className="space-y-3 text-left">
-                  <p className="text-sm font-medium text-on-surface text-center">
-                    Select a time slot that works for you:
-                  </p>
-                  <div className="space-y-2">
-                    {verificationMeeting.proposedTimes.map((slot) => {
-                      const start = new Date(slot.start);
-                      const end = new Date(slot.end);
-                      const isSelected = selectedSlot === slot.start;
+              {verificationMeeting &&
+                verificationMeeting.proposedTimes.length > 0 && (
+                  <div className="space-y-3 text-left">
+                    <p className="text-sm font-medium text-on-surface text-center">
+                      Select a time slot that works for you:
+                    </p>
+                    <div className="space-y-2">
+                      {verificationMeeting.proposedTimes.map((slot) => {
+                        const start = new Date(slot.start);
+                        const end = new Date(slot.end);
+                        const isSelected = selectedSlot === slot.start;
 
-                      return (
-                        <button
-                          key={slot.id}
-                          type="button"
-                          onClick={() => setSelectedSlot(slot.start)}
-                          className={`w-full p-3 rounded-xl border text-left text-sm transition-colors ${
-                            isSelected
-                              ? "border-violet-500 bg-violet-50 text-violet-800"
-                              : "border-gray-200 hover:bg-gray-50"
-                          }`}
-                        >
-                          <div className="font-medium">
-                            {start.toLocaleDateString(undefined, {
-                              weekday: "long",
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </div>
-                          <div className="text-gray-500">
-                            {start.toLocaleTimeString(undefined, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}{" "}
-                            —{" "}
-                            {end.toLocaleTimeString(undefined, {
-                              hour: "2-digit",
-                              minute: "2-digit",
-                            })}
-                          </div>
-                        </button>
-                      );
-                    })}
+                        return (
+                          <button
+                            key={slot.id}
+                            type="button"
+                            onClick={() => setSelectedSlot(slot.start)}
+                            className={`w-full p-3 rounded-xl border text-left text-sm transition-colors ${
+                              isSelected
+                                ? "border-violet-500 bg-violet-50 text-violet-800"
+                                : "border-gray-200 hover:bg-gray-50"
+                            }`}
+                          >
+                            <div className="font-medium">
+                              {start.toLocaleDateString(undefined, {
+                                weekday: "long",
+                                month: "short",
+                                day: "numeric",
+                              })}
+                            </div>
+                            <div className="text-gray-500">
+                              {start.toLocaleTimeString(undefined, {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}{" "}
+                              —{" "}
+                              {end.toLocaleTimeString(undefined, {
+                                hour: "2-digit",
+                                minute: "2-digit",
+                              })}
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleScheduleMeeting}
+                      disabled={!selectedSlot || scheduling}
+                      className="w-full py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    >
+                      {scheduling ? "Confirming..." : "Confirm Time Slot"}
+                    </button>
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleScheduleMeeting}
-                    disabled={!selectedSlot || scheduling}
-                    className="w-full py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
-                    {scheduling ? "Confirming..." : "Confirm Time Slot"}
-                  </button>
-                </div>
-              )}
+                )}
 
               {!verificationMeeting && (
                 <div className="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">

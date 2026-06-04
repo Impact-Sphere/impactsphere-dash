@@ -75,7 +75,9 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let requests;
+    let requests: Awaited<
+      ReturnType<typeof prisma.companyMatchingRequest.findMany>
+    > = [];
 
     if (user.userType === "ADMIN") {
       requests = await prisma.companyMatchingRequest.findMany({

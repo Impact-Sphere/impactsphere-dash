@@ -109,7 +109,10 @@ export async function PUT(
       recommendedProjectIds?: string[];
     } = {};
 
-    if (status && ["PENDING", "IN_REVIEW", "MATCHED", "DECLINED"].includes(status)) {
+    if (
+      status &&
+      ["PENDING", "IN_REVIEW", "MATCHED", "DECLINED"].includes(status)
+    ) {
       updateData.status = status;
     }
 

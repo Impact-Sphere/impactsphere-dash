@@ -17,8 +17,8 @@ async function requireAdmin() {
     select: { userType: true },
   });
 
-  if(user?.userType !== "ADMIN"){
-    return NextResponse.json({error: "FORBIDDEN", status: 403})
+  if (user?.userType !== "ADMIN") {
+    return NextResponse.json({ error: "FORBIDDEN", status: 403 });
   }
 
   return { userId: session.user.id };

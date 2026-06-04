@@ -75,7 +75,7 @@ export async function GET() {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    let chats;
+    let chats: Awaited<ReturnType<typeof prisma.supportChat.findMany>> = [];
 
     if (user.userType === "ADMIN") {
       chats = await prisma.supportChat.findMany({

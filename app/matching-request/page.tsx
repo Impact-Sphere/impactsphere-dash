@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -63,7 +64,7 @@ const TIMELINE_OPTIONS = [
 export default function MatchingRequestPage() {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
-  const [userType, setUserType] = useState<string | null>(null);
+  const [, setUserType] = useState<string | null>(null);
   const [requests, setRequests] = useState<MatchingRequest[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
@@ -245,10 +246,10 @@ export default function MatchingRequestPage() {
             <form onSubmit={handleSubmit} className="space-y-5">
               {/* Cause Areas */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-on-surface">
+                <p className="text-sm font-medium text-on-surface">
                   Cause areas you want to support{" "}
                   <span className="text-red-500">*</span>
-                </label>
+                </p>
                 <div className="flex flex-wrap gap-2">
                   {CAUSE_OPTIONS.map((cause) => {
                     const selected = selectedCauses.includes(cause);
@@ -272,10 +273,14 @@ export default function MatchingRequestPage() {
 
               {/* Description */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-on-surface">
+                <label
+                  htmlFor="description"
+                  className="text-sm font-medium text-on-surface"
+                >
                   Describe what you are looking for
                 </label>
                 <textarea
+                  id="description"
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
                   rows={3}
@@ -287,10 +292,14 @@ export default function MatchingRequestPage() {
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {/* Budget */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-on-surface">
+                  <label
+                    htmlFor="budgetRange"
+                    className="text-sm font-medium text-on-surface"
+                  >
                     Budget range
                   </label>
                   <select
+                    id="budgetRange"
                     value={budgetRange}
                     onChange={(e) => setBudgetRange(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-white"
@@ -306,10 +315,14 @@ export default function MatchingRequestPage() {
 
                 {/* Location */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-on-surface">
+                  <label
+                    htmlFor="location"
+                    className="text-sm font-medium text-on-surface"
+                  >
                     Preferred location
                   </label>
                   <input
+                    id="location"
                     type="text"
                     value={location}
                     onChange={(e) => setLocation(e.target.value)}
@@ -320,10 +333,14 @@ export default function MatchingRequestPage() {
 
                 {/* Timeline */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-on-surface">
+                  <label
+                    htmlFor="timeline"
+                    className="text-sm font-medium text-on-surface"
+                  >
                     Timeline
                   </label>
                   <select
+                    id="timeline"
                     value={timeline}
                     onChange={(e) => setTimeline(e.target.value)}
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm bg-white"
@@ -379,8 +396,7 @@ export default function MatchingRequestPage() {
                     <div className="flex items-center gap-2">
                       {getStatusBadge(req.status)}
                       <span className="text-xs text-gray-400">
-                        Submitted{" "}
-                        {new Date(req.createdAt).toLocaleDateString()}
+                        Submitted {new Date(req.createdAt).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-1">
@@ -412,10 +428,8 @@ export default function MatchingRequestPage() {
                     <div>
                       <span className="text-gray-400">Budget</span>
                       <p className="font-medium text-on-surface">
-                        {
-                          BUDGET_OPTIONS.find((b) => b.value === req.budgetRange)
-                            ?.label || req.budgetRange
-                        }
+                        {BUDGET_OPTIONS.find((b) => b.value === req.budgetRange)
+                          ?.label || req.budgetRange}
                       </p>
                     </div>
                   )}
@@ -431,11 +445,8 @@ export default function MatchingRequestPage() {
                     <div>
                       <span className="text-gray-400">Timeline</span>
                       <p className="font-medium text-on-surface">
-                        {
-                          TIMELINE_OPTIONS.find(
-                            (t) => t.value === req.timeline,
-                          )?.label || req.timeline
-                        }
+                        {TIMELINE_OPTIONS.find((t) => t.value === req.timeline)
+                          ?.label || req.timeline}
                       </p>
                     </div>
                   )}
@@ -449,62 +460,67 @@ export default function MatchingRequestPage() {
                 )}
 
                 {/* Recommended Projects */}
-                {req.recommendedProjects && req.recommendedProjects.length > 0 && (
-                  <div className="space-y-3">
-                    <h3 className="text-sm font-semibold text-on-surface">
-                      Recommended Projects
-                    </h3>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      {req.recommendedProjects.map((project) => (
-                        <Link
-                          key={project.id}
-                          href={`/projects/${project.id}`}
-                          className="block rounded-xl border border-gray-200 p-4 hover:border-primary transition-colors"
-                        >
-                          <div className="flex items-start gap-3">
-                            {project.image && (
-                              <img
-                                src={project.image}
-                                alt={project.title}
-                                className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
-                              />
-                            )}
-                            <div className="space-y-1 min-w-0">
-                              <p className="text-sm font-medium text-on-surface truncate">
-                                {project.title}
-                              </p>
-                              <p className="text-xs text-gray-500">
-                                {project.category} ·{" "}
-                                {project.ngo?.ngoInfo?.ngoName ||
-                                  project.ngo?.name ||
-                                  "Unknown NGO"}
-                              </p>
-                              <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
-                                <div
-                                  className="bg-primary h-1.5 rounded-full"
-                                  style={{
-                                    width: `${Math.min(
-                                      100,
-                                      (project.currentAmount /
-                                        Math.max(project.targetBudget, 1)) *
-                                        100,
-                                    )}%`,
-                                  }}
+                {req.recommendedProjects &&
+                  req.recommendedProjects.length > 0 && (
+                    <div className="space-y-3">
+                      <h3 className="text-sm font-semibold text-on-surface">
+                        Recommended Projects
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        {req.recommendedProjects.map((project) => (
+                          <Link
+                            key={project.id}
+                            href={`/projects/${project.id}`}
+                            className="block rounded-xl border border-gray-200 p-4 hover:border-primary transition-colors"
+                          >
+                            <div className="flex items-start gap-3">
+                              {project.image && (
+                                <Image
+                                  src={project.image}
+                                  alt={project.title}
+                                  width={64}
+                                  height={64}
+                                  unoptimized
+                                  className="w-16 h-16 rounded-lg object-cover flex-shrink-0"
                                 />
+                              )}
+                              <div className="space-y-1 min-w-0">
+                                <p className="text-sm font-medium text-on-surface truncate">
+                                  {project.title}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                  {project.category} ·{" "}
+                                  {project.ngo?.ngoInfo?.ngoName ||
+                                    project.ngo?.name ||
+                                    "Unknown NGO"}
+                                </p>
+                                <div className="w-full bg-gray-100 rounded-full h-1.5 mt-1">
+                                  <div
+                                    className="bg-primary h-1.5 rounded-full"
+                                    style={{
+                                      width: `${Math.min(
+                                        100,
+                                        (project.currentAmount /
+                                          Math.max(project.targetBudget, 1)) *
+                                          100,
+                                      )}%`,
+                                    }}
+                                  />
+                                </div>
                               </div>
                             </div>
-                          </div>
-                        </Link>
-                      ))}
+                          </Link>
+                        ))}
+                      </div>
                     </div>
-                  </div>
-                )}
+                  )}
 
                 {req.status === "MATCHED" &&
                   (!req.recommendedProjects ||
                     req.recommendedProjects.length === 0) && (
                     <div className="text-sm text-gray-500">
-                      Our team is preparing personalized recommendations for you.
+                      Our team is preparing personalized recommendations for
+                      you.
                     </div>
                   )}
               </div>
