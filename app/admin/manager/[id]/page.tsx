@@ -209,7 +209,7 @@ export default function AdminWorkroomPage({
 
   if (isPending || loading) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -217,7 +217,7 @@ export default function AdminWorkroomPage({
 
   if (error) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-gray-500">{error}</p>
           <button
@@ -249,7 +249,7 @@ export default function AdminWorkroomPage({
       : "Due on delivery";
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-10 px-8">
+    <main className="min-h-screen bg-surface py-10 px-8">
       <div className="max-w-6xl mx-auto space-y-6">
         <div className="flex items-center justify-between">
           <div className="space-y-1">

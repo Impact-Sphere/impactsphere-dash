@@ -12,8 +12,10 @@ import {
 import { authClient } from "@/app/lib/auth-client";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
+import { useSidebar } from "./sidebar-context";
 
 export function Sidebar() {
+  const { open, close } = useSidebar();
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
@@ -50,23 +52,40 @@ export function Sidebar() {
   const isApprovedNgo = userType === "NGO" && approvalStatus === "APPROVED";
 
   return (
-    <aside className="h-screen w-72 fixed left-0 top-0 overflow-y-auto bg-slate-50 flex flex-col p-6 space-y-8 z-40">
-      {/* Logo */}
-      <Link href="/" className="flex items-center space-x-3">
-        <div className="w-10 h-10 relative">
-          <Image
-            src="/images/logo.svg"
-            alt="ImpactSphere"
-            fill
-            className="object-contain"
-          />
-        </div>
-        <span className="text-xl font-black text-violet-900 font-manrope">
-          ImpactSphere
-        </span>
-      </Link>
+    <aside
+      data-state={open ? "open" : "closed"}
+      aria-label="Primary navigation"
+      className={cn(
+        "h-screen w-72 fixed left-0 top-0 overflow-y-auto bg-slate-50 flex flex-col p-6 space-y-8 z-50",
+        "transition-transform duration-300 ease-in-out will-change-transform",
+        "lg:translate-x-0 lg:z-40",
+        open ? "translate-x-0" : "-translate-x-full",
+      )}
+    >
+      <div className="flex items-center justify-between -mt-2">
+        <Link href="/" className="flex items-center space-x-3 min-w-0">
+          <div className="w-10 h-10 relative shrink-0">
+            <Image
+              src="/images/logo.svg"
+              alt="ImpactSphere"
+              fill
+              className="object-contain"
+            />
+          </div>
+          <span className="text-xl font-black text-violet-900 font-manrope truncate">
+            ImpactSphere
+          </span>
+        </Link>
+        <button
+          type="button"
+          onClick={close}
+          aria-label="Close menu"
+          className="w-10 h-10 -mr-2 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200/50 lg:hidden"
+        >
+          <span className="material-symbols-outlined text-2xl">close</span>
+        </button>
+      </div>
 
-      {/* Main Navigation */}
       <nav className="flex-1 space-y-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -176,7 +195,6 @@ export function Sidebar() {
         )}
       </nav>
 
-      {/* CTA Button */}
       {(isAdmin || isApprovedNgo) && (
         <div className="pt-6 border-t border-outline-variant/10">
           <Link
@@ -188,7 +206,6 @@ export function Sidebar() {
         </div>
       )}
 
-      {/* Footer Navigation */}
       <div className="space-y-2 mt-auto">
         {footerNavItems.map((item) => (
           <Link
@@ -204,7 +221,6 @@ export function Sidebar() {
         ))}
       </div>
 
-      {/* Currency Picker */}
       <div className="pt-4 border-t border-outline-variant/10 relative">
         <button
           type="button"
@@ -250,7 +266,6 @@ export function Sidebar() {
         )}
       </div>
 
-      {/* Auth Section */}
       <div className="pt-4 border-t border-outline-variant/10 space-y-2">
         {session?.user ? (
           <div className="space-y-2">

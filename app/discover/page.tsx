@@ -94,7 +94,7 @@ function DiscoverContent() {
   const hasNoResults = !loading && projects.length === 0;
 
   return (
-    <main className="ml-72 min-h-screen">
+    <main className="min-h-screen">
       <Header
         title="Project Discovery"
         subtitle="Explore high-impact initiatives awaiting your partnership."
@@ -200,7 +200,7 @@ function DiscoverContent() {
 
 function DiscoverFallback() {
   return (
-    <main className="ml-72 min-h-screen">
+    <main className="min-h-screen">
       <div className="sticky top-0 z-30 bg-white/70 backdrop-blur-2xl px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div>
           <div className="h-9 w-64 bg-surface-container rounded-lg animate-pulse" />
