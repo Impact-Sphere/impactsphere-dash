@@ -183,10 +183,14 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto h-[calc(100vh-150px)] bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex">
+    <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-8rem)] lg:h-[calc(100vh-9rem)] bg-white sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
         {/* Chat List */}
-        <div className="w-80 border-r border-gray-100 flex flex-col">
+        <div
+          className={`w-full sm:w-80 border-b sm:border-b-0 sm:border-r border-gray-100 flex-col ${
+            !activeChat ? "flex" : "hidden"
+          } sm:flex`}
+        >
           <div className="p-4 border-b border-gray-100">
             <h2 className="font-bold text-on-surface">Chats</h2>
           </div>
@@ -205,14 +209,14 @@ export default function ChatPage() {
                     activeChat === chat.id ? "bg-violet-50" : ""
                   }`}
                 >
-                  <p className="font-medium text-sm text-on-surface">
+                  <p className="font-medium text-sm text-on-surface break-words">
                     {chat.serviceAcquisition.service.name}
                     <span className="text-primary">
                       {" "}
                       — {chat.serviceAcquisition.package.name}
                     </span>
                   </p>
-                  <p className="text-xs text-gray-500 mt-0.5">
+                  <p className="text-xs text-gray-500 mt-0.5 break-words">
                     {chat.serviceAcquisition.project.title}
                   </p>
                   <div className="flex items-center gap-1 mt-1">
@@ -252,25 +256,39 @@ export default function ChatPage() {
         </div>
 
         {/* Chat Area */}
-        <div className="flex-1 flex flex-col">
+        <div
+          className={`flex-1 flex-col min-w-0 ${
+            activeChat ? "flex" : "hidden"
+          } sm:flex`}
+        >
           {activeChatData ? (
             <>
               <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-on-surface">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => setActiveChat(null)}
+                      className="sm:hidden -ml-2 mb-1 inline-flex items-center gap-1 text-xs text-primary font-medium"
+                    >
+                      <span className="material-symbols-outlined text-base">
+                        arrow_back
+                      </span>
+                      Back to chats
+                    </button>
+                    <h3 className="font-semibold text-on-surface break-words">
                       {activeChatData.serviceAcquisition.service.name}
                       <span className="text-primary text-sm font-normal">
                         {" "}
                         — {activeChatData.serviceAcquisition.package.name}
                       </span>
                     </h3>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 break-words">
                       Project: {activeChatData.serviceAcquisition.project.title}
                     </p>
                   </div>
                   <span
-                    className={`text-xs px-2 py-1 rounded-full font-medium ${
+                    className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
                       acqStatus === "DELIVERED"
                         ? "bg-blue-100 text-blue-700"
                         : acqStatus === "COMPLETED"
@@ -293,7 +311,7 @@ export default function ChatPage() {
                 </div>
 
                 {/* Action buttons */}
-                <div className="flex gap-2 mt-3">
+                <div className="flex flex-wrap gap-2 mt-3">
                   {isProvider &&
                     (acqStatus === "ACTIVE" ||
                       acqStatus === "REVISION_REQUESTED") && (
@@ -346,7 +364,7 @@ export default function ChatPage() {
                     }`}
                   >
                     <div
-                      className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                      className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
                         msg.senderId === session?.user.id
                           ? "bg-primary text-white rounded-br-none"
                           : "bg-gray-100 text-on-surface rounded-bl-none"
@@ -359,7 +377,7 @@ export default function ChatPage() {
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="p-4 border-t border-gray-100">
+              <div className="p-3 sm:p-4 border-t border-gray-100">
                 <div className="flex gap-2">
                   <input
                     type="text"
@@ -367,13 +385,13 @@ export default function ChatPage() {
                     onChange={(e) => setNewMessage(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                     placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   />
                   <button
                     type="button"
                     onClick={sendMessage}
                     disabled={sending || !newMessage.trim()}
-                    className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                    className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                   >
                     {sending ? "..." : "Send"}
                   </button>
@@ -390,8 +408,8 @@ export default function ChatPage() {
 
       {/* Deliver Modal */}
       {showDeliverModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Deliver Work</h3>
             <p className="text-sm text-gray-500">
               Add a note describing what you&apos;ve delivered.
@@ -403,7 +421,7 @@ export default function ChatPage() {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="Describe what you've completed..."
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeliverModal(false)}
@@ -426,8 +444,8 @@ export default function ChatPage() {
 
       {/* Revision Modal */}
       {showRevisionModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Request Revision</h3>
             <p className="text-sm text-gray-500">
               Describe what needs to be changed.
@@ -439,7 +457,7 @@ export default function ChatPage() {
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="What needs to be revised?"
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowRevisionModal(false)}
