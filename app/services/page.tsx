@@ -432,8 +432,14 @@ function ServicesCatalogContent() {
               </select>
               {activeProject && (
                 <p className="text-xs text-gray-500">
-                  This project has {format(availableBudget)} available after
-                  service spending.
+                  This project has{" "}
+                  {format(
+                    availableBudget -
+                      (activeService.packages.find(
+                        (p) => p.id === selectedPackage,
+                      )?.price || 0),
+                  )}{" "}
+                  available after service spending.
                 </p>
               )}
             </div>
