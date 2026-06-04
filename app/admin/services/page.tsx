@@ -221,10 +221,10 @@ export default function AdminServicesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-2 min-w-0">
             <h1 className="text-2xl font-bold text-on-surface">
               Services Management
             </h1>
@@ -238,7 +238,7 @@ export default function AdminServicesPage() {
               resetForm();
               setShowModal(true);
             }}
-            className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90"
+            className="self-start sm:self-auto px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90"
           >
             + New Service
           </button>
@@ -248,12 +248,14 @@ export default function AdminServicesPage() {
           {services.map((service) => (
             <div
               key={service.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
             >
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{service.name}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-semibold break-words">
+                      {service.name}
+                    </h3>
                     {service.featured && (
                       <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                         Featured
@@ -266,7 +268,7 @@ export default function AdminServicesPage() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">{service.category}</p>
-                  <div className="flex gap-4 text-sm">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                     {service.packages.map((p) => (
                       <span key={p.id} className="text-gray-600">
                         {p.name}: €{p.price.toFixed(0)}
@@ -274,7 +276,7 @@ export default function AdminServicesPage() {
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => handleToggleActive(service)}
@@ -305,8 +307,8 @@ export default function AdminServicesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-2xl w-full p-5 sm:p-6 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold">
               {editingService ? "Edit Service" : "New Service"}
             </h3>
@@ -387,7 +389,7 @@ export default function AdminServicesPage() {
                       }}
                       className="w-full px-3 py-2 border rounded-lg text-sm"
                     />
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <input
                         type="number"
                         placeholder="Price (€)"
@@ -427,7 +429,7 @@ export default function AdminServicesPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
