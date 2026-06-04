@@ -45,6 +45,7 @@ model User {
   verificationMeetings    VerificationMeetingRequest[] @relation("VerificationMeetings")
   adminVerificationMeetings VerificationMeetingRequest[] @relation("AdminVerificationMeetings")
   supportChats    SupportChat[]
+  matchingRequests CompanyMatchingRequest[]
   services        Service[]
   favoriteProjects FavoriteProject[]
 
@@ -507,5 +508,32 @@ model SupportMessage {
   @@index([senderId])
 
   @@map("support_message")
+}
+
+enum MatchingRequestStatus {
+  PENDING
+  IN_REVIEW
+  MATCHED
+  DECLINED
+}
+
+model CompanyMatchingRequest {
+  id            String                @id @default(uuid())
+  companyId     String
+  company       User                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  causeAreas    String[]              @default([])
+  description   String?
+  budgetRange   String?
+  location      String?
+  timeline      String?
+  status        MatchingRequestStatus @default(PENDING)
+  adminNotes    String?
+  recommendedProjectIds String[]      @default([])
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@map("company_matching_request")
 }
 

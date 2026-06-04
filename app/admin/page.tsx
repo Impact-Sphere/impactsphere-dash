@@ -128,9 +128,11 @@ export default function AdminDashboardPage() {
   const router = useRouter();
   const { format } = useCurrency();
   const { data: session, isPending } = authClient.useSession();
-  const [activeTab, setActiveTab] = useState<"users" | "projects">("users");
+  const [activeTab, setActiveTab] = useState<"users" | "projects" | "matching">("users");
   const [users, setUsers] = useState<PendingUser[]>([]);
   const [projects, setProjects] = useState<PendingProject[]>([]);
+  const [matchingRequests, setMatchingRequests] = useState<unknown[]>([]);
+  const [allProjects, setAllProjects] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [isAdmin, setIsAdmin] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -141,12 +143,19 @@ export default function AdminDashboardPage() {
   const [modalNotes, setModalNotes] = useState("");
   const [modalTimes, setModalTimes] = useState<TimeSlot[]>([]);
   const [modalSaving, setModalSaving] = useState(false);
+  const [recommendModalOpen, setRecommendModalOpen] = useState(false);
+  const [recommendRequestId, setRecommendRequestId] = useState<string | null>(null);
+  const [recommendNotes, setRecommendNotes] = useState("");
+  const [selectedProjectIds, setSelectedProjectIds] = useState<string[]>([]);
+  const [recommendSaving, setRecommendSaving] = useState(false);
 
   const fetchData = useCallback(async () => {
     setLoading(true);
-    const [usersRes, projectsRes] = await Promise.all([
+    const [usersRes, projectsRes, matchingRes, allProjectsRes] = await Promise.all([
       fetch("/api/admin/users"),
       fetch("/api/admin/projects"),
+      fetch("/api/matching-requests"),
+      fetch("/api/projects"),
     ]);
 
     if (usersRes.ok) {
@@ -154,6 +163,12 @@ export default function AdminDashboardPage() {
     }
     if (projectsRes.ok) {
       setProjects(await projectsRes.json());
+    }
+    if (matchingRes.ok) {
+      setMatchingRequests(await matchingRes.json());
+    }
+    if (allProjectsRes.ok) {
+      setAllProjects(await allProjectsRes.json());
     }
     setLoading(false);
   }, []);
@@ -334,6 +349,40 @@ export default function AdminDashboardPage() {
     }
   };
 
+  const submitRecommend = async () => {
+    if (!recommendRequestId) return;
+    setRecommendSaving(true);
+    const res = await fetch(`/api/matching-requests/${recommendRequestId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        status: "MATCHED",
+        adminNotes: recommendNotes,
+        recommendedProjectIds: selectedProjectIds,
+      }),
+    });
+    setRecommendSaving(false);
+
+    if (res.ok) {
+      const updated = await res.json();
+      setMatchingRequests((prev) =>
+        prev.map((r: any) => (r.id === recommendRequestId ? { ...r, ...updated } : r)),
+      );
+      setRecommendModalOpen(false);
+      setRecommendRequestId(null);
+      setRecommendNotes("");
+      setSelectedProjectIds([]);
+    }
+  };
+
+  const toggleProjectSelection = (projectId: string) => {
+    setSelectedProjectIds((prev) =>
+      prev.includes(projectId)
+        ? prev.filter((id) => id !== projectId)
+        : [...prev, projectId],
+    );
+  };
+
   if (isPending || loading || !isAdmin) {
     return (
       <main className="ml-72 min-h-screen flex items-center justify-center">
@@ -377,6 +426,17 @@ export default function AdminDashboardPage() {
             }`}
           >
             Pending Projects ({projects.length})
+          </button>
+          <button
+            type="button"
+            onClick={() => setActiveTab("matching")}
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+              activeTab === "matching"
+                ? "bg-primary text-white"
+                : "text-gray-500 hover:bg-gray-50"
+            }`}
+          >
+            Matching ({matchingRequests.length})
           </button>
           <button
             type="button"
@@ -937,6 +997,128 @@ export default function AdminDashboardPage() {
             )}
           </div>
         )}
+
+        {activeTab === "matching" && (
+          <div className="space-y-4">
+            {matchingRequests.length === 0 ? (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500">
+                No matching requests yet.
+              </div>
+            ) : (
+              matchingRequests.map((req: any) => (
+                <div
+                  key={req.id}
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span
+                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            req.status === "PENDING"
+                              ? "bg-amber-100 text-amber-700"
+                              : req.status === "IN_REVIEW"
+                                ? "bg-blue-100 text-blue-700"
+                                : req.status === "MATCHED"
+                                  ? "bg-emerald-100 text-emerald-700"
+                                  : "bg-red-100 text-red-700"
+                          }`}
+                        >
+                          {req.status}
+                        </span>
+                        <span className="text-xs text-gray-400">
+                          {new Date(req.createdAt).toLocaleDateString()}
+                        </span>
+                      </div>
+                      <p className="font-semibold text-on-surface">
+                        {req.company?.companyInfo?.companyName ||
+                          req.company?.name ||
+                          req.company?.email ||
+                          "Unknown Company"}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        {req.company?.email}
+                      </p>
+                    </div>
+                    {req.status !== "MATCHED" && req.status !== "DECLINED" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setRecommendRequestId(req.id);
+                          setRecommendNotes(req.adminNotes || "");
+                          setSelectedProjectIds(req.recommendedProjectIds || []);
+                          setRecommendModalOpen(true);
+                        }}
+                        className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                      >
+                        Recommend Projects
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="flex flex-wrap gap-1">
+                    {req.causeAreas.map((cause: string) => (
+                      <span
+                        key={cause}
+                        className="text-xs px-2 py-0.5 bg-violet-50 text-violet-700 rounded-full"
+                      >
+                        {cause}
+                      </span>
+                    ))}
+                  </div>
+
+                  {req.description && (
+                    <p className="text-sm text-gray-600">{req.description}</p>
+                  )}
+
+                  <div className="grid grid-cols-3 gap-4 text-sm">
+                    {req.budgetRange && (
+                      <div>
+                        <span className="text-gray-400">Budget</span>
+                        <p className="font-medium text-on-surface">
+                          {req.budgetRange}
+                        </p>
+                      </div>
+                    )}
+                    {req.location && (
+                      <div>
+                        <span className="text-gray-400">Location</span>
+                        <p className="font-medium text-on-surface">
+                          {req.location}
+                        </p>
+                      </div>
+                    )}
+                    {req.timeline && (
+                      <div>
+                        <span className="text-gray-400">Timeline</span>
+                        <p className="font-medium text-on-surface">
+                          {req.timeline}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {req.adminNotes && (
+                    <div className="rounded-xl bg-amber-50 border border-amber-200 p-3 text-sm text-amber-800">
+                      <span className="font-semibold">Admin notes: </span>
+                      <span className="whitespace-pre-wrap">
+                        {req.adminNotes}
+                      </span>
+                    </div>
+                  )}
+
+                  {req.recommendedProjectIds?.length > 0 && (
+                    <div className="text-sm">
+                      <span className="font-medium text-on-surface">
+                        Recommended projects: {req.recommendedProjectIds.length}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              ))
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modal for Request More Info / Request Meeting */}
@@ -1101,6 +1283,103 @@ export default function AdminDashboardPage() {
                 className="flex-1 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {modalSaving ? "Saving..." : "Send Request"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Recommend Projects Modal */}
+      {recommendModalOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="space-y-1">
+              <h3 className="text-lg font-bold text-on-surface">
+                Recommend Projects
+              </h3>
+              <p className="text-sm text-gray-500">
+                Select projects to recommend to this company and add any notes.
+              </p>
+            </div>
+
+            <textarea
+              value={recommendNotes}
+              onChange={(e) => setRecommendNotes(e.target.value)}
+              rows={3}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary text-sm"
+              placeholder="Add a personalized message or notes about these recommendations..."
+            />
+
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-on-surface">
+                Select projects to recommend:
+              </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-80 overflow-y-auto">
+                {allProjects.map((project: any) => {
+                  const selected = selectedProjectIds.includes(project.id);
+                  return (
+                    <button
+                      key={project.id}
+                      type="button"
+                      onClick={() => toggleProjectSelection(project.id)}
+                      className={`text-left p-3 rounded-xl border transition-colors text-sm ${
+                        selected
+                          ? "border-primary bg-violet-50"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div className="flex items-start gap-2">
+                        <div
+                          className={`w-4 h-4 rounded border mt-0.5 flex-shrink-0 flex items-center justify-center ${
+                            selected
+                              ? "bg-primary border-primary"
+                              : "border-gray-300"
+                          }`}
+                        >
+                          {selected && (
+                            <span className="material-symbols-outlined text-white text-xs">
+                              check
+                            </span>
+                          )}
+                        </div>
+                        <div>
+                          <p className="font-medium text-on-surface">
+                            {project.title}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {project.category} ·{" "}
+                            {project.ngo?.ngoInfo?.ngoName ||
+                              project.ngo?.name ||
+                              "Unknown NGO"}
+                          </p>
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setRecommendModalOpen(false);
+                  setRecommendRequestId(null);
+                  setRecommendNotes("");
+                  setSelectedProjectIds([]);
+                }}
+                className="flex-1 py-2.5 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitRecommend}
+                disabled={recommendSaving}
+                className="flex-1 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+              >
+                {recommendSaving ? "Saving..." : "Send Recommendations"}
               </button>
             </div>
           </div>
