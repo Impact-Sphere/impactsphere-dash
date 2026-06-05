@@ -16,6 +16,7 @@
           buildInputs = with pkgs; [
             nodejs_24
             pnpm
+            minio-client
             openssl
             prisma-engines
             stripe-cli
