@@ -15,7 +15,7 @@ const NGOS = [
   {
     name: "Green Earth Alliance",
     email: "ngo1@demo.local",
-    password: "",
+    password: "demoongpass",
     ngoName: "Green Earth Alliance",
     taxId: "NGO-001-2024",
     contact: "contact@greenearth.demo | +1 555-0101",
