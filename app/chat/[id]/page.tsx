@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface WorkroomData {
@@ -80,6 +81,10 @@ export default function WorkroomPage({
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [error, setError] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -185,13 +190,20 @@ export default function WorkroomPage({
       setShowRevisionModal(false);
       setDeliveryMessage("");
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Action completed successfully.",
+      });
       // Reload workroom data
       fetch(`/api/workroom/${chatId}`)
         .then((r) => r.json())
         .then((data: WorkroomData) => setWorkroom(data));
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Action failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Action failed",
+      });
     }
   };
 
@@ -213,12 +225,19 @@ export default function WorkroomPage({
       setShowReviewForm(false);
       setReviewRating(5);
       setReviewComment("");
+      setToastMessage({
+        type: "success",
+        message: "Review submitted successfully.",
+      });
       fetch(`/api/workroom/${chatId}`)
         .then((r) => r.json())
         .then((data: WorkroomData) => setWorkroom(data));
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to submit review");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Failed to submit review",
+      });
     }
   };
 
@@ -269,7 +288,16 @@ export default function WorkroomPage({
   const acq = workroom.serviceAcquisition;
 
   return (
-    <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -663,5 +691,6 @@ export default function WorkroomPage({
         </div>
       )}
     </main>
+  </>
   );
 }

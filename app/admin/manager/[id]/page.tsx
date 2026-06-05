@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Workroom {
@@ -72,6 +73,10 @@ export default function AdminWorkroomPage({
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [revisionMessage, setRevisionMessage] = useState("");
   const [error, setError] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -146,7 +151,10 @@ export default function AdminWorkroomPage({
       setNewMessage("");
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Unable to send message");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Unable to send message",
+      });
     }
   };
 
@@ -164,9 +172,16 @@ export default function AdminWorkroomPage({
     if (res.ok) {
       setShowDeliverModal(false);
       setDeliveryMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Delivery message sent successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Delivery failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Delivery failed",
+      });
     }
   };
 
@@ -183,7 +198,15 @@ export default function AdminWorkroomPage({
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Accept failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Accept failed",
+      });
+    } else {
+      setToastMessage({
+        type: "success",
+        message: "Accepted successfully.",
+      });
     }
   };
 
@@ -201,9 +224,16 @@ export default function AdminWorkroomPage({
     if (res.ok) {
       setShowRevisionModal(false);
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Revision request sent successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Revision request failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Revision request failed",
+      });
     }
   };
 
@@ -249,7 +279,16 @@ export default function AdminWorkroomPage({
       : "Due on delivery";
 
   return (
-    <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-10 px-0 sm:px-6 lg:px-8">
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-10 px-0 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div className="space-y-1 min-w-0">
@@ -499,5 +538,6 @@ export default function AdminWorkroomPage({
         </div>
       )}
     </main>
+  </>
   );
 }

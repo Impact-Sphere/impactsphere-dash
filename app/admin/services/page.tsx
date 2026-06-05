@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { ConfirmModal } from "@/app/components/ui/confirm-modal";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Package {
@@ -37,6 +39,12 @@ export default function AdminServicesPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
+
+  const [deleteServiceId, setDeleteServiceId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -97,6 +105,7 @@ export default function AdminServicesPage() {
   }, [session, isPending, router, loadData]);
 
   const resetForm = () => {
+    setStatusMessage(null);
     setFormData({
       name: "",
       description: "",
@@ -146,10 +155,14 @@ export default function AdminServicesPage() {
       }));
 
     if (packages.length === 0) {
-      alert("At least one package with price and description is required");
+      setStatusMessage({
+        type: "error",
+        message: "At least one package with price and description is required",
+      });
       return;
     }
 
+    setStatusMessage(null);
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -169,18 +182,31 @@ export default function AdminServicesPage() {
       setShowModal(false);
       resetForm();
       loadData();
+      setStatusMessage({
+        type: "success",
+        message: "Service saved successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to save service");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to save service",
+      });
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
     const res = await fetch(`/api/admin/services?id=${id}`, {
       method: "DELETE",
     });
-    if (res.ok) loadData();
+    if (res.ok) {
+      loadData();
+      setStatusMessage({
+        type: "success",
+        message: "Service deleted successfully.",
+      });
+    }
+    setDeleteServiceId(null);
   };
 
   const handleToggleActive = async (service: Service) => {
@@ -243,6 +269,23 @@ export default function AdminServicesPage() {
             + New Service
           </button>
         </div>
+        <ConfirmModal
+          open={Boolean(deleteServiceId)}
+          title="Delete service"
+          description="Are you sure you want to delete this service? This action cannot be undone."
+          confirmText="Yes, delete"
+          cancelText="Cancel"
+          onConfirm={() => deleteServiceId && handleDelete(deleteServiceId)}
+          onCancel={() => setDeleteServiceId(null)}
+        />
+
+        {statusMessage && (
+          <StatusMessage
+            type={statusMessage.type}
+            message={statusMessage.message}
+            onClose={() => setStatusMessage(null)}
+          />
+        )}
 
         <div className="space-y-4">
           {services.map((service) => (
@@ -293,7 +336,7 @@ export default function AdminServicesPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(service.id)}
+                    onClick={() => setDeleteServiceId(service.id)}
                     className="px-3 py-1.5 border border-red-200 text-red-600 text-sm rounded-lg"
                   >
                     Delete

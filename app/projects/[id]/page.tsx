@@ -9,6 +9,7 @@ import { useCurrency } from "@/app/components/currency/currency-context";
 import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 import {
   createDefaultSlot,
@@ -60,17 +61,39 @@ export default function ProjectDetailPage() {
     null,
   );
   const [loadingRequest, setLoadingRequest] = useState(false);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const [isFavorited, setIsFavoritedLocal] = useState(false);
   const onFavoriteToggle = async () => {
     if (!project) return;
+
+    setStatusMessage(null);
+
     const res = await fetch("/api/projects/favorites", {
       method: isFavorited ? "DELETE" : "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ projectId: project.id }),
     });
-    if (!res.ok) throw Error("Failed to toggle favorite");
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to update favorites.",
+      });
+      return;
+    }
+
     setIsFavoritedLocal(!isFavorited);
+    setStatusMessage({
+      type: "success",
+      message: isFavorited
+        ? "Project removed from favorites."
+        : "Project added to favorites.",
+    });
   };
 
   const fetchProject = useCallback(async () => {
@@ -156,7 +179,10 @@ export default function ProjectDetailPage() {
     if (res.ok && data.clientSecret) {
       setClientSecret(data.clientSecret);
     } else {
-      alert(data.error || "Failed to initiate payment.");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to initiate payment.",
+      });
     }
 
     setDonating(false);
@@ -169,9 +195,11 @@ export default function ProjectDetailPage() {
 
   const handleRequestMeeting = async () => {
     if (hasInvalidSlots) {
-      alert(
-        "Some meeting slots are invalid or overlapping. Please fix them before saving.",
-      );
+      setStatusMessage({
+        type: "error",
+        message:
+          "Some meeting slots are invalid or overlapping. Please fix them before saving.",
+      });
 
       return;
     }
@@ -200,10 +228,16 @@ export default function ProjectDetailPage() {
       setMeetingTimes([]);
       setMeetingNotes("");
       await fetchExistingRequest();
-      alert("Meeting request sent successfully!");
+      setStatusMessage({
+        type: "success",
+        message: "Meeting request sent successfully!",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to send meeting request.");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to send meeting request.",
+      });
     }
   };
 
@@ -349,6 +383,14 @@ export default function ProjectDetailPage() {
               {getNgoName(project)}
             </a>
           </p>
+
+          {statusMessage && (
+            <StatusMessage
+              type={statusMessage.type}
+              message={statusMessage.message}
+              onClose={() => setStatusMessage(null)}
+            />
+          )}
 
           {/* Favorite Button */}
           {session?.user && (

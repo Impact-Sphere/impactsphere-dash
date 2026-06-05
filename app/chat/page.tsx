@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Chat {
@@ -38,6 +39,10 @@ export default function ChatPage() {
   const [deliveryMessage, setDeliveryMessage] = useState("");
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [revisionMessage, setRevisionMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -96,6 +101,12 @@ export default function ChatPage() {
       const message = await res.json();
       setMessages((prev) => [...prev, message]);
       setNewMessage("");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setToastMessage({
+        type: "error",
+        message: data.error || "Unable to send message",
+      });
     }
   };
 
@@ -114,13 +125,20 @@ export default function ChatPage() {
     if (res.ok) {
       setShowDeliverModal(false);
       setDeliveryMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Delivery message sent successfully.",
+      });
       // Reload chats to get updated status
       fetch("/api/chat")
         .then((r) => r.json())
         .then(setChats);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Delivery failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Delivery failed",
+      });
     }
   };
 
@@ -158,12 +176,19 @@ export default function ChatPage() {
     if (res.ok) {
       setShowRevisionModal(false);
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Revision request sent successfully.",
+      });
       fetch("/api/chat")
         .then((r) => r.json())
         .then(setChats);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Revision request failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Revision request failed",
+      });
     }
   };
 
@@ -183,7 +208,16 @@ export default function ChatPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
       <div className="max-w-5xl mx-auto h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-8rem)] lg:h-[calc(100vh-9rem)] bg-white sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
         {/* Chat List */}
         <div
@@ -478,5 +512,6 @@ export default function ChatPage() {
         </div>
       )}
     </main>
+  </>
   );
 }
