@@ -10,7 +10,6 @@ export const navItems: NavItem[] = [
 ];
 
 export const footerNavItems: NavItem[] = [
-  { id: "settings", label: "Settings", icon: "settings", href: "/settings" },
   {
     id: "support",
     label: "Support",

@@ -43,7 +43,23 @@ export function Sidebar() {
 
         if (isPending && pathname !== "/pending-approval") {
           router.push("/pending-approval");
+          return;
         }
+
+        // Redirect users who haven't completed onboarding
+        fetch("/api/onboarding")
+          .then((res) => res.json())
+          .then((onData) => {
+            if (
+              onData.needsOnboarding &&
+              pathname !== "/onboarding" &&
+              pathname !== "/resubmit" &&
+              pathname !== "/login"
+            ) {
+              router.push("/onboarding");
+            }
+          })
+          .catch(() => {});
       })
       .catch(() => {});
   }, [session, pathname, router]);
