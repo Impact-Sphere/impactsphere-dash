@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface AcquiredService {
@@ -45,6 +46,10 @@ export default function MyServicesPage() {
     null,
   );
   const [revisionMessage, setRevisionMessage] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const loadAcquisitions = useCallback(() => {
     fetch("/api/services/acquired")
@@ -83,9 +88,16 @@ export default function MyServicesPage() {
       loadAcquisitions();
       setShowRevisionModal(null);
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Action completed successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Action failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Action failed",
+      });
     }
   };
 
@@ -104,9 +116,16 @@ export default function MyServicesPage() {
       setReviewRating(5);
       setReviewComment("");
       loadAcquisitions();
+      setToastMessage({
+        type: "success",
+        message: "Review submitted successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to submit review");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Failed to submit review",
+      });
     }
   };
 
@@ -143,10 +162,19 @@ export default function MyServicesPage() {
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-on-surface">
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface">
             My Acquired Services
           </h1>
           <p className="text-gray-500">
@@ -156,7 +184,7 @@ export default function MyServicesPage() {
 
         <div className="space-y-4">
           {acquisitions.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500 space-y-4">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center text-gray-500 space-y-4">
               <p>You haven&apos;t acquired any services yet.</p>
               <Link
                 href="/services"
@@ -169,12 +197,12 @@ export default function MyServicesPage() {
             acquisitions.map((acq) => (
               <div
                 key={acq.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4"
               >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-3 flex-wrap gap-y-1">
-                      <h3 className="text-lg font-semibold text-on-surface">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-1.5">
+                      <h3 className="text-base sm:text-lg font-semibold text-on-surface break-words">
                         {acq.service.name}
                         <span className="text-primary font-medium">
                           {" "}
@@ -188,11 +216,11 @@ export default function MyServicesPage() {
                       {statusBadge(acq.status)}
                     </div>
                   </div>
-                  <div className="flex space-x-2">
+                  <div className="flex sm:flex-shrink-0">
                     {acq.chat && (
                       <Link
                         href={`/chat/${acq.chat.id}`}
-                        className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                        className="w-full sm:w-auto text-center px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
                       >
                         Open Chat
                       </Link>
@@ -214,7 +242,7 @@ export default function MyServicesPage() {
 
                 {/* Actions for DELIVERED status */}
                 {acq.status === "DELIVERED" && (
-                  <div className="flex gap-3 pt-2 border-t border-gray-100">
+                  <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 pt-2 border-t border-gray-100">
                     <button
                       type="button"
                       onClick={() => handleAction(acq.id, "accept")}
@@ -251,7 +279,7 @@ export default function MyServicesPage() {
                       className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
                       placeholder="Describe what needs to be changed..."
                     />
-                    <div className="flex gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2">
                       <button
                         type="button"
                         onClick={() =>
@@ -302,7 +330,7 @@ export default function MyServicesPage() {
                           className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
                           placeholder="Write a comment (optional)..."
                         />
-                        <div className="flex gap-2">
+                        <div className="flex flex-col sm:flex-row gap-2">
                           <button
                             type="button"
                             onClick={() => handleReview(acq.id)}
@@ -358,28 +386,28 @@ export default function MyServicesPage() {
                   </div>
                 )}
 
-                <div className="grid grid-cols-2 md:grid-cols-6 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 text-sm">
                   <div className="space-y-1">
                     <span className="text-gray-400">Category</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       {acq.service.category}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Package</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       {acq.package.name}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Cost</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       €{acq.package.price.toFixed(2)}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Donation spend</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       €{acq.package.price.toFixed(2)}
                     </p>
                     <p className="text-xs text-gray-500">
@@ -396,13 +424,13 @@ export default function MyServicesPage() {
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Provider</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       {acq.service.provider.name || acq.service.provider.email}
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-4 text-xs text-gray-400">
+                <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-gray-400">
                   <span>
                     Acquired: {new Date(acq.createdAt).toLocaleDateString()}
                   </span>
@@ -431,5 +459,6 @@ export default function MyServicesPage() {
         </div>
       </div>
     </main>
+  </>
   );
 }

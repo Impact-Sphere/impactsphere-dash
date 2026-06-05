@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import DatePicker from "react-datepicker";
+import { ConfirmModal } from "@/app/components/ui/confirm-modal";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import "react-datepicker/dist/react-datepicker.css";
 import {
   createDefaultSlot,
@@ -29,6 +31,13 @@ export function Meetings({
   const [meetingTimes, setMeetingTimes] = useState<TimeSlot[]>([]);
   const [meetingNotes, setMeetingNotes] = useState("");
   const [savingMeeting, setSavingMeeting] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+  const [scheduleError, setScheduleError] = useState<string | null>(null);
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
+  const [cancelMeetingId, setCancelMeetingId] = useState<string | null>(null);
 
   const [schedulingRequest, setSchedulingRequest] =
     useState<MeetingRequest | null>(null);
@@ -137,30 +146,33 @@ export function Meetings({
   }, [fetchMeetingRequests]);
 
   const handleCancelMeeting = async (id: string) => {
-    const ok = confirm("Cancel this meeting request?");
-
-    if (!ok) return;
-
     const res = await fetch(`/api/meeting-requests/${id}`, {
       method: "DELETE",
     });
 
     if (res.ok) {
       fetchMeetingRequests();
+      setToastMessage({
+        type: "success",
+        message: "Meeting request canceled successfully.",
+      });
     }
+
+    setCancelMeetingId(null);
   };
 
   const handleSaveMeeting = async () => {
     if (!editingRequest) return;
 
     if (hasInvalidSlots) {
-      alert(
+      setSaveError(
         "Some meeting slots are invalid or overlapping. Please fix them before saving.",
       );
       return;
     }
 
     setSavingMeeting(true);
+    setSaveError(null);
 
     const mergedTimes = mergeContiguousSlots(meetingTimes);
     const trimmedNotes = meetingNotes.trim();
@@ -180,7 +192,14 @@ export function Meetings({
 
     if (res.ok) {
       setEditingRequest(null);
+      setSaveError(null);
       fetchMeetingRequests();
+      setToastMessage({
+        type: "success",
+        message: "Meeting request updated successfully.",
+      });
+    } else {
+      setSaveError("Failed to save changes. Please try again.");
     }
   };
 
@@ -253,8 +272,7 @@ export function Meetings({
     const slotEnd = new Date(selectedSlot.end).getTime();
 
     if (selected < slotStart || selected > slotEnd) {
-      alert("Selected time is outside the proposed range.");
-
+      setScheduleError("Selected time is outside the proposed range.");
       return;
     }
 
@@ -272,12 +290,39 @@ export function Meetings({
     if (res.ok) {
       setSchedulingRequest(null);
       setSelectedMeetingStart(null);
+      setScheduleError(null);
       fetchMeetingRequests();
+      setToastMessage({
+        type: "success",
+        message: "Meeting scheduled successfully.",
+      });
+    } else {
+      setScheduleError("Failed to schedule meeting. Please try again.");
     }
   };
 
   return (
     <div className="space-y-6">
+      <ConfirmModal
+        open={Boolean(cancelMeetingId)}
+        title="Cancel meeting request"
+        description="Are you sure you want to cancel this meeting request? This action cannot be undone."
+        confirmText="Yes, cancel"
+        cancelText="No, keep it"
+        onConfirm={() =>
+          cancelMeetingId && handleCancelMeeting(cancelMeetingId)
+        }
+        onCancel={() => setCancelMeetingId(null)}
+      />
+
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
         <h2 className="text-xl font-bold text-on-surface mb-6">
           Meeting Requests
@@ -366,7 +411,7 @@ export function Meetings({
 
                       <button
                         type="button"
-                        onClick={() => handleCancelMeeting(req.id)}
+                        onClick={() => setCancelMeetingId(req.id)}
                         className="flex-1 flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-700 text-on-primary px-6 py-2 rounded-lg text-sm font-medium transition-colors"
                       >
                         Cancel
@@ -411,6 +456,8 @@ export function Meetings({
               Select the timeframes according to your availability (All times
               are shown in YOUR local timezone).
             </p>
+
+            {saveError && <StatusMessage type="error" message={saveError} />}
 
             <div className="space-y-4">
               {hasInvalidSlots && (
@@ -650,6 +697,11 @@ export function Meetings({
                 </div>
               </div>
 
+              {scheduleError && (
+                <div className="mb-4">
+                  <StatusMessage type="error" message={scheduleError} />
+                </div>
+              )}
               {schedulingRequest.notes?.trim() && (
                 <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4 text-sm text-gray-700">
                   <div className="font-semibold text-gray-900 mb-1">

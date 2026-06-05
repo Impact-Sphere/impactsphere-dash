@@ -23,20 +23,20 @@ export function Header({
   onTabChange,
 }: HeaderProps) {
   return (
-    <header className="sticky top-0 z-30 bg-white/70 backdrop-blur-2xl px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight text-on-surface">
+    <header className="sticky top-14 lg:top-0 z-20 bg-white/70 backdrop-blur-2xl px-4 sm:px-6 lg:px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+      <div className="min-w-0">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
           {title}
         </h1>
         <p className="text-sm text-on-surface-variant font-medium mt-1">
           {subtitle}
         </p>
       </div>
-      <div className="flex items-center space-x-6">
+      <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 lg:gap-6 w-full lg:w-auto">
         {onSearchChange && (
           <SearchInput
             placeholder={searchPlaceholder}
-            className="w-80"
+            className="w-full sm:w-72 lg:w-80"
             value={searchValue}
             onChange={(e) => onSearchChange?.(e.target.value)}
             onKeyDown={(e) => {
@@ -45,7 +45,7 @@ export function Header({
           />
         )}
         {onTabChange && (
-          <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full">
+          <div className="flex items-center space-x-2 p-1 bg-surface-container-low rounded-full self-start sm:self-auto">
             <button
               type="button"
               onClick={() => onTabChange?.("all")}

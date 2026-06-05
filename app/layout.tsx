@@ -2,7 +2,11 @@ import type { Metadata } from "next";
 import { Inter, Manrope } from "next/font/google";
 import "./globals.css";
 import { CurrencyProvider } from "./components/currency/currency-context";
+import { AppShell } from "./components/layout/app-shell";
+import { MobileTopBar } from "./components/layout/mobile-top-bar";
 import { Sidebar } from "./components/layout/sidebar";
+import { SidebarBackdrop } from "./components/layout/sidebar-backdrop";
+import { SidebarProvider } from "./components/layout/sidebar-context";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -40,8 +44,12 @@ export default function RootLayout({
       </head>
       <body className="min-h-full bg-surface text-on-surface">
         <CurrencyProvider>
-          <Sidebar />
-          {children}
+          <SidebarProvider>
+            <Sidebar />
+            <SidebarBackdrop />
+            <MobileTopBar />
+            <AppShell>{children}</AppShell>
+          </SidebarProvider>
         </CurrencyProvider>
       </body>
     </html>

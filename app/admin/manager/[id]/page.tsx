@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Workroom {
@@ -72,6 +73,10 @@ export default function AdminWorkroomPage({
   const [showRevisionModal, setShowRevisionModal] = useState(false);
   const [revisionMessage, setRevisionMessage] = useState("");
   const [error, setError] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -146,7 +151,10 @@ export default function AdminWorkroomPage({
       setNewMessage("");
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Unable to send message");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Unable to send message",
+      });
     }
   };
 
@@ -164,9 +172,16 @@ export default function AdminWorkroomPage({
     if (res.ok) {
       setShowDeliverModal(false);
       setDeliveryMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Delivery message sent successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Delivery failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Delivery failed",
+      });
     }
   };
 
@@ -183,7 +198,15 @@ export default function AdminWorkroomPage({
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Accept failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Accept failed",
+      });
+    } else {
+      setToastMessage({
+        type: "success",
+        message: "Accepted successfully.",
+      });
     }
   };
 
@@ -201,15 +224,22 @@ export default function AdminWorkroomPage({
     if (res.ok) {
       setShowRevisionModal(false);
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Revision request sent successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Revision request failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Revision request failed",
+      });
     }
   };
 
   if (isPending || loading) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -217,7 +247,7 @@ export default function AdminWorkroomPage({
 
   if (error) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-gray-500">{error}</p>
           <button
@@ -249,11 +279,22 @@ export default function AdminWorkroomPage({
       : "Due on delivery";
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-10 px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-on-surface">Workroom</h1>
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-10 px-0 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-on-surface">
+              Workroom
+            </h1>
             <p className="text-sm text-gray-500">
               Chat, deliver work, and handle revisions for this service.
             </p>
@@ -261,30 +302,30 @@ export default function AdminWorkroomPage({
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="self-start sm:self-auto px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
             Back
           </button>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex h-[calc(100vh-220px)]">
-          <div className="flex-1 flex flex-col">
+        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-13rem)]">
+          <div className="flex-1 flex flex-col min-w-0">
             <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-semibold text-on-surface">
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0">
+                  <h3 className="font-semibold text-on-surface break-words">
                     {acq.service.name}
                     <span className="text-primary text-sm font-normal">
                       {" "}
                       - {acq.package.name}
                     </span>
                   </h3>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-gray-500 break-words">
                     Project: {acq.project.title}
                   </p>
                 </div>
                 <span
-                  className={`text-xs px-2 py-1 rounded-full font-medium ${
+                  className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
                     acqStatus === "DELIVERED"
                       ? "bg-blue-100 text-blue-700"
                       : acqStatus === "COMPLETED"
@@ -344,7 +385,7 @@ export default function AdminWorkroomPage({
                   }`}
                 >
                   <div
-                    className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                    className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
                       msg.senderId === session?.user.id
                         ? "bg-primary text-white rounded-br-none"
                         : "bg-gray-100 text-on-surface rounded-bl-none"
@@ -357,7 +398,7 @@ export default function AdminWorkroomPage({
               <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-3 sm:p-4 border-t border-gray-100">
               {!canMessage && (
                 <p className="text-xs text-gray-400 mb-2">
                   You have read-only access to this workroom.
@@ -370,14 +411,14 @@ export default function AdminWorkroomPage({
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder={canMessage ? "Type a message..." : "Read-only"}
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                   disabled={!canMessage}
                 />
                 <button
                   type="button"
                   onClick={sendMessage}
                   disabled={sending || !newMessage.trim() || !canMessage}
-                  className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {sending ? "..." : "Send"}
                 </button>
@@ -385,7 +426,7 @@ export default function AdminWorkroomPage({
             </div>
           </div>
 
-          <aside className="w-80 border-l border-gray-100 bg-slate-50 p-4 space-y-4">
+          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-on-surface">
                 Delivery Summary
@@ -428,8 +469,8 @@ export default function AdminWorkroomPage({
       </div>
 
       {showDeliverModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Deliver Work</h3>
             <p className="text-sm text-gray-500">
               Add a note describing what you have delivered.
@@ -441,7 +482,7 @@ export default function AdminWorkroomPage({
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="Describe what you have completed..."
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeliverModal(false)}
@@ -463,8 +504,8 @@ export default function AdminWorkroomPage({
       )}
 
       {showRevisionModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Request Revision</h3>
             <p className="text-sm text-gray-500">
               Describe what needs to be changed.
@@ -476,7 +517,7 @@ export default function AdminWorkroomPage({
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="What needs to be revised?"
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowRevisionModal(false)}
@@ -497,5 +538,6 @@ export default function AdminWorkroomPage({
         </div>
       )}
     </main>
+  </>
   );
 }

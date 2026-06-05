@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { StatusMessage } from "@/app/components/ui/status-message";
 
 interface ImageUploadFieldProps {
   value: string;
@@ -20,14 +21,26 @@ export function ImageUploadField({
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState(value);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   const handleFile = async (file: File) => {
+    setStatusMessage(null);
+
     if (!file.type.startsWith("image/")) {
-      alert("Please select an image file.");
+      setStatusMessage({
+        type: "error",
+        message: "Please select an image file.",
+      });
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
-      alert("File too large. Max 5MB.");
+      setStatusMessage({
+        type: "error",
+        message: "File too large. Max 5MB.",
+      });
       return;
     }
 
@@ -44,11 +57,21 @@ export function ImageUploadField({
       if (res.ok && data.url) {
         onChange(data.url);
         setPreview(data.url);
+        setStatusMessage({
+          type: "success",
+          message: "Image uploaded successfully.",
+        });
       } else {
-        alert(data.error || "Upload failed.");
+        setStatusMessage({
+          type: "error",
+          message: data.error || "Upload failed.",
+        });
       }
     } catch {
-      alert("Upload failed.");
+      setStatusMessage({
+        type: "error",
+        message: "Upload failed.",
+      });
     } finally {
       setUploading(false);
     }
@@ -116,6 +139,14 @@ export function ImageUploadField({
           </span>
           <span className="text-xs text-gray-400">Drop or click to upload</span>
         </button>
+      )}
+
+      {statusMessage && (
+        <StatusMessage
+          type={statusMessage.type}
+          message={statusMessage.message}
+          className="mt-3"
+        />
       )}
     </div>
   );

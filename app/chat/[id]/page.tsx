@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface WorkroomData {
@@ -80,6 +81,10 @@ export default function WorkroomPage({
   const [reviewRating, setReviewRating] = useState(5);
   const [reviewComment, setReviewComment] = useState("");
   const [error, setError] = useState("");
+  const [toastMessage, setToastMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -185,13 +190,20 @@ export default function WorkroomPage({
       setShowRevisionModal(false);
       setDeliveryMessage("");
       setRevisionMessage("");
+      setToastMessage({
+        type: "success",
+        message: "Action completed successfully.",
+      });
       // Reload workroom data
       fetch(`/api/workroom/${chatId}`)
         .then((r) => r.json())
         .then((data: WorkroomData) => setWorkroom(data));
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Action failed");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Action failed",
+      });
     }
   };
 
@@ -213,12 +225,19 @@ export default function WorkroomPage({
       setShowReviewForm(false);
       setReviewRating(5);
       setReviewComment("");
+      setToastMessage({
+        type: "success",
+        message: "Review submitted successfully.",
+      });
       fetch(`/api/workroom/${chatId}`)
         .then((r) => r.json())
         .then((data: WorkroomData) => setWorkroom(data));
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to submit review");
+      setToastMessage({
+        type: "error",
+        message: data.error || "Failed to submit review",
+      });
     }
   };
 
@@ -269,19 +288,28 @@ export default function WorkroomPage({
   const acq = workroom.serviceAcquisition;
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-6xl mx-auto space-y-6">
+    <>
+      {toastMessage && (
+        <StatusMessage
+          type={toastMessage.type}
+          message={toastMessage.message}
+          onClose={() => setToastMessage(null)}
+        />
+      )}
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
         {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold text-on-surface">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-on-surface break-words">
               {acq.service.name}
-              <span className="text-primary text-lg font-normal">
+              <span className="text-primary text-base sm:text-lg font-normal">
                 {" "}
                 — {acq.package.name}
               </span>
             </h1>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-500 break-words">
               Project: <span className="font-medium">{acq.project.title}</span>
               {" · "}
               {isProvider
@@ -289,7 +317,7 @@ export default function WorkroomPage({
                 : `Provider: ${acq.service.provider.name || acq.service.provider.email}`}
             </p>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             {statusBadge(acqStatus)}
             <button
               type="button"
@@ -303,9 +331,9 @@ export default function WorkroomPage({
           </div>
         </div>
 
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex h-[calc(100vh-260px)]">
+        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-15rem)]">
           {/* Chat Area */}
-          <div className="flex-1 flex flex-col">
+          <div className="flex-1 flex flex-col min-w-0">
             {/* Chat Header with Actions */}
             <div className="p-4 border-b border-gray-100">
               <div className="flex items-center justify-between">
@@ -397,7 +425,7 @@ export default function WorkroomPage({
                     className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
                     placeholder="Write a comment (optional)..."
                   />
-                  <div className="flex gap-2">
+                  <div className="flex flex-col sm:flex-row gap-2">
                     <button
                       type="button"
                       onClick={handleReview}
@@ -461,7 +489,7 @@ export default function WorkroomPage({
                     className={`flex ${msg.senderId === session?.user.id ? "justify-end" : "justify-start"}`}
                   >
                     <div
-                      className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
+                      className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
                         msg.senderId === session?.user.id
                           ? "bg-primary text-white rounded-br-none"
                           : "bg-gray-100 text-on-surface rounded-bl-none"
@@ -476,7 +504,7 @@ export default function WorkroomPage({
             </div>
 
             {/* Input */}
-            <div className="p-4 border-t border-gray-100">
+            <div className="p-3 sm:p-4 border-t border-gray-100">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -484,13 +512,13 @@ export default function WorkroomPage({
                   onChange={(e) => setNewMessage(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && sendMessage()}
                   placeholder="Type a message..."
-                  className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
                 />
                 <button
                   type="button"
                   onClick={sendMessage}
                   disabled={sending || !newMessage.trim()}
-                  className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
                   {sending ? "..." : "Send"}
                 </button>
@@ -499,7 +527,7 @@ export default function WorkroomPage({
           </div>
 
           {/* Sidebar */}
-          <aside className="w-80 border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
+          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
             <div className="space-y-1">
               <h3 className="text-sm font-semibold text-on-surface">
                 Service Details
@@ -593,8 +621,8 @@ export default function WorkroomPage({
 
       {/* Deliver Modal */}
       {showDeliverModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Deliver Work</h3>
             <p className="text-sm text-gray-500">
               Add a note describing what you&apos;ve completed.
@@ -606,7 +634,7 @@ export default function WorkroomPage({
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="Describe what you've completed..."
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeliverModal(false)}
@@ -629,8 +657,8 @@ export default function WorkroomPage({
 
       {/* Revision Modal */}
       {showRevisionModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-lg font-bold">Request Revision</h3>
             <p className="text-sm text-gray-500">
               Describe what needs to be changed.
@@ -642,7 +670,7 @@ export default function WorkroomPage({
               className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
               placeholder="What needs to be revised?"
             />
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowRevisionModal(false)}
@@ -663,5 +691,6 @@ export default function WorkroomPage({
         </div>
       )}
     </main>
+  </>
   );
 }

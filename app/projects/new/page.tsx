@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { ImageUploadField } from "@/app/components/ui/image-upload-field";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 const CATEGORY_OPTIONS = [
@@ -33,6 +34,10 @@ export default function NewProjectPage() {
   const [targetBudget, setTargetBudget] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [checking, setChecking] = useState(true);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
 
   useEffect(() => {
     if (isPending) return;
@@ -54,19 +59,24 @@ export default function NewProjectPage() {
   }, [session, isPending, router]);
 
   const handleUploadDocuments = async (files: FileList | null) => {
+    setStatusMessage(null);
     if (!files?.length) return;
 
     const countLeft = 5 - projectDocuments.length;
     if (countLeft <= 0) {
-      alert("You can only upload up to 5 documents.");
+      setStatusMessage({
+        type: "error",
+        message: "You can only upload up to 5 documents.",
+      });
       return;
     }
 
     const selectedFiles = Array.from(files).slice(0, countLeft);
     if (files.length > countLeft) {
-      alert(
-        `Only ${countLeft} more document${countLeft === 1 ? "" : "s"} can be added.`,
-      );
+      setStatusMessage({
+        type: "info",
+        message: `Only ${countLeft} more document${countLeft === 1 ? "" : "s"} can be added.`,
+      });
     }
 
     const uploaded: typeof projectDocuments = [];
@@ -90,7 +100,10 @@ export default function NewProjectPage() {
         const error = await res
           .json()
           .catch(() => ({ error: "Upload failed" }));
-        alert(error.error || "Unable to upload document.");
+        setStatusMessage({
+          type: "error",
+          message: error.error || "Unable to upload document.",
+        });
       }
     }
 
@@ -103,6 +116,7 @@ export default function NewProjectPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setStatusMessage(null);
     setSubmitting(true);
 
     const res = await fetch("/api/projects", {
@@ -125,22 +139,25 @@ export default function NewProjectPage() {
       router.push(`/projects/${project.id}`);
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to create project.");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to create project.",
+      });
     }
   };
 
   if (isPending || checking) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-12 px-8">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-2xl mx-auto">
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-8">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8">
           <div className="text-center space-y-2">
             <h1 className="text-2xl font-bold text-on-surface">
               Create a New Project
@@ -151,7 +168,7 @@ export default function NewProjectPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-5 sm:space-y-6">
             <div className="space-y-2">
               <div className="text-sm font-medium text-on-surface">
                 Project Title
@@ -222,12 +239,19 @@ export default function NewProjectPage() {
                 disabled={projectDocuments.length >= 5}
                 className="w-full text-sm text-gray-500 file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 file:rounded-lg file:hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
               />
+              {statusMessage && (
+                <StatusMessage
+                  type={statusMessage.type}
+                  message={statusMessage.message}
+                  onClose={() => setStatusMessage(null)}
+                />
+              )}
               {projectDocuments.length ? (
                 <div className="flex flex-wrap gap-3 mt-3">
                   {projectDocuments.map((doc) => (
                     <div
                       key={doc.id}
-                      className="group relative flex items-center justify-center w-28 h-28 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-xs text-left overflow-hidden"
+                      className="group relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-xs text-left overflow-hidden"
                     >
                       <div className="absolute inset-0 bg-white/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
                       <div className="relative z-10 w-full h-full flex flex-col justify-between">
@@ -246,8 +270,8 @@ export default function NewProjectPage() {
                           <button
                             type="button"
                             onClick={() => removeDocument(doc.id)}
-                            className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 opacity-0 transition-opacity duration-200 group-hover:opacity-100 hover:bg-red-50 hover:text-red-600"
-                            aria-label="Remove document"
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 opacity-70 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-red-50 hover:text-red-600"
+                            aria-label={`Remove ${doc.fileName}`}
                           >
                             ×
                           </button>
@@ -279,7 +303,7 @@ export default function NewProjectPage() {
               />
             </div>
 
-            <div className="flex gap-3 pt-2">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => router.push("/discover")}

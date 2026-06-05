@@ -2,6 +2,8 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+import { ConfirmModal } from "@/app/components/ui/confirm-modal";
+import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 interface Package {
@@ -37,6 +39,12 @@ export default function AdminServicesPage() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [editingService, setEditingService] = useState<Service | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: "error" | "success" | "info";
+    message: string;
+  } | null>(null);
+
+  const [deleteServiceId, setDeleteServiceId] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -97,6 +105,7 @@ export default function AdminServicesPage() {
   }, [session, isPending, router, loadData]);
 
   const resetForm = () => {
+    setStatusMessage(null);
     setFormData({
       name: "",
       description: "",
@@ -146,10 +155,14 @@ export default function AdminServicesPage() {
       }));
 
     if (packages.length === 0) {
-      alert("At least one package with price and description is required");
+      setStatusMessage({
+        type: "error",
+        message: "At least one package with price and description is required",
+      });
       return;
     }
 
+    setStatusMessage(null);
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
@@ -169,18 +182,31 @@ export default function AdminServicesPage() {
       setShowModal(false);
       resetForm();
       loadData();
+      setStatusMessage({
+        type: "success",
+        message: "Service saved successfully.",
+      });
     } else {
       const data = await res.json().catch(() => ({}));
-      alert(data.error || "Failed to save service");
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to save service",
+      });
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Are you sure?")) return;
     const res = await fetch(`/api/admin/services?id=${id}`, {
       method: "DELETE",
     });
-    if (res.ok) loadData();
+    if (res.ok) {
+      loadData();
+      setStatusMessage({
+        type: "success",
+        message: "Service deleted successfully.",
+      });
+    }
+    setDeleteServiceId(null);
   };
 
   const handleToggleActive = async (service: Service) => {
@@ -214,17 +240,17 @@ export default function AdminServicesPage() {
 
   if (isPending || loading || !isAdmin) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-2 min-w-0">
             <h1 className="text-2xl font-bold text-on-surface">
               Services Management
             </h1>
@@ -238,22 +264,41 @@ export default function AdminServicesPage() {
               resetForm();
               setShowModal(true);
             }}
-            className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90"
+            className="self-start sm:self-auto px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90"
           >
             + New Service
           </button>
         </div>
+        <ConfirmModal
+          open={Boolean(deleteServiceId)}
+          title="Delete service"
+          description="Are you sure you want to delete this service? This action cannot be undone."
+          confirmText="Yes, delete"
+          cancelText="Cancel"
+          onConfirm={() => deleteServiceId && handleDelete(deleteServiceId)}
+          onCancel={() => setDeleteServiceId(null)}
+        />
+
+        {statusMessage && (
+          <StatusMessage
+            type={statusMessage.type}
+            message={statusMessage.message}
+            onClose={() => setStatusMessage(null)}
+          />
+        )}
 
         <div className="space-y-4">
           {services.map((service) => (
             <div
               key={service.id}
-              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6"
+              className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6"
             >
-              <div className="flex items-start justify-between">
-                <div className="space-y-1">
-                  <div className="flex items-center gap-2">
-                    <h3 className="text-lg font-semibold">{service.name}</h3>
+              <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                <div className="space-y-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h3 className="text-lg font-semibold break-words">
+                      {service.name}
+                    </h3>
                     {service.featured && (
                       <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">
                         Featured
@@ -266,7 +311,7 @@ export default function AdminServicesPage() {
                     </span>
                   </div>
                   <p className="text-sm text-gray-500">{service.category}</p>
-                  <div className="flex gap-4 text-sm">
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                     {service.packages.map((p) => (
                       <span key={p.id} className="text-gray-600">
                         {p.name}: €{p.price.toFixed(0)}
@@ -274,7 +319,7 @@ export default function AdminServicesPage() {
                     ))}
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2 shrink-0">
                   <button
                     type="button"
                     onClick={() => handleToggleActive(service)}
@@ -291,7 +336,7 @@ export default function AdminServicesPage() {
                   </button>
                   <button
                     type="button"
-                    onClick={() => handleDelete(service.id)}
+                    onClick={() => setDeleteServiceId(service.id)}
                     className="px-3 py-1.5 border border-red-200 text-red-600 text-sm rounded-lg"
                   >
                     Delete
@@ -305,8 +350,8 @@ export default function AdminServicesPage() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-2xl w-full p-6 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-2xl w-full p-5 sm:p-6 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-bold">
               {editingService ? "Edit Service" : "New Service"}
             </h3>
@@ -387,7 +432,7 @@ export default function AdminServicesPage() {
                       }}
                       className="w-full px-3 py-2 border rounded-lg text-sm"
                     />
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                       <input
                         type="number"
                         placeholder="Price (€)"
@@ -427,7 +472,7 @@ export default function AdminServicesPage() {
               </div>
             </div>
 
-            <div className="flex gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <button
                 type="button"
                 onClick={() => setShowModal(false)}
