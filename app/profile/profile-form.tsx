@@ -256,10 +256,10 @@ export function ProfileForm() {
   return (
     <div className="max-w-3xl mx-auto space-y-6">
       {/* Header Card */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center space-x-6">
-            <div className="relative w-24 h-24 rounded-2xl overflow-hidden bg-violet-100 flex items-center justify-center text-3xl font-bold text-violet-700">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-4 sm:space-x-6 sm:gap-0">
+            <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-2xl overflow-hidden bg-violet-100 flex items-center justify-center text-2xl sm:text-3xl font-bold text-violet-700 shrink-0">
               {avatarUrl || image ? (
                 // biome-ignore lint/performance/noImgElement: user-provided avatar URLs may be external
                 <img
@@ -299,9 +299,9 @@ export function ProfileForm() {
                 </button>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-2 min-w-0">
               <div className="flex items-center space-x-3">
-                <h1 className="text-2xl font-bold text-on-surface">
+                <h1 className="text-xl sm:text-2xl font-bold text-on-surface break-words">
                   {profile.name || "Unnamed User"}
                 </h1>
               </div>
@@ -341,7 +341,7 @@ export function ProfileForm() {
                 setActiveTab("details");
                 setIsEditing(true);
               }}
-              className="flex items-center space-x-2 px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
+              className="flex items-center justify-center space-x-2 w-full sm:w-auto px-4 py-2 bg-primary text-white text-sm font-medium rounded-lg hover:bg-primary/90 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">
                 edit
@@ -353,7 +353,7 @@ export function ProfileForm() {
       </div>
 
       {/* Tabs */}
-      <div className="flex items-center space-x-2">
+      <div className="flex flex-wrap items-center gap-2">
         <TabButton tab="projects" label="Projects" icon="grid_view" />
         {(profile.userType === "NGO" || profile.userType === "COMPANY") && (
           <TabButton
@@ -379,7 +379,7 @@ export function ProfileForm() {
 
       {/* Details Tab */}
       {activeTab === "details" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <div className="text-sm font-medium text-on-surface">
@@ -566,7 +566,7 @@ export function ProfileForm() {
           </div>
 
           {isEditing && (
-            <div className="flex gap-3 pt-4 border-t border-gray-100">
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={handleCancel}

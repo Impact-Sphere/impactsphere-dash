@@ -9,8 +9,8 @@ export const metadata: Metadata = {
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-surface">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg">
+    <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
+      <div className="w-full max-w-md p-5 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-on-surface">Welcome back</h1>
           <p className="text-sm text-gray-500">

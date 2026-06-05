@@ -81,17 +81,17 @@ export default function AdminAcquisitionsPage() {
 
   if (isPending || loading || !isAdmin) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <div className="flex items-center justify-between">
-          <div className="space-y-2">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-2 min-w-0">
             <h1 className="text-2xl font-bold text-on-surface">
               Service Acquisitions
             </h1>
@@ -101,7 +101,7 @@ export default function AdminAcquisitionsPage() {
           </div>
           <Link
             href="/admin"
-            className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            className="self-start sm:self-auto px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
           >
             Back to Dashboard
           </Link>
@@ -109,19 +109,19 @@ export default function AdminAcquisitionsPage() {
 
         <div className="space-y-4">
           {acquisitions.length === 0 ? (
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center text-gray-500">
               No service acquisitions yet.
             </div>
           ) : (
             acquisitions.map((acq) => (
               <div
                 key={acq.id}
-                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4"
               >
-                <div className="flex items-start justify-between">
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-3">
-                      <h3 className="text-lg font-semibold text-on-surface">
+                <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-1.5">
+                      <h3 className="text-lg font-semibold text-on-surface break-words">
                         {acq.service.name}
                         <span className="text-primary font-medium">
                           {" "}
@@ -130,7 +130,7 @@ export default function AdminAcquisitionsPage() {
                       </h3>
                       {statusBadge(acq.status)}
                     </div>
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 break-words">
                       Project:{" "}
                       <span className="font-medium">{acq.project.title}</span>
                       {" · "}
@@ -145,29 +145,29 @@ export default function AdminAcquisitionsPage() {
                   {acq.chat && (
                     <Link
                       href={`/chat/${acq.chat.id}`}
-                      className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
+                      className="self-start sm:self-auto px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
                     >
                       Open Workroom
                     </Link>
                   )}
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 text-sm">
                   <div className="space-y-1">
                     <span className="text-gray-400">Category</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       {acq.service.category}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Package Cost</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       €{acq.package.price.toFixed(2)}
                     </p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-gray-400">Provider</span>
-                    <p className="font-medium text-on-surface">
+                    <p className="font-medium text-on-surface break-words">
                       {acq.service.provider.name || acq.service.provider.email}
                     </p>
                   </div>

@@ -416,15 +416,15 @@ export default function AdminDashboardPage() {
 
   if (isPending || loading || !isAdmin) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto space-y-8">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
         <div className="space-y-2">
           <h1 className="text-2xl font-bold text-on-surface">
             Admin Dashboard
@@ -435,7 +435,7 @@ export default function AdminDashboardPage() {
         </div>
 
         {/* Tabs */}
-        <div className="flex space-x-1 bg-white rounded-xl p-1 border border-gray-100 w-fit">
+        <div className="flex flex-wrap gap-1 bg-white rounded-xl p-1 border border-gray-100 w-fit">
           <button
             type="button"
             onClick={() => setActiveTab("users")}
@@ -488,26 +488,27 @@ export default function AdminDashboardPage() {
         {activeTab === "users" && (
           <div className="space-y-4">
             {users.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center text-gray-500">
                 No pending users to review.
               </div>
             ) : (
               users.map((user) => (
                 <div
                   key={user.id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <div className="flex items-center flex-wrap gap-2">
-                        <h3 className="text-lg font-semibold text-on-surface">
+
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="space-y-1 min-w-0">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-1.5">
+                        <h3 className="text-lg font-semibold text-on-surface break-words">
                           {user.ngoInfo?.ngoName ||
                             user.companyInfo?.companyName ||
                             user.name ||
                             "Unnamed"}
                         </h3>
                         <span
-                          className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                          className={`self-start inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                             user.userType === "NGO"
                               ? "bg-emerald-100 text-emerald-700"
                               : "bg-blue-100 text-blue-700"
@@ -517,9 +518,11 @@ export default function AdminDashboardPage() {
                         </span>
                         <StatusBadge status={user.approvalStatus} />
                       </div>
-                      <p className="text-sm text-gray-500">{user.email}</p>
+                      <p className="text-sm text-gray-500 break-words">
+                        {user.email}
+                      </p>
                     </div>
-                    <div className="flex flex-wrap gap-2">
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                       {user.approvalStatus === "REJECTED" ? (
                         <span className="px-3 py-1.5 border border-red-200 text-red-700 font-medium rounded-lg text-sm bg-red-50 cursor-default">
                           Rejected
@@ -533,6 +536,7 @@ export default function AdminDashboardPage() {
                           Reject
                         </button>
                       )}
+
                       <button
                         type="button"
                         onClick={() => openModal(user.id, "request_more_info")}
@@ -922,21 +926,21 @@ export default function AdminDashboardPage() {
         {activeTab === "projects" && (
           <div className="space-y-4">
             {projects.length === 0 ? (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 text-center text-gray-500">
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 sm:p-12 text-center text-gray-500">
                 No pending projects to review.
               </div>
             ) : (
               projects.map((project) => (
                 <div
                   key={project.id}
-                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4"
+                  className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="space-y-1">
-                      <h3 className="text-lg font-semibold text-on-surface">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
+                    <div className="space-y-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-on-surface break-words">
                         {project.title}
                       </h3>
-                      <p className="text-sm text-gray-500">
+                      <p className="text-sm text-gray-500 break-words">
                         by{" "}
                         {project.ngo.ngoInfo?.ngoName ||
                           project.ngo.name ||
@@ -944,7 +948,7 @@ export default function AdminDashboardPage() {
                         · {project.category}
                       </p>
                     </div>
-                    <div className="flex space-x-2">
+                    <div className="flex flex-col sm:flex-row gap-2 shrink-0">
                       <button
                         type="button"
                         onClick={() =>
@@ -968,7 +972,7 @@ export default function AdminDashboardPage() {
 
                   <p className="text-sm text-gray-700">{project.description}</p>
 
-                  <div className="flex items-center space-x-6 text-sm">
+                  <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
                     <div>
                       <span className="text-gray-400">Target Budget</span>
                       <p className="font-medium text-on-surface">

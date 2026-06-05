@@ -21,8 +21,6 @@ RUN --mount=type=cache,target=/root/.npm \
     echo "No lockfile found." && exit 1; \
   fi
 
-RUN DATABASE_URL="postgresql://dummy:dummy@localhost:5432/dummy" npx prisma generate
-
 FROM node:${NODE_VERSION} AS builder
 
 WORKDIR /app
@@ -32,6 +30,11 @@ COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
 
 ENV NODE_ENV=production
+
+ARG NEXT_PUBLIC_BETTER_AUTH_URL
+ARG NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY
+ENV NEXT_PUBLIC_BETTER_AUTH_URL=${NEXT_PUBLIC_BETTER_AUTH_URL}
+ENV NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY}
 
 RUN if [ -f package-lock.json ]; then \
     npm run build; \

@@ -8,8 +8,8 @@ export const metadata: Metadata = {
 
 export default function OnboardingPage() {
   return (
-    <div className="min-h-screen flex items-start justify-center bg-surface py-12">
-      <div className="w-full max-w-2xl p-8 space-y-8 bg-white rounded-2xl shadow-lg">
+    <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-start justify-center bg-surface px-4 py-6 sm:px-6 sm:py-10 lg:py-12">
+      <div className="w-full max-w-2xl p-4 sm:p-6 lg:p-8 space-y-6 sm:space-y-8 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-on-surface">
             Welcome to ImpactSphere!
