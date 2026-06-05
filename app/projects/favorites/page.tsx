@@ -69,7 +69,7 @@ function DiscoverContent() {
   const hasNoResults = !loading && projects.length === 0;
 
   return (
-    <main className="ml-72 min-h-screen">
+    <main className="min-h-screen">
       <Header
         title="Favorite Projects"
         subtitle="Projects saved by you"
@@ -79,9 +79,9 @@ function DiscoverContent() {
         // onSearchSubmit={handleSearchSubmit}
       />
 
-      <section className="px-12 py-8 space-y-12">
+      <section className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 space-y-8 sm:space-y-12">
         {loading ? (
-          <div className="grid grid-cols-12 gap-8">
+          <div className="grid grid-cols-12 gap-6 sm:gap-8">
             {["sk-a", "sk-b", "sk-c", "sk-d", "sk-e", "sk-f"].map((key) => (
               <ProjectCardSkeleton
                 key={key}
@@ -111,7 +111,7 @@ function DiscoverContent() {
         ) : (
           <>
             {/* Project Grid */}
-            <div className="grid grid-cols-12 gap-8">
+            <div className="grid grid-cols-12 gap-6 sm:gap-8">
               {/* Standard Project Cards */}
               {projects.map((project) => (
                 <ProjectCard
@@ -124,12 +124,12 @@ function DiscoverContent() {
             </div>
 
             {/* Pagination */}
-            <footer className="px-12 py-12 flex justify-between items-center opacity-60">
+            <footer className="px-0 sm:px-2 lg:px-12 py-8 sm:py-12 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 text-center sm:text-left opacity-60">
               <span className="text-xs font-medium">
                 Showing {projects.length} approved initiative
                 {projects.length !== 1 ? "s" : ""}
               </span>
-              <div className="flex space-x-2">
+              <div className="flex justify-center space-x-2">
                 <button
                   type="button"
                   className="w-10 h-10 rounded-full border border-outline-variant/20 flex items-center justify-center hover:bg-surface-container transition-colors"
@@ -156,18 +156,18 @@ function DiscoverContent() {
 
 function DiscoverFallback() {
   return (
-    <main className="ml-72 min-h-screen">
-      <div className="sticky top-0 z-30 bg-white/70 backdrop-blur-2xl px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
-        <div>
-          <div className="h-9 w-64 bg-surface-container rounded-lg animate-pulse" />
-          <div className="h-5 w-96 bg-surface-container rounded mt-1 animate-pulse" />
+    <main className="min-h-screen">
+      <div className="sticky top-14 lg:top-0 z-20 bg-white/70 backdrop-blur-2xl px-4 sm:px-6 lg:px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+        <div className="min-w-0">
+          <div className="h-9 w-48 sm:w-64 bg-surface-container rounded-lg animate-pulse" />
+          <div className="h-5 w-56 sm:w-96 bg-surface-container rounded mt-1 animate-pulse" />
         </div>
-        <div className="flex items-center space-x-6">
-          <div className="w-80 h-12 bg-surface-container rounded-full animate-pulse" />
-          <div className="w-40 h-10 bg-surface-container rounded-full animate-pulse" />
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-6 w-full lg:w-auto">
+          <div className="w-full sm:w-72 lg:w-80 h-12 bg-surface-container rounded-full animate-pulse" />
+          <div className="w-32 sm:w-40 h-10 bg-surface-container rounded-full animate-pulse" />
         </div>
       </div>
-      <section className="px-12 py-8 space-y-12">
+      <section className="px-4 sm:px-6 lg:px-12 py-6 sm:py-8 space-y-8 sm:space-y-12">
         <div className="flex flex-wrap gap-3">
           {categories.map((cat) => (
             <div
@@ -176,7 +176,7 @@ function DiscoverFallback() {
             />
           ))}
         </div>
-        <div className="grid grid-cols-12 gap-8">
+        <div className="grid grid-cols-12 gap-6 sm:gap-8">
           {[
             "fb-sk-a",
             "fb-sk-b",

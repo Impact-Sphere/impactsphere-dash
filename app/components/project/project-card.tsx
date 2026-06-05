@@ -55,7 +55,7 @@ export function ProjectCard({
   return (
     <article
       className={cn(
-        "bg-surface-container-lowest rounded-xl p-8 flex flex-col hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.08)] transition-all",
+        "bg-surface-container-lowest rounded-xl p-5 sm:p-6 lg:p-8 flex flex-col hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.08)] transition-all",
         className,
       )}
       style={{
@@ -63,7 +63,7 @@ export function ProjectCard({
         transition: "opacity 0.2s ease",
       }}
     >
-      <div className="h-48 w-full rounded-xl overflow-hidden mb-6 relative group">
+      <div className="h-44 sm:h-48 w-full rounded-xl overflow-hidden mb-5 sm:mb-6 relative group">
         {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
         <img
           src={getProjectImage(project.image)}
@@ -74,12 +74,16 @@ export function ProjectCard({
           <button
             type="button"
             onClick={onFavoriteToggle}
+            aria-label={
+              isFavorited ? "Remove from favorites" : "Add to favorites"
+            }
+            aria-pressed={isFavorited}
             className="
             absolute top-3 right-3
             bg-white/80 backdrop-blur
             p-3 rounded-full
             shadow-md
-            opacity-0 group-hover:opacity-100
+            opacity-70 group-hover:opacity-100 focus-visible:opacity-100
             transition-opacity
             hover:scale-110
           "
@@ -108,11 +112,11 @@ export function ProjectCard({
           </span>
         )}
       </div>
-      <h3 className="text-xl font-bold mt-3">{project.title}</h3>
+      <h3 className="text-lg sm:text-xl font-bold mt-3">{project.title}</h3>
       <p className="text-sm text-on-surface-variant mt-2 flex-1">
         {project.description}
       </p>
-      <div className="mt-8 space-y-4">
+      <div className="mt-6 sm:mt-8 space-y-4">
         <div className="space-y-1.5">
           <div className="flex justify-between text-xs font-bold">
             <span className="text-primary">{funded}%</span>

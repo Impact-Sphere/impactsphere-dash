@@ -154,17 +154,17 @@ function ServicesCatalogContent() {
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8">
         <div className="space-y-2">
-          <h1 className="text-3xl font-bold text-on-surface">
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface">
             Services Catalog
           </h1>
           <p className="text-gray-500">
             Browse professional services to boost your project impact
           </p>
           {activeProject && (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex flex-wrap items-center gap-2 text-sm">
               <span className="text-gray-500">Buying for:</span>
               <span className="font-medium text-on-surface">
                 {activeProject.title}
@@ -184,7 +184,7 @@ function ServicesCatalogContent() {
             placeholder="Search services..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            className="w-full sm:flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
           />
         </div>
 
@@ -214,10 +214,10 @@ function ServicesCatalogContent() {
               className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden"
             >
               {/* Service Header */}
-              <div className="p-6 border-b border-gray-100">
-                <div className="flex items-start justify-between">
-                  <div className="space-y-2">
-                    <div className="flex items-center gap-3">
+              <div className="p-4 sm:p-6 border-b border-gray-100">
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                  <div className="space-y-2 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       {service.featured && (
                         <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
                           Featured
@@ -227,13 +227,13 @@ function ServicesCatalogContent() {
                         {service.category}
                       </span>
                     </div>
-                    <h3 className="text-xl font-bold text-on-surface">
+                    <h3 className="text-lg sm:text-xl font-bold text-on-surface">
                       {service.name}
                     </h3>
                     <p className="text-gray-500 max-w-2xl">
                       {service.description}
                     </p>
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                       {renderStars(service.rating)}
                       <span className="text-gray-400">
                         {service.reviewCount} reviews
@@ -250,18 +250,18 @@ function ServicesCatalogContent() {
                       ))}
                     </div>
                   </div>
-                  <div className="text-right">
+                  <div className="md:text-right shrink-0">
                     <div className="flex items-center gap-2">
-                      <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-sm">
+                      <div className="w-10 h-10 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-sm shrink-0">
                         {service.provider.name?.charAt(0) ||
                           service.provider.email.charAt(0)}
                       </div>
-                      <div>
-                        <p className="text-sm font-medium">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">
                           {service.provider.name || service.provider.email}
                         </p>
                         {service.provider.providerBio && (
-                          <p className="text-xs text-gray-500 max-w-[200px] truncate">
+                          <p className="text-xs text-gray-500 md:max-w-[200px] truncate">
                             {service.provider.providerBio}
                           </p>
                         )}
@@ -279,7 +279,7 @@ function ServicesCatalogContent() {
                   return (
                     <div
                       key={pkg.id}
-                      className={`p-6 ${idx === 1 ? "bg-violet-50/50" : ""}`}
+                      className={`p-4 sm:p-6 ${idx === 1 ? "bg-violet-50/50" : ""}`}
                     >
                       <div className="space-y-4">
                         <div>
@@ -358,8 +358,8 @@ function ServicesCatalogContent() {
 
       {/* Acquire Modal */}
       {showAcquireModal && activeService && (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-6">
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <div className="space-y-2">
               <h3 className="text-xl font-bold text-on-surface">
                 Acquire {activeService.name}
