@@ -109,21 +109,55 @@ export function Sidebar() {
           );
         })}
         {session?.user && (
-          <Link
-            href="/projects/favorites"
-            className={cn(
-              "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
-              "hover:translate-x-1",
-              pathname === "/projects/favorites"
-                ? "bg-white text-violet-700 shadow-sm"
-                : "text-slate-500 hover:bg-slate-200/50",
+          <>
+            <Link
+              href="/projects/favorites"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/projects/favorites"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">star</span>
+              <span className="text-sm font-semibold font-inter">
+                Favorite Projects
+              </span>
+            </Link>
+            {userType === "COMPANY" && (
+              <Link
+                href="/matching-request"
+                className={cn(
+                  "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                  "hover:translate-x-1",
+                  pathname === "/matching-request"
+                    ? "bg-white text-violet-700 shadow-sm"
+                    : "text-slate-500 hover:bg-slate-200/50",
+                )}
+              >
+                <span className="material-symbols-outlined">handshake</span>
+                <span className="text-sm font-semibold font-inter">
+                  Find Projects
+                </span>
+              </Link>
             )}
-          >
-            <span className="material-symbols-outlined">star</span>
-            <span className="text-sm font-semibold font-inter">
-              Favorite Projects
-            </span>
-          </Link>
+            <Link
+              href="/support"
+              className={cn(
+                "flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-300 ease-in-out active:scale-98",
+                "hover:translate-x-1",
+                pathname === "/support"
+                  ? "bg-white text-violet-700 shadow-sm"
+                  : "text-slate-500 hover:bg-slate-200/50",
+              )}
+            >
+              <span className="material-symbols-outlined">chat</span>
+              <span className="text-sm font-semibold font-inter">
+                Contact ImpactSphere
+              </span>
+            </Link>
+          </>
         )}
         {isAdmin && (
           <>

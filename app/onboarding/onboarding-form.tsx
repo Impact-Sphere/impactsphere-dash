@@ -78,7 +78,11 @@ const isValidEmail = (value: string) =>
 const isValidPhoneNumber = (value: string) =>
   !value || /^[+0-9()\s-]{7,25}$/.test(value.trim());
 
-export function OnboardingForm() {
+interface OnboardingFormProps {
+  mode?: "onboarding" | "resubmit";
+}
+
+export function OnboardingForm({ mode = "onboarding" }: OnboardingFormProps) {
   const router = useRouter();
   const { data: session, isPending } = authClient.useSession();
   const [step, setStep] = useState<Step>("select-type");
@@ -86,6 +90,8 @@ export function OnboardingForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [fieldErrors, setFieldErrors] = useState<ValidationError[]>([]);
+  const [adminNotes, setAdminNotes] = useState("");
+  const [loadingProfile, setLoadingProfile] = useState(mode === "resubmit");
 
   const [organizationName, setOrganizationName] = useState("");
   const [country, setCountry] = useState("");
@@ -121,6 +127,81 @@ export function OnboardingForm() {
   const getFieldError = (field: string) =>
     fieldErrors.find((e) => e.field === field)?.message;
 
+  // Pre-fill data in resubmit mode
+  useEffect(() => {
+    if (mode !== "resubmit" || isPending || !session) return;
+
+    const loadProfile = async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (!res.ok) return;
+        const data = await res.json();
+        setAdminNotes(data.adminNotes || "");
+
+        const type = data.userType as UserType | null;
+        if (!type) return;
+
+        setUserType(type);
+        setStep("identity");
+
+        if (type === "NGO" && data.ngoInfo) {
+          const info = data.ngoInfo;
+          setOrganizationName(info.ngoName || "");
+          setCountry(info.country || "");
+          setCityRegion(info.cityRegion || "");
+          setNgoType(info.ngoType || NGO_TYPES[0]);
+          setYearFounded(info.yearFounded ? String(info.yearFounded) : "");
+          setMissionStatement(info.missionStatement || "");
+          setActivitiesDescription(info.activitiesDescription || "");
+          setCurrentOrPastProjects(info.currentOrPastProjects || "");
+          setContactEmail(info.contactEmail || "");
+          setPhoneNumber(info.phoneNumber || "");
+          setWebsite(info.website || "");
+          setRegistrationNumber(info.registrationNumber || "");
+          setRepresentativeFullName(info.representativeFullName || "");
+          setRepresentativeRole(info.representativeRole || "");
+          setRepresentativeIdType(info.representativeIdType || ID_TYPES[0]);
+          setIdNumber(info.representativeIdNumber || "");
+          setIdDocumentUrl(info.representativeIdDocumentUrl || "");
+          setActivityProofLink(info.activityProofLink || "");
+          setDeclarationConfirmed(Boolean(info.declarationConfirmed));
+          if (info.registrationDocuments) {
+            setRegistrationDocuments(info.registrationDocuments);
+          }
+          if (info.activityProofUrls) {
+            setActivityProofUrls(info.activityProofUrls);
+          }
+        } else if (type === "COMPANY" && data.companyInfo) {
+          const info = data.companyInfo;
+          setOrganizationName(info.companyName || "");
+          setCountry(info.country || "");
+          setIndustryType(info.industryType || INDUSTRY_TYPES[0]);
+          setYearFounded(info.yearFounded ? String(info.yearFounded) : "");
+          setBusinessDescription(info.businessDescription || "");
+          setContactEmail(info.contactEmail || "");
+          setPhoneNumber(info.phoneNumber || "");
+          setWebsite(info.website || "");
+          setRegisteredAddress(info.registeredAddress || "");
+          setRegistrationNumber(info.registrationNumber || "");
+          setTaxVatNumber(info.taxVatNumber || "");
+          setRepresentativeFullName(info.representativeFullName || "");
+          setRepresentativeJobTitle(info.representativeJobTitle || "");
+          setRepresentativeIdType(info.representativeIdType || ID_TYPES[0]);
+          setIdNumber(info.representativeIdNumber || "");
+          setIdDocumentUrl(info.representativeIdDocumentUrl || "");
+          setDeclarationConfirmed(Boolean(info.declarationConfirmed));
+          if (info.registrationDocuments) {
+            setRegistrationDocuments(info.registrationDocuments);
+          }
+        }
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    loadProfile();
+  }, [mode, session, isPending]);
+
   useEffect(() => {
     if (!isPending && !session) {
       router.push("/login");
@@ -140,10 +221,10 @@ export function OnboardingForm() {
       }
     };
 
-    if (!isPending && session) {
+    if (!isPending && session && mode === "onboarding") {
       checkOnboarding();
     }
-  }, [session, isPending, router]);
+  }, [session, isPending, router, mode]);
 
   // Returns { id, url } from the upload API
   const uploadFile = async (
@@ -533,7 +614,7 @@ export function OnboardingForm() {
     }
   };
 
-  if (isPending) {
+  if (isPending || loadingProfile) {
     return (
       <div className="flex items-center justify-center py-12">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
@@ -596,6 +677,13 @@ export function OnboardingForm() {
           Provide details that verify your organization and support approval.
         </p>
       </div>
+
+      {mode === "resubmit" && adminNotes && (
+        <div className="rounded-2xl bg-amber-50 border border-amber-200 p-4 text-sm text-amber-800">
+          <p className="font-semibold">Message from the admin:</p>
+          <p className="mt-1 whitespace-pre-wrap">{adminNotes}</p>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-2xl bg-red-50 border border-red-200 p-3 sm:p-4 text-sm text-red-700">

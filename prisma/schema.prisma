@@ -15,6 +15,8 @@ enum UserType {
 
 enum ApprovalStatus {
   PENDING
+  MORE_INFO_REQUESTED
+  MEETING_REQUESTED
   APPROVED
   REJECTED
 }
@@ -40,6 +42,10 @@ model User {
   projects        Project[]
   donations       Donation[]
   meetingRequests MeetingRequest[]
+  verificationMeetings    VerificationMeetingRequest[] @relation("VerificationMeetings")
+  adminVerificationMeetings VerificationMeetingRequest[] @relation("AdminVerificationMeetings")
+  supportChats    SupportChat[]
+  matchingRequests CompanyMatchingRequest[]
   services        Service[]
   favoriteProjects FavoriteProject[]
 
@@ -294,6 +300,44 @@ model MeetingRequest {
   @@map("meeting_request")
 }
 
+model VerificationMeetingTimeSlot {
+  id String @id @default(uuid())
+
+  meetingId String
+  meeting   VerificationMeetingRequest @relation(fields: [meetingId], references: [id], onDelete: Cascade)
+
+  start DateTime
+  end   DateTime
+
+  @@index([meetingId])
+  @@map("verification_meeting_time_slot")
+}
+
+model VerificationMeetingRequest {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation("VerificationMeetings", fields: [userId], references: [id], onDelete: Cascade)
+
+  adminId String
+  admin   User   @relation("AdminVerificationMeetings", fields: [adminId], references: [id], onDelete: Cascade)
+
+  status MeetingRequestStatus @default(PENDING)
+
+  proposedTimes VerificationMeetingTimeSlot[]
+  selectedTime  DateTime?
+
+  notes String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([adminId])
+  @@index([status])
+  @@map("verification_meeting_request")
+}
+
 enum ServiceAcquisitionStatus {
   ACTIVE
   DELIVERED
@@ -429,5 +473,67 @@ model FavoriteProject {
   @@unique([userId, projectId])
 
   @@map("favorite_project")
+}
+
+enum SupportChatStatus {
+  OPEN
+  CLOSED
+}
+
+model SupportChat {
+  id        String            @id @default(uuid())
+  userId    String
+  user      User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    SupportChatStatus @default(OPEN)
+  subject   String?
+  createdAt DateTime          @default(now())
+  updatedAt DateTime          @updatedAt
+
+  messages  SupportMessage[]
+
+  @@index([userId])
+  @@index([status])
+  @@map("support_chat")
+}
+
+model SupportMessage {
+  id        String   @id @default(uuid())
+  chatId    String
+  chat      SupportChat @relation(fields: [chatId], references: [id], onDelete: Cascade)
+  senderId  String
+  content   String
+  createdAt DateTime @default(now())
+
+  @@index([chatId])
+  @@index([senderId])
+
+  @@map("support_message")
+}
+
+enum MatchingRequestStatus {
+  PENDING
+  IN_REVIEW
+  MATCHED
+  DECLINED
+}
+
+model CompanyMatchingRequest {
+  id            String                @id @default(uuid())
+  companyId     String
+  company       User                  @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  causeAreas    String[]              @default([])
+  description   String?
+  budgetRange   String?
+  location      String?
+  timeline      String?
+  status        MatchingRequestStatus @default(PENDING)
+  adminNotes    String?
+  recommendedProjectIds String[]      @default([])
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  @@index([companyId])
+  @@index([status])
+  @@map("company_matching_request")
 }
 
