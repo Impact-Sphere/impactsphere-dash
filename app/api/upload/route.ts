@@ -1,9 +1,8 @@
-import { writeFile } from "node:fs/promises";
-import { join } from "node:path";
 import { headers } from "next/headers";
 import { NextResponse } from "next/server";
 import { auth } from "@/app/lib/auth";
 import { prisma } from "@/app/lib/db";
+import { getStorage } from "@/app/lib/storage";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 
@@ -73,13 +72,12 @@ export async function POST(request: Request) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const uploadDir = join(process.cwd(), "public", "uploads");
-    const filepath = join(uploadDir, filename);
-    await writeFile(filepath, buffer);
+    const storage = getStorage();
+    const url = await storage.upload(filename, buffer, file.type);
 
     const record = await prisma.uploadedFile.create({
       data: {
-        url: `/uploads/${filename}`,
+        url,
         fileName: file.name,
         mimeType: file.type,
         size: file.size,
