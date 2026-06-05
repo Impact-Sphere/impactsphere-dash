@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
+import { useRouter } from "next/navigation";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -22,6 +23,7 @@ export function FeaturedProjectCard({
 }: FeaturedProjectCardProps) {
   const { data: session } = authClient.useSession();
   const { format } = useCurrency();
+  const router = useRouter();
   const funded = getFundedPercent(project.currentAmount, project.targetBudget);
 
   const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
@@ -39,9 +41,10 @@ export function FeaturedProjectCard({
   return (
     <article
       className={cn(
-        "col-span-12 lg:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-lowest transition-all hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.12)]",
+        "col-span-12 lg:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-lowest transition-all hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.12)] cursor-pointer",
         className,
       )}
+      onClick={() => router.push(`/projects/${project.id}`)}
     >
       <div className="flex flex-col md:flex-row h-full group">
         <div className="md:w-1/2 overflow-hidden relative min-h-[220px] sm:min-h-[280px] md:min-h-0">
@@ -80,20 +83,18 @@ export function FeaturedProjectCard({
               </div>
               <ProgressBar value={funded} size="md" />
             </div>
-            <a href={`/projects/${project.id}`}>
-              <Button
-                size="lg"
-                className="shadow-xl shadow-primary/20 hover:translate-y-[-2px]"
-              >
-                Fund Now
-              </Button>
-            </a>
+            <Button
+              size="lg"
+              className="shadow-xl shadow-primary/20 hover:translate-y-[-2px]"
+            >
+              Fund Now
+            </Button>
           </div>
         </div>
         {session?.user && (
           <button
             type="button"
-            onClick={onFavoriteToggle}
+            onClick={(e) => { e.stopPropagation(); onFavoriteToggle(); }}
             aria-label={
               isFavorited ? "Remove from favorites" : "Add to favorites"
             }
