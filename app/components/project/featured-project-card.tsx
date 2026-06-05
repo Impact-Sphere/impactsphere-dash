@@ -44,7 +44,7 @@ export function FeaturedProjectCard({
       )}
     >
       <div className="flex flex-col md:flex-row h-full group">
-        <div className="md:w-1/2 overflow-hidden relative min-h-[300px] md:min-h-0">
+        <div className="md:w-1/2 overflow-hidden relative min-h-[220px] sm:min-h-[280px] md:min-h-0">
           {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
           <img
             src={getProjectImage(project.image)}
@@ -52,10 +52,10 @@ export function FeaturedProjectCard({
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
           />
         </div>
-        <div className="md:w-1/2 p-10 flex flex-col justify-between">
+        <div className="md:w-1/2 p-6 sm:p-8 lg:p-10 flex flex-col justify-between">
           <div>
             <Badge variant="primary">{project.category}</Badge>
-            <h3 className="text-3xl font-bold mt-4 leading-tight">
+            <h3 className="text-2xl sm:text-3xl font-bold mt-4 leading-tight">
               {project.title}
             </h3>
             <p className="text-on-surface-variant text-sm mt-4 leading-relaxed">
@@ -64,14 +64,14 @@ export function FeaturedProjectCard({
           </div>
           <div className="mt-8 space-y-6">
             <div className="space-y-2">
-              <div className="flex justify-between items-end">
-                <span className="text-2xl font-black text-primary">
+              <div className="flex justify-between items-end gap-3">
+                <span className="text-xl sm:text-2xl font-black text-primary">
                   {funded}%{" "}
                   <span className="text-sm font-medium text-on-surface-variant">
                     funded
                   </span>
                 </span>
-                <span className="text-sm font-bold">
+                <span className="text-sm font-bold text-right">
                   {format(project.currentAmount)}{" "}
                   <span className="text-on-surface-variant font-normal">
                     of {format(project.targetBudget)}
@@ -94,12 +94,16 @@ export function FeaturedProjectCard({
           <button
             type="button"
             onClick={onFavoriteToggle}
+            aria-label={
+              isFavorited ? "Remove from favorites" : "Add to favorites"
+            }
+            aria-pressed={isFavorited}
             className="
             absolute top-3 right-3
             bg-white/80 backdrop-blur
             p-3 rounded-full
             shadow-md
-            opacity-0 group-hover:opacity-100
+            opacity-70 group-hover:opacity-100 focus-visible:opacity-100
             transition-opacity
             hover:scale-110
           "

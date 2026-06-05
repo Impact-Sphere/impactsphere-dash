@@ -307,7 +307,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center">
+      <main className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -315,7 +315,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <main className="ml-72 min-h-screen flex items-center justify-center text-gray-500">
+      <main className="min-h-screen flex items-center justify-center text-gray-500">
         Project not found.
       </main>
     );
@@ -332,10 +332,10 @@ export default function ProjectDetailPage() {
   const acquisitions = project.serviceAcquisitions || [];
 
   return (
-    <main className="ml-72 min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-4xl mx-auto space-y-8">
+    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         {/* Image */}
-        <div className="relative w-full h-80 rounded-2xl overflow-hidden">
+        <div className="relative w-full h-56 sm:h-64 lg:h-80 rounded-2xl overflow-hidden">
           {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
           <img
             src={getProjectImage(project.image)}
@@ -346,7 +346,7 @@ export default function ProjectDetailPage() {
 
         {/* Header */}
         <div className="space-y-4">
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <Badge variant="primary">{project.category}</Badge>
             {project.status === "COMPLETED" && (
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-emerald-100 text-emerald-700">
@@ -371,10 +371,10 @@ export default function ProjectDetailPage() {
               </span>
             )}
           </div>
-          <h1 className="text-3xl font-bold text-on-surface">
+          <h1 className="text-2xl sm:text-3xl font-bold text-on-surface">
             {project.title}
           </h1>
-          <p className="text-gray-500">
+          <p className="text-gray-500 break-words">
             by{" "}
             <a
               href={`/profile/${project.ngoId}`}
@@ -397,37 +397,43 @@ export default function ProjectDetailPage() {
             <button
               type="button"
               onClick={onFavoriteToggle}
+              aria-label={
+                isFavorited ? "Remove from favorites" : "Add to favorites"
+              }
+              aria-pressed={isFavorited}
               className="
-              bg-white/80 backdrop-blur
-              p-3 rounded
-              text-xl
-              shadow-md
+              bg-white border border-gray-200
+              px-4 py-2 rounded-full
+              text-sm
+              shadow-sm
               transition-opacity
-              hover:scale-110
+              hover:bg-primary/5
               flex flex-row items-center gap-2
             "
             >
               {isFavorited ? (
-                <FaStar className="text-yellow-500 text-xl" />
+                <FaStar className="text-yellow-500 text-base" />
               ) : (
-                <FaRegStar className="text-gray-600 text-xl" />
+                <FaRegStar className="text-gray-600 text-base" />
               )}
 
-              <span>{isFavorited ? "Remove from" : "Add to "} Favorites</span>
+              <span className="font-medium text-on-surface">
+                {isFavorited ? "Saved to favorites" : "Add to favorites"}
+              </span>
             </button>
           )}
         </div>
 
         {/* Funding bar */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
-          <div className="flex justify-between items-end">
-            <span className="text-3xl font-black text-primary">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-end gap-2">
+            <span className="text-2xl sm:text-3xl font-black text-primary">
               {funded}%
-              <span className="text-base font-medium text-on-surface-variant ml-2">
+              <span className="text-sm sm:text-base font-medium text-on-surface-variant ml-2">
                 funded
               </span>
             </span>
-            <span className="text-lg font-bold">
+            <span className="text-base sm:text-lg font-bold">
               {format(project.currentAmount)}{" "}
               <span className="text-on-surface-variant font-normal">
                 of {format(project.targetBudget)}
@@ -463,24 +469,24 @@ export default function ProjectDetailPage() {
         </div>
 
         {/* Budget Breakdown */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-4">
           <h2 className="text-lg font-semibold text-on-surface">Budget</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
             <div className="bg-slate-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-gray-400">Total Donated</p>
-              <p className="text-xl font-bold text-on-surface">
+              <p className="text-lg sm:text-xl font-bold text-on-surface break-words">
                 {format(project.currentAmount)}
               </p>
             </div>
             <div className="bg-slate-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-gray-400">Spent on Services</p>
-              <p className="text-xl font-bold text-amber-600">
+              <p className="text-lg sm:text-xl font-bold text-amber-600 break-words">
                 {format(project.serviceSpent || 0)}
               </p>
             </div>
             <div className="bg-emerald-50 rounded-xl p-4 space-y-1">
               <p className="text-xs text-emerald-600">Available for Services</p>
-              <p className="text-xl font-bold text-emerald-700">
+              <p className="text-lg sm:text-xl font-bold text-emerald-700 break-words">
                 {format(availableBudget)}
               </p>
             </div>
@@ -504,7 +510,7 @@ export default function ProjectDetailPage() {
 
         {/* Services Bought */}
         {acquisitions.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-4">
             <h2 className="text-lg font-semibold text-on-surface">
               Services Bought
             </h2>
@@ -512,10 +518,10 @@ export default function ProjectDetailPage() {
               {acquisitions.map((acq) => (
                 <div
                   key={acq.id}
-                  className="flex items-start justify-between py-3 border-b border-gray-100 last:border-0"
+                  className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 py-3 border-b border-gray-100 last:border-0"
                 >
-                  <div className="space-y-1">
-                    <div className="flex items-center space-x-2">
+                  <div className="space-y-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                       <span className="font-medium text-on-surface">
                         {acq.service.name}
                       </span>
@@ -523,13 +529,12 @@ export default function ProjectDetailPage() {
                         — {acq.package.name}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-3 text-xs text-gray-500">
-                      <span>
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-gray-500">
+                      <span className="break-words">
                         Provider:{" "}
                         {acq.service.provider.name ||
                           acq.service.provider.email}
                       </span>
-                      <span>·</span>
                       <span
                         className={`font-medium ${
                           acq.status === "ACTIVE"
@@ -574,7 +579,7 @@ export default function ProjectDetailPage() {
                       </div>
                     )}
                   </div>
-                  <div className="flex items-center space-x-3">
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
                     <span className="text-sm font-bold text-on-surface">
                       {format(acq.package.price)}
                     </span>
@@ -595,7 +600,7 @@ export default function ProjectDetailPage() {
         )}
 
         {/* Description */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-6">
           <div>
             <h2 className="text-lg font-semibold text-on-surface mb-4">
               About this project
@@ -614,9 +619,9 @@ export default function ProjectDetailPage() {
                 {project.projectDocuments.map((doc) => (
                   <div
                     key={doc.id}
-                    className="flex items-center justify-between rounded-2xl bg-gray-50 p-4"
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 sm:gap-3 rounded-2xl bg-gray-50 p-4"
                   >
-                    <div>
+                    <div className="min-w-0">
                       <p className="font-medium text-on-surface truncate">
                         {doc.fileName}
                       </p>
@@ -624,7 +629,7 @@ export default function ProjectDetailPage() {
                         {doc.mimeType || "Document"}
                       </p>
                     </div>
-                    <div className="flex items-center gap-3 text-sm">
+                    <div className="flex items-center gap-3 text-sm shrink-0">
                       <a
                         href={doc.url}
                         target="_blank"
@@ -643,7 +648,7 @@ export default function ProjectDetailPage() {
 
         {/* Donations */}
         {project.donations && project.donations.length > 0 && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-4">
             <h2 className="text-lg font-semibold text-on-surface">
               Recent Donations
             </h2>
@@ -651,23 +656,23 @@ export default function ProjectDetailPage() {
               {project.donations.map((donation) => (
                 <div
                   key={donation.id}
-                  className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0"
+                  className="flex items-center justify-between gap-3 py-3 border-b border-gray-100 last:border-0"
                 >
-                  <div className="flex items-center space-x-3">
-                    <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xs">
+                  <div className="flex items-center space-x-3 min-w-0">
+                    <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-xs shrink-0">
                       {(
                         donation.company.name ||
                         donation.company.companyInfo?.companyName ||
                         "?"
                       ).charAt(0)}
                     </div>
-                    <span className="text-sm font-medium text-on-surface">
+                    <span className="text-sm font-medium text-on-surface truncate">
                       {donation.company.companyInfo?.companyName ||
                         donation.company.name ||
                         "Anonymous"}
                     </span>
                   </div>
-                  <span className="text-sm font-bold text-primary">
+                  <span className="text-sm font-bold text-primary shrink-0">
                     {format(donation.amount)}
                   </span>
                 </div>
@@ -677,7 +682,7 @@ export default function ProjectDetailPage() {
         )}
 
         {isLoggedIn && isCompany && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 space-y-4">
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 lg:p-8 space-y-4">
             <h2 className="text-lg font-semibold text-on-surface">
               Want to know better the project before donating? Request a
               meeting!
@@ -732,8 +737,8 @@ export default function ProjectDetailPage() {
 
       {/* Donate Modal */}
       {donateOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-md p-5 sm:p-6 lg:p-8 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-on-surface">
               Make a Donation
             </h2>
@@ -791,8 +796,8 @@ export default function ProjectDetailPage() {
       )}
 
       {meetingOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl p-8 space-y-6 max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-2xl p-5 sm:p-6 lg:p-8 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
             <h2 className="text-xl font-bold text-on-surface">
               Request Meeting
             </h2>

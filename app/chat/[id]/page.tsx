@@ -296,408 +296,401 @@ export default function WorkroomPage({
           onClose={() => setToastMessage(null)}
         />
       )}
-      <main className="min-h-screen bg-surface py-12 px-8">
-        <div className="max-w-6xl mx-auto space-y-6">
-          {/* Header */}
-          <div className="flex items-center justify-between">
-            <div className="space-y-1">
-              <h1 className="text-2xl font-bold text-on-surface">
-                {acq.service.name}
-                <span className="text-primary text-lg font-normal">
-                  {" "}
-                  — {acq.package.name}
-                </span>
-              </h1>
-              <p className="text-sm text-gray-500">
-                Project:{" "}
-                <span className="font-medium">{acq.project.title}</span>
-                {" · "}
-                {isProvider
-                  ? `NGO: ${acq.project.ngo.ngoInfo?.ngoName || acq.project.ngo.name || acq.project.ngo.email}`
-                  : `Provider: ${acq.service.provider.name || acq.service.provider.email}`}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              {statusBadge(acqStatus)}
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    isProvider ? "/admin/acquisitions" : "/my-services",
-                  )
-                }
-                className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
-              >
-                Back
-              </button>
-            </div>
+
+      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="space-y-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-on-surface break-words">
+              {acq.service.name}
+              <span className="text-primary text-base sm:text-lg font-normal">
+                {" "}
+                — {acq.package.name}
+              </span>
+            </h1>
+            <p className="text-sm text-gray-500 break-words">
+              Project: <span className="font-medium">{acq.project.title}</span>
+              {" · "}
+              {isProvider
+                ? `NGO: ${acq.project.ngo.ngoInfo?.ngoName || acq.project.ngo.name || acq.project.ngo.email}`
+                : `Provider: ${acq.service.provider.name || acq.service.provider.email}`}
+            </p>
           </div>
-
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex h-[calc(100vh-260px)]">
-            {/* Chat Area */}
-            <div className="flex-1 flex flex-col">
-              {/* Chat Header with Actions */}
-              <div className="p-4 border-b border-gray-100">
-                <div className="flex items-center justify-between">
-                  <h3 className="font-semibold text-on-surface">
-                    Workroom Chat
-                  </h3>
-                  <span className="text-xs text-gray-400">
-                    {revisionsLeft} revision{revisionsLeft !== 1 ? "s" : ""}{" "}
-                    left
-                  </span>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {isProvider &&
-                    (acqStatus === "ACTIVE" ||
-                      acqStatus === "REVISION_REQUESTED") && (
-                      <button
-                        type="button"
-                        onClick={() => setShowDeliverModal(true)}
-                        className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
-                      >
-                        📦 Deliver Work
-                      </button>
-                    )}
-                  {isNgo && acqStatus === "DELIVERED" && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => handleAction("accept")}
-                        disabled={actionLoading}
-                        className="px-3 py-1.5 bg-emerald-600 text-white font-medium rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50"
-                      >
-                        ✓ Accept Delivery
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setShowRevisionModal(true)}
-                        disabled={actionLoading || revisionsLeft === 0}
-                        className="px-3 py-1.5 border border-amber-300 text-amber-700 font-medium rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50"
-                      >
-                        🔄 Request Revision ({revisionsLeft} left)
-                      </button>
-                    </>
-                  )}
-                  {isNgo &&
-                    acqStatus === "COMPLETED" &&
-                    !acq.review &&
-                    !showReviewForm && (
-                      <button
-                        type="button"
-                        onClick={() => setShowReviewForm(true)}
-                        className="px-3 py-1.5 border border-primary text-primary font-medium rounded-lg text-sm hover:bg-primary/5"
-                      >
-                        ⭐ Leave a Review
-                      </button>
-                    )}
-                </div>
-
-                {/* Delivery Note */}
-                {acqStatus === "DELIVERED" && acq.deliveryMessage && (
-                  <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3">
-                    <p className="text-xs font-medium text-blue-800 mb-0.5">
-                      Provider&apos;s delivery note:
-                    </p>
-                    <p className="text-sm text-blue-700">
-                      {acq.deliveryMessage}
-                    </p>
-                  </div>
-                )}
-
-                {/* Review Form */}
-                {showReviewForm && (
-                  <div className="mt-3 bg-violet-50 border border-violet-100 rounded-lg p-3 space-y-2">
-                    <p className="text-sm font-medium text-violet-800">
-                      Leave a review
-                    </p>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <button
-                          key={star}
-                          type="button"
-                          onClick={() => setReviewRating(star)}
-                          className={`text-2xl ${star <= reviewRating ? "text-yellow-400" : "text-gray-300"}`}
-                        >
-                          ★
-                        </button>
-                      ))}
-                    </div>
-                    <textarea
-                      value={reviewComment}
-                      onChange={(e) => setReviewComment(e.target.value)}
-                      rows={2}
-                      className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
-                      placeholder="Write a comment (optional)..."
-                    />
-                    <div className="flex gap-2">
-                      <button
-                        type="button"
-                        onClick={handleReview}
-                        disabled={actionLoading}
-                        className="px-4 py-2 bg-primary text-white font-medium rounded-lg text-sm disabled:opacity-50"
-                      >
-                        Submit Review
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setShowReviewForm(false);
-                          setReviewRating(5);
-                          setReviewComment("");
-                        }}
-                        className="px-4 py-2 border text-gray-600 rounded-lg text-sm"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {/* Existing Review */}
-                {acq.review && (
-                  <div className="mt-3 bg-yellow-50 border border-yellow-100 rounded-lg p-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-sm font-medium text-on-surface">
-                        Review:
-                      </span>
-                      <div className="flex">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <span
-                            key={star}
-                            className={`text-sm ${star <= (acq.review?.rating ?? 0) ? "text-yellow-400" : "text-gray-300"}`}
-                          >
-                            ★
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    {acq.review.comment && (
-                      <p className="text-sm text-gray-600 mt-1">
-                        {acq.review.comment}
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-
-              {/* Messages */}
-              <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                {messages.length === 0 ? (
-                  <div className="text-center text-gray-400 text-sm py-8">
-                    No messages yet. Start the conversation!
-                  </div>
-                ) : (
-                  messages.map((msg) => (
-                    <div
-                      key={msg.id}
-                      className={`flex ${msg.senderId === session?.user.id ? "justify-end" : "justify-start"}`}
-                    >
-                      <div
-                        className={`max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap ${
-                          msg.senderId === session?.user.id
-                            ? "bg-primary text-white rounded-br-none"
-                            : "bg-gray-100 text-on-surface rounded-bl-none"
-                        }`}
-                      >
-                        {msg.content}
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Input */}
-              <div className="p-4 border-t border-gray-100">
-                <div className="flex gap-2">
-                  <input
-                    type="text"
-                    value={newMessage}
-                    onChange={(e) => setNewMessage(e.target.value)}
-                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                    placeholder="Type a message..."
-                    className="flex-1 px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <button
-                    type="button"
-                    onClick={sendMessage}
-                    disabled={sending || !newMessage.trim()}
-                    className="px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
-                  >
-                    {sending ? "..." : "Send"}
-                  </button>
-                </div>
-              </div>
-            </div>
-
-            {/* Sidebar */}
-            <aside className="w-80 border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
-              <div className="space-y-1">
-                <h3 className="text-sm font-semibold text-on-surface">
-                  Service Details
-                </h3>
-                <p className="text-xs text-gray-500">
-                  Overview of this acquisition
-                </p>
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Status</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {STATUS_LABELS[acqStatus] || acqStatus}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Revisions</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {acq.revisionsUsed} used, {revisionsLeft} left
-                  </p>
-                </div>
-                {acq.deliveredAt && (
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-400">Delivered</p>
-                    <p className="text-sm font-semibold text-on-surface">
-                      {new Date(acq.deliveredAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
-                {acq.completedAt && (
-                  <div className="space-y-1">
-                    <p className="text-xs text-gray-400">Completed</p>
-                    <p className="text-sm font-semibold text-on-surface">
-                      {new Date(acq.completedAt).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Package</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {acq.package.name}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Price</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {format(acq.package.price)}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Delivery Time</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {acq.package.deliveryDays} days
-                  </p>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">
-                    {isProvider ? "NGO" : "Provider"}
-                  </p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {isProvider
-                      ? acq.project.ngo.ngoInfo?.ngoName ||
-                        acq.project.ngo.name ||
-                        acq.project.ngo.email
-                      : acq.service.provider.name || acq.service.provider.email}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Project</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {acq.project.title}
-                  </p>
-                </div>
-                <div className="space-y-1">
-                  <p className="text-xs text-gray-400">Category</p>
-                  <p className="text-sm font-semibold text-on-surface">
-                    {acq.service.category}
-                  </p>
-                </div>
-              </div>
-            </aside>
+          <div className="flex items-center gap-3 shrink-0">
+            {statusBadge(acqStatus)}
+            <button
+              type="button"
+              onClick={() =>
+                router.push(isProvider ? "/admin/acquisitions" : "/my-services")
+              }
+              className="px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            >
+              Back
+            </button>
           </div>
         </div>
 
-        {/* Deliver Modal */}
-        {showDeliverModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
-              <h3 className="text-lg font-bold">Deliver Work</h3>
-              <p className="text-sm text-gray-500">
-                Add a note describing what you&apos;ve completed.
-              </p>
-              <textarea
-                value={deliveryMessage}
-                onChange={(e) => setDeliveryMessage(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
-                placeholder="Describe what you've completed..."
-              />
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setShowDeliverModal(false)}
-                  className="flex-1 py-2 border text-gray-600 rounded-lg"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAction("deliver", deliveryMessage)}
-                  disabled={actionLoading}
-                  className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
-                >
-                  {actionLoading ? "..." : "Submit Delivery"}
-                </button>
+        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-15rem)]">
+          {/* Chat Area */}
+          <div className="flex-1 flex flex-col min-w-0">
+            {/* Chat Header with Actions */}
+            <div className="p-4 border-b border-gray-100">
+              <div className="flex items-center justify-between">
+                <h3 className="font-semibold text-on-surface">Workroom Chat</h3>
+                <span className="text-xs text-gray-400">
+                  {revisionsLeft} revision{revisionsLeft !== 1 ? "s" : ""} left
+                </span>
               </div>
-            </div>
-          </div>
-        )}
 
-        {/* Revision Modal */}
-        {showRevisionModal && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 space-y-4">
-              <h3 className="text-lg font-bold">Request Revision</h3>
-              <p className="text-sm text-gray-500">
-                Describe what needs to be changed.
-              </p>
-              <textarea
-                value={revisionMessage}
-                onChange={(e) => setRevisionMessage(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
-                placeholder="What needs to be revised?"
-              />
-              <div className="flex gap-3">
+              {/* Action Buttons */}
+              <div className="flex flex-wrap gap-2 mt-3">
+                {isProvider &&
+                  (acqStatus === "ACTIVE" ||
+                    acqStatus === "REVISION_REQUESTED") && (
+                    <button
+                      type="button"
+                      onClick={() => setShowDeliverModal(true)}
+                      className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
+                    >
+                      📦 Deliver Work
+                    </button>
+                  )}
+                {isNgo && acqStatus === "DELIVERED" && (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => handleAction("accept")}
+                      disabled={actionLoading}
+                      className="px-3 py-1.5 bg-emerald-600 text-white font-medium rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50"
+                    >
+                      ✓ Accept Delivery
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowRevisionModal(true)}
+                      disabled={actionLoading || revisionsLeft === 0}
+                      className="px-3 py-1.5 border border-amber-300 text-amber-700 font-medium rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50"
+                    >
+                      🔄 Request Revision ({revisionsLeft} left)
+                    </button>
+                  </>
+                )}
+                {isNgo &&
+                  acqStatus === "COMPLETED" &&
+                  !acq.review &&
+                  !showReviewForm && (
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewForm(true)}
+                      className="px-3 py-1.5 border border-primary text-primary font-medium rounded-lg text-sm hover:bg-primary/5"
+                    >
+                      ⭐ Leave a Review
+                    </button>
+                  )}
+              </div>
+
+              {/* Delivery Note */}
+              {acqStatus === "DELIVERED" && acq.deliveryMessage && (
+                <div className="mt-3 bg-blue-50 border border-blue-100 rounded-lg p-3">
+                  <p className="text-xs font-medium text-blue-800 mb-0.5">
+                    Provider&apos;s delivery note:
+                  </p>
+                  <p className="text-sm text-blue-700">{acq.deliveryMessage}</p>
+                </div>
+              )}
+
+              {/* Review Form */}
+              {showReviewForm && (
+                <div className="mt-3 bg-violet-50 border border-violet-100 rounded-lg p-3 space-y-2">
+                  <p className="text-sm font-medium text-violet-800">
+                    Leave a review
+                  </p>
+                  <div className="flex gap-1">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        type="button"
+                        onClick={() => setReviewRating(star)}
+                        className={`text-2xl ${star <= reviewRating ? "text-yellow-400" : "text-gray-300"}`}
+                      >
+                        ★
+                      </button>
+                    ))}
+                  </div>
+                  <textarea
+                    value={reviewComment}
+                    onChange={(e) => setReviewComment(e.target.value)}
+                    rows={2}
+                    className="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm resize-none"
+                    placeholder="Write a comment (optional)..."
+                  />
+                  <div className="flex flex-col sm:flex-row gap-2">
+                    <button
+                      type="button"
+                      onClick={handleReview}
+                      disabled={actionLoading}
+                      className="px-4 py-2 bg-primary text-white font-medium rounded-lg text-sm disabled:opacity-50"
+                    >
+                      Submit Review
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowReviewForm(false);
+                        setReviewRating(5);
+                        setReviewComment("");
+                      }}
+                      className="px-4 py-2 border text-gray-600 rounded-lg text-sm"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Existing Review */}
+              {acq.review && (
+                <div className="mt-3 bg-yellow-50 border border-yellow-100 rounded-lg p-3">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-medium text-on-surface">
+                      Review:
+                    </span>
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <span
+                          key={star}
+                          className={`text-sm ${star <= (acq.review?.rating ?? 0) ? "text-yellow-400" : "text-gray-300"}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                  {acq.review.comment && (
+                    <p className="text-sm text-gray-600 mt-1">
+                      {acq.review.comment}
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Messages */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {messages.length === 0 ? (
+                <div className="text-center text-gray-400 text-sm py-8">
+                  No messages yet. Start the conversation!
+                </div>
+              ) : (
+                messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.senderId === session?.user.id ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
+                        msg.senderId === session?.user.id
+                          ? "bg-primary text-white rounded-br-none"
+                          : "bg-gray-100 text-on-surface rounded-bl-none"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))
+              )}
+              <div ref={messagesEndRef} />
+            </div>
+
+            {/* Input */}
+            <div className="p-3 sm:p-4 border-t border-gray-100">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                  placeholder="Type a message..."
+                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                />
                 <button
                   type="button"
-                  onClick={() => setShowRevisionModal(false)}
-                  className="flex-1 py-2 border text-gray-600 rounded-lg"
+                  onClick={sendMessage}
+                  disabled={sending || !newMessage.trim()}
+                  className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
                 >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleAction("revision", revisionMessage)}
-                  disabled={actionLoading}
-                  className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50"
-                >
-                  {actionLoading ? "..." : "Request Revision"}
+                  {sending ? "..." : "Send"}
                 </button>
               </div>
             </div>
           </div>
-        )}
-      </main>
-    </>
+
+          {/* Sidebar */}
+          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
+            <div className="space-y-1">
+              <h3 className="text-sm font-semibold text-on-surface">
+                Service Details
+              </h3>
+              <p className="text-xs text-gray-500">
+                Overview of this acquisition
+              </p>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Status</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {STATUS_LABELS[acqStatus] || acqStatus}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Revisions</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.revisionsUsed} used, {revisionsLeft} left
+                </p>
+              </div>
+              {acq.deliveredAt && (
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-400">Delivered</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    {new Date(acq.deliveredAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+              {acq.completedAt && (
+                <div className="space-y-1">
+                  <p className="text-xs text-gray-400">Completed</p>
+                  <p className="text-sm font-semibold text-on-surface">
+                    {new Date(acq.completedAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Package</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.package.name}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Price</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {format(acq.package.price)}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Delivery Time</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.package.deliveryDays} days
+                </p>
+              </div>
+            </div>
+
+            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-3">
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">
+                  {isProvider ? "NGO" : "Provider"}
+                </p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {isProvider
+                    ? acq.project.ngo.ngoInfo?.ngoName ||
+                      acq.project.ngo.name ||
+                      acq.project.ngo.email
+                    : acq.service.provider.name || acq.service.provider.email}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Project</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.project.title}
+                </p>
+              </div>
+              <div className="space-y-1">
+                <p className="text-xs text-gray-400">Category</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.service.category}
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </div>
+
+      {/* Deliver Modal */}
+      {showDeliverModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold">Deliver Work</h3>
+            <p className="text-sm text-gray-500">
+              Add a note describing what you&apos;ve completed.
+            </p>
+            <textarea
+              value={deliveryMessage}
+              onChange={(e) => setDeliveryMessage(e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
+              placeholder="Describe what you've completed..."
+            />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeliverModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAction("deliver", deliveryMessage)}
+                disabled={actionLoading}
+                className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
+              >
+                {actionLoading ? "..." : "Submit Delivery"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Revision Modal */}
+      {showRevisionModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+            <h3 className="text-lg font-bold">Request Revision</h3>
+            <p className="text-sm text-gray-500">
+              Describe what needs to be changed.
+            </p>
+            <textarea
+              value={revisionMessage}
+              onChange={(e) => setRevisionMessage(e.target.value)}
+              rows={4}
+              className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
+              placeholder="What needs to be revised?"
+            />
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+              <button
+                type="button"
+                onClick={() => setShowRevisionModal(false)}
+                className="flex-1 py-2 border text-gray-600 rounded-lg"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => handleAction("revision", revisionMessage)}
+                disabled={actionLoading}
+                className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50"
+              >
+                {actionLoading ? "..." : "Request Revision"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </main>
+  </>
   );
 }

@@ -598,13 +598,13 @@ export function OnboardingForm() {
       </div>
 
       {error && (
-        <div className="rounded-2xl bg-red-50 border border-red-200 p-4 text-sm text-red-700">
+        <div className="rounded-2xl bg-red-50 border border-red-200 p-3 sm:p-4 text-sm text-red-700">
           {error}
         </div>
       )}
 
       {userType && (
-        <div className="rounded-2xl bg-white border border-gray-100 p-5 shadow-sm">
+        <div className="rounded-2xl bg-white border border-gray-100 p-4 sm:p-5 shadow-sm">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div>
               <p className="text-xs font-semibold uppercase tracking-[0.2em] text-gray-500">
@@ -643,7 +643,7 @@ export function OnboardingForm() {
       )}
 
       {currentStepErrors.length > 0 && (
-        <div className="rounded-2xl bg-yellow-50 border border-amber-200 p-4 text-sm text-amber-800">
+        <div className="rounded-2xl bg-yellow-50 border border-amber-200 p-3 sm:p-4 text-sm text-amber-800">
           <p className="font-semibold">Fix the following before continuing:</p>
           <ul className="mt-2 space-y-1 list-disc list-inside">
             {currentStepErrors.map((e) => (
@@ -654,7 +654,7 @@ export function OnboardingForm() {
       )}
 
       {step === "identity" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
           <div className="text-lg font-semibold">
             {userType === "NGO" ? "Organization identity" : "Company identity"}
           </div>
@@ -842,7 +842,7 @@ export function OnboardingForm() {
       )}
 
       {step === "contact" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
           <div className="text-lg font-semibold">Contact information</div>
           <div className="grid gap-6 md:grid-cols-2">
             <label className="flex flex-col gap-2 md:col-span-2">
@@ -916,7 +916,7 @@ export function OnboardingForm() {
       )}
 
       {step === "legal" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
           <div className="text-lg font-semibold">Legal / formal identity</div>
           <div className="grid gap-6 md:grid-cols-2">
             <label className="flex flex-col gap-2">
@@ -1004,7 +1004,8 @@ export function OnboardingForm() {
                               setRegistrationDocuments,
                             )
                           }
-                          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                          aria-label={`Remove ${file.fileName}`}
+                          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 opacity-70 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
                         >
                           <span className="material-symbols-outlined text-sm">
                             close
@@ -1027,7 +1028,7 @@ export function OnboardingForm() {
       )}
 
       {step === "representative" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
           <div className="text-lg font-semibold">Representative identity</div>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 md:col-span-2">
@@ -1159,7 +1160,7 @@ export function OnboardingForm() {
       )}
 
       {step === "activity" && userType === "NGO" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-6">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-6">
           <div className="text-lg font-semibold">Activity proof</div>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="flex flex-col gap-2 md:col-span-2">
@@ -1212,7 +1213,8 @@ export function OnboardingForm() {
                           onClick={() =>
                             removeUploadedFile(file.url, setActivityProofUrls)
                           }
-                          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 opacity-0 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
+                          aria-label={`Remove ${file.fileName}`}
+                          className="absolute right-2 top-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white text-gray-500 opacity-70 transition hover:bg-red-50 hover:text-red-600 group-hover:opacity-100"
                         >
                           <span className="material-symbols-outlined text-sm">
                             close
@@ -1250,7 +1252,7 @@ export function OnboardingForm() {
       )}
 
       {step === "declaration" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 space-y-4">
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4">
           <div className="text-lg font-semibold">Declaration</div>
           <label className="flex items-start gap-3">
             <input
