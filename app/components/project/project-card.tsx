@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
 import { useCurrency } from "@/app/components/currency/currency-context";
@@ -24,6 +25,7 @@ export function ProjectCard({
 }: ProjectCardProps) {
   const { format } = useCurrency();
   const { data: session } = authClient.useSession();
+  const router = useRouter();
 
   const [isFavorited, setIsFavoritedLocal] = useState(!!project.isFavorited);
 
@@ -53,15 +55,25 @@ export function ProjectCard({
   const funded = getFundedPercent(project.currentAmount, project.targetBudget);
 
   return (
-    <article
+    // biome-ignore lint/a11y/useSemanticElements: contains nested interactive buttons
+    <div
       className={cn(
-        "bg-surface-container-lowest rounded-xl p-5 sm:p-6 lg:p-8 flex flex-col hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.08)] transition-all",
+        "bg-surface-container-lowest rounded-xl p-5 sm:p-6 lg:p-8 flex flex-col hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.08)] transition-all cursor-pointer",
         className,
       )}
       style={{
         opacity: transparentWhenNotFavorite && !isFavorited ? 0.35 : 1,
         transition: "opacity 0.2s ease",
       }}
+      onClick={() => router.push(`/projects/${project.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          router.push(`/projects/${project.id}`);
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <div className="h-44 sm:h-48 w-full rounded-xl overflow-hidden mb-5 sm:mb-6 relative group">
         {/* biome-ignore lint/performance/noImgElement: user-provided project images may be from any external host */}
@@ -73,7 +85,10 @@ export function ProjectCard({
         {session?.user && (
           <button
             type="button"
-            onClick={onFavoriteToggle}
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle();
+            }}
             aria-label={
               isFavorited ? "Remove from favorites" : "Add to favorites"
             }
@@ -126,12 +141,10 @@ export function ProjectCard({
           </div>
           <ProgressBar value={funded} size="sm" />
         </div>
-        <a href={`/projects/${project.id}`}>
-          <Button variant="secondary" size="lg" className="w-full">
-            Fund Now
-          </Button>
-        </a>
+        <Button variant="secondary" size="lg" className="w-full">
+          Fund Now
+        </Button>
       </div>
-    </article>
+    </div>
   );
 }
