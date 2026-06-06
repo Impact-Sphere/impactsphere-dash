@@ -12,8 +12,8 @@ import {
 import { authClient } from "@/app/lib/auth-client";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
-import { useProfile } from "./use-profile";
 import { useSidebar } from "./sidebar-context";
+import { useProfile } from "./use-profile";
 
 export function Sidebar() {
   const { open, close } = useSidebar();
