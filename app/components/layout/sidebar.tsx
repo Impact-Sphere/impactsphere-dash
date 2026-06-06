@@ -12,6 +12,7 @@ import {
 import { authClient } from "@/app/lib/auth-client";
 import { footerNavItems, navItems } from "@/app/lib/data";
 import { cn } from "@/app/lib/utils";
+import { useProfile } from "./use-profile";
 import { useSidebar } from "./sidebar-context";
 
 export function Sidebar() {
@@ -19,50 +20,46 @@ export function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
   const { data: session } = authClient.useSession();
+  const { profile } = useProfile();
   const {
     currency,
     setCurrency,
     symbol,
     loading: currencyLoading,
   } = useCurrency();
-  const [userType, setUserType] = useState<string | null>(null);
-  const [approvalStatus, setApprovalStatus] = useState<string | null>(null);
   const [showCurrencyPicker, setShowCurrencyPicker] = useState(false);
 
+  const userType = profile?.userType ?? null;
+  const approvalStatus = profile?.approvalStatus ?? null;
+  const profileImage = profile?.image ?? null;
+
   useEffect(() => {
-    if (!session) return;
-    fetch("/api/profile")
+    if (!session || !profile) return;
+
+    const isPending =
+      approvalStatus === "PENDING" &&
+      ["NGO", "COMPANY"].includes(userType || "");
+
+    if (isPending && pathname !== "/pending-approval") {
+      router.push("/pending-approval");
+      return;
+    }
+
+    // Redirect users who haven't completed onboarding
+    fetch("/api/onboarding")
       .then((res) => res.json())
-      .then((data) => {
-        setUserType(data.userType || null);
-        setApprovalStatus(data.approvalStatus || null);
-
-        const isPending =
-          data.approvalStatus === "PENDING" &&
-          ["NGO", "COMPANY"].includes(data.userType);
-
-        if (isPending && pathname !== "/pending-approval") {
-          router.push("/pending-approval");
-          return;
+      .then((onData) => {
+        if (
+          onData.needsOnboarding &&
+          pathname !== "/onboarding" &&
+          pathname !== "/resubmit" &&
+          pathname !== "/login"
+        ) {
+          router.push("/onboarding");
         }
-
-        // Redirect users who haven't completed onboarding
-        fetch("/api/onboarding")
-          .then((res) => res.json())
-          .then((onData) => {
-            if (
-              onData.needsOnboarding &&
-              pathname !== "/onboarding" &&
-              pathname !== "/resubmit" &&
-              pathname !== "/login"
-            ) {
-              router.push("/onboarding");
-            }
-          })
-          .catch(() => {});
       })
       .catch(() => {});
-  }, [session, pathname, router]);
+  }, [session, profile, pathname, router, userType, approvalStatus]);
 
   const isAdmin = userType === "ADMIN";
   const isApprovedNgo = userType === "NGO" && approvalStatus === "APPROVED";
@@ -323,8 +320,19 @@ export function Sidebar() {
               href="/profile"
               className="flex items-center space-x-3 px-4 py-2 rounded-xl hover:bg-slate-200/50 transition-colors"
             >
-              <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-sm">
-                {session.user.name?.charAt(0) || session.user.email?.charAt(0)}
+              <div className="w-8 h-8 rounded-full bg-violet-100 flex items-center justify-center text-violet-700 font-bold text-sm overflow-hidden">
+                {profileImage ? (
+                  <Image
+                    src={profileImage}
+                    alt="Avatar"
+                    width={32}
+                    height={32}
+                    unoptimized
+                    className="object-cover w-full h-full"
+                  />
+                ) : (
+                  session.user.name?.charAt(0) || session.user.email?.charAt(0)
+                )}
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-on-surface truncate">
