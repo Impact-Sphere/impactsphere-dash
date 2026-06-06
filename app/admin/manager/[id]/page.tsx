@@ -289,255 +289,255 @@ export default function AdminWorkroomPage({
       )}
 
       <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-10 px-0 sm:px-6 lg:px-8">
-      <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div className="space-y-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-on-surface">
-              Workroom
-            </h1>
-            <p className="text-sm text-gray-500">
-              Chat, deliver work, and handle revisions for this service.
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => router.back()}
-            className="self-start sm:self-auto px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
-          >
-            Back
-          </button>
-        </div>
-
-        <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-13rem)]">
-          <div className="flex-1 flex flex-col min-w-0">
-            <div className="p-4 border-b border-gray-100">
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0">
-                  <h3 className="font-semibold text-on-surface break-words">
-                    {acq.service.name}
-                    <span className="text-primary text-sm font-normal">
-                      {" "}
-                      - {acq.package.name}
-                    </span>
-                  </h3>
-                  <p className="text-xs text-gray-500 break-words">
-                    Project: {acq.project.title}
-                  </p>
-                </div>
-                <span
-                  className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
-                    acqStatus === "DELIVERED"
-                      ? "bg-blue-100 text-blue-700"
-                      : acqStatus === "COMPLETED"
-                        ? "bg-violet-100 text-violet-700"
-                        : acqStatus === "REVISION_REQUESTED"
-                          ? "bg-amber-100 text-amber-700"
-                          : "bg-emerald-100 text-emerald-700"
-                  }`}
-                >
-                  {statusLabel}
-                </span>
-              </div>
-
-              <div className="flex flex-wrap gap-2 mt-3">
-                {isProvider &&
-                  (acqStatus === "ACTIVE" ||
-                    acqStatus === "REVISION_REQUESTED") && (
-                    <button
-                      type="button"
-                      onClick={() => setShowDeliverModal(true)}
-                      className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
-                    >
-                      Deliver Work
-                    </button>
-                  )}
-                {isNgo && acqStatus === "DELIVERED" && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={handleAccept}
-                      disabled={actionLoading}
-                      className="px-3 py-1.5 bg-emerald-600 text-white font-medium rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => setShowRevisionModal(true)}
-                      disabled={actionLoading || revisionsLeft === 0}
-                      className="px-3 py-1.5 border border-amber-300 text-amber-700 font-medium rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50"
-                    >
-                      Request Revision ({revisionsLeft} left)
-                    </button>
-                  </>
-                )}
-              </div>
+        <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div className="space-y-1 min-w-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-on-surface">
+                Workroom
+              </h1>
+              <p className="text-sm text-gray-500">
+                Chat, deliver work, and handle revisions for this service.
+              </p>
             </div>
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="self-start sm:self-auto px-4 py-2 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+            >
+              Back
+            </button>
+          </div>
 
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {messages.map((msg) => (
-                <div
-                  key={msg.id}
-                  className={`flex ${
-                    msg.senderId === session?.user.id
-                      ? "justify-end"
-                      : "justify-start"
-                  }`}
-                >
-                  <div
-                    className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
-                      msg.senderId === session?.user.id
-                        ? "bg-primary text-white rounded-br-none"
-                        : "bg-gray-100 text-on-surface rounded-bl-none"
+          <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-13rem)]">
+            <div className="flex-1 flex flex-col min-w-0">
+              <div className="p-4 border-b border-gray-100">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold text-on-surface break-words">
+                      {acq.service.name}
+                      <span className="text-primary text-sm font-normal">
+                        {" "}
+                        - {acq.package.name}
+                      </span>
+                    </h3>
+                    <p className="text-xs text-gray-500 break-words">
+                      Project: {acq.project.title}
+                    </p>
+                  </div>
+                  <span
+                    className={`shrink-0 text-xs px-2 py-1 rounded-full font-medium ${
+                      acqStatus === "DELIVERED"
+                        ? "bg-blue-100 text-blue-700"
+                        : acqStatus === "COMPLETED"
+                          ? "bg-violet-100 text-violet-700"
+                          : acqStatus === "REVISION_REQUESTED"
+                            ? "bg-amber-100 text-amber-700"
+                            : "bg-emerald-100 text-emerald-700"
                     }`}
                   >
-                    {msg.content}
-                  </div>
+                    {statusLabel}
+                  </span>
                 </div>
-              ))}
-              <div ref={messagesEndRef} />
+
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {isProvider &&
+                    (acqStatus === "ACTIVE" ||
+                      acqStatus === "REVISION_REQUESTED") && (
+                      <button
+                        type="button"
+                        onClick={() => setShowDeliverModal(true)}
+                        className="px-3 py-1.5 bg-primary text-white font-medium rounded-lg text-sm hover:bg-primary/90"
+                      >
+                        Deliver Work
+                      </button>
+                    )}
+                  {isNgo && acqStatus === "DELIVERED" && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={handleAccept}
+                        disabled={actionLoading}
+                        className="px-3 py-1.5 bg-emerald-600 text-white font-medium rounded-lg text-sm hover:bg-emerald-700 disabled:opacity-50"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowRevisionModal(true)}
+                        disabled={actionLoading || revisionsLeft === 0}
+                        className="px-3 py-1.5 border border-amber-300 text-amber-700 font-medium rounded-lg text-sm hover:bg-amber-50 disabled:opacity-50"
+                      >
+                        Request Revision ({revisionsLeft} left)
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex-1 overflow-y-auto p-4 space-y-3">
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${
+                      msg.senderId === session?.user.id
+                        ? "justify-end"
+                        : "justify-start"
+                    }`}
+                  >
+                    <div
+                      className={`max-w-[85%] sm:max-w-[70%] px-4 py-2 rounded-2xl text-sm whitespace-pre-wrap break-words ${
+                        msg.senderId === session?.user.id
+                          ? "bg-primary text-white rounded-br-none"
+                          : "bg-gray-100 text-on-surface rounded-bl-none"
+                      }`}
+                    >
+                      {msg.content}
+                    </div>
+                  </div>
+                ))}
+                <div ref={messagesEndRef} />
+              </div>
+
+              <div className="p-3 sm:p-4 border-t border-gray-100">
+                {!canMessage && (
+                  <p className="text-xs text-gray-400 mb-2">
+                    You have read-only access to this workroom.
+                  </p>
+                )}
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={newMessage}
+                    onChange={(e) => setNewMessage(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && sendMessage()}
+                    placeholder={canMessage ? "Type a message..." : "Read-only"}
+                    className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+                    disabled={!canMessage}
+                  />
+                  <button
+                    type="button"
+                    onClick={sendMessage}
+                    disabled={sending || !newMessage.trim() || !canMessage}
+                    className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  >
+                    {sending ? "..." : "Send"}
+                  </button>
+                </div>
+              </div>
             </div>
 
-            <div className="p-3 sm:p-4 border-t border-gray-100">
-              {!canMessage && (
-                <p className="text-xs text-gray-400 mb-2">
-                  You have read-only access to this workroom.
+            <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
+              <div className="space-y-1">
+                <h3 className="text-sm font-semibold text-on-surface">
+                  Delivery Summary
+                </h3>
+                <p className="text-xs text-gray-500">
+                  Track status, revisions, and donation spend.
                 </p>
-              )}
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={newMessage}
-                  onChange={(e) => setNewMessage(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && sendMessage()}
-                  placeholder={canMessage ? "Type a message..." : "Read-only"}
-                  className="flex-1 min-w-0 px-3 sm:px-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                  disabled={!canMessage}
-                />
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+                <p className="text-xs text-gray-400">Status</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {statusLabel}
+                </p>
+                <p className="text-xs text-gray-400">Revisions</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.revisionsUsed} used, {revisionsLeft} left
+                </p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+                <p className="text-xs text-gray-400">Donation spend</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {format(acq.package.price)}
+                </p>
+                <p className="text-xs text-gray-500">{spendLabel}</p>
+              </div>
+              <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
+                <p className="text-xs text-gray-400">Project</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.project.ngo.ngoInfo?.ngoName ||
+                    acq.project.ngo.name ||
+                    acq.project.ngo.email}
+                </p>
+                <p className="text-xs text-gray-400">Service</p>
+                <p className="text-sm font-semibold text-on-surface">
+                  {acq.service.name}
+                </p>
+              </div>
+            </aside>
+          </div>
+        </div>
+
+        {showDeliverModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+            <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold">Deliver Work</h3>
+              <p className="text-sm text-gray-500">
+                Add a note describing what you have delivered.
+              </p>
+              <textarea
+                value={deliveryMessage}
+                onChange={(e) => setDeliveryMessage(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
+                placeholder="Describe what you have completed..."
+              />
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
                 <button
                   type="button"
-                  onClick={sendMessage}
-                  disabled={sending || !newMessage.trim() || !canMessage}
-                  className="shrink-0 px-4 py-2 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 disabled:opacity-50 transition-colors"
+                  onClick={() => setShowDeliverModal(false)}
+                  className="flex-1 py-2 border text-gray-600 rounded-lg"
                 >
-                  {sending ? "..." : "Send"}
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeliver}
+                  disabled={actionLoading}
+                  className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
+                >
+                  {actionLoading ? "..." : "Submit Delivery"}
                 </button>
               </div>
             </div>
           </div>
+        )}
 
-          <aside className="w-full lg:w-80 border-t lg:border-t-0 lg:border-l border-gray-100 bg-slate-50 p-4 space-y-4 overflow-y-auto">
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold text-on-surface">
-                Delivery Summary
-              </h3>
-              <p className="text-xs text-gray-500">
-                Track status, revisions, and donation spend.
+        {showRevisionModal && (
+          <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
+            <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+              <h3 className="text-lg font-bold">Request Revision</h3>
+              <p className="text-sm text-gray-500">
+                Describe what needs to be changed.
               </p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-              <p className="text-xs text-gray-400">Status</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {statusLabel}
-              </p>
-              <p className="text-xs text-gray-400">Revisions</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {acq.revisionsUsed} used, {revisionsLeft} left
-              </p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-              <p className="text-xs text-gray-400">Donation spend</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {format(acq.package.price)}
-              </p>
-              <p className="text-xs text-gray-500">{spendLabel}</p>
-            </div>
-            <div className="bg-white rounded-xl border border-gray-100 p-4 space-y-2">
-              <p className="text-xs text-gray-400">Project</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {acq.project.ngo.ngoInfo?.ngoName ||
-                  acq.project.ngo.name ||
-                  acq.project.ngo.email}
-              </p>
-              <p className="text-xs text-gray-400">Service</p>
-              <p className="text-sm font-semibold text-on-surface">
-                {acq.service.name}
-              </p>
-            </div>
-          </aside>
-        </div>
-      </div>
-
-      {showDeliverModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold">Deliver Work</h3>
-            <p className="text-sm text-gray-500">
-              Add a note describing what you have delivered.
-            </p>
-            <textarea
-              value={deliveryMessage}
-              onChange={(e) => setDeliveryMessage(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
-              placeholder="Describe what you have completed..."
-            />
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <button
-                type="button"
-                onClick={() => setShowDeliverModal(false)}
-                className="flex-1 py-2 border text-gray-600 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleDeliver}
-                disabled={actionLoading}
-                className="flex-1 py-2 bg-primary text-white rounded-lg disabled:opacity-50"
-              >
-                {actionLoading ? "..." : "Submit Delivery"}
-              </button>
+              <textarea
+                value={revisionMessage}
+                onChange={(e) => setRevisionMessage(e.target.value)}
+                rows={4}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
+                placeholder="What needs to be revised?"
+              />
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                <button
+                  type="button"
+                  onClick={() => setShowRevisionModal(false)}
+                  className="flex-1 py-2 border text-gray-600 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRevision}
+                  disabled={actionLoading}
+                  className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50"
+                >
+                  {actionLoading ? "..." : "Request Revision"}
+                </button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {showRevisionModal && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 sm:p-4">
-          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl max-w-md w-full p-5 sm:p-6 space-y-4 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
-            <h3 className="text-lg font-bold">Request Revision</h3>
-            <p className="text-sm text-gray-500">
-              Describe what needs to be changed.
-            </p>
-            <textarea
-              value={revisionMessage}
-              onChange={(e) => setRevisionMessage(e.target.value)}
-              rows={4}
-              className="w-full px-3 py-2 border border-gray-200 rounded-lg resize-none"
-              placeholder="What needs to be revised?"
-            />
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
-              <button
-                type="button"
-                onClick={() => setShowRevisionModal(false)}
-                className="flex-1 py-2 border text-gray-600 rounded-lg"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleRevision}
-                disabled={actionLoading}
-                className="flex-1 py-2 bg-amber-600 text-white rounded-lg disabled:opacity-50"
-              >
-                {actionLoading ? "..." : "Request Revision"}
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-    </main>
-  </>
+        )}
+      </main>
+    </>
   );
 }

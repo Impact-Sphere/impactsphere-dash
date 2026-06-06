@@ -2,8 +2,8 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useProfile } from "./use-profile";
 import { useSidebar } from "./sidebar-context";
+import { useProfile } from "./use-profile";
 
 export function MobileTopBar() {
   const { toggle } = useSidebar();
