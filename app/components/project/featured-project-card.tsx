@@ -1,8 +1,8 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { FaRegStar, FaStar } from "react-icons/fa";
-import { useRouter } from "next/navigation";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { Badge } from "@/app/components/ui/badge";
 import { Button } from "@/app/components/ui/button";
@@ -39,12 +39,21 @@ export function FeaturedProjectCard({
   };
 
   return (
-    <article
+    // biome-ignore lint/a11y/useSemanticElements: contains nested interactive buttons
+    <div
       className={cn(
         "col-span-12 lg:col-span-8 group relative overflow-hidden rounded-xl bg-surface-container-lowest transition-all hover:shadow-[0_32px_64px_-12px_rgba(69,0,173,0.12)] cursor-pointer",
         className,
       )}
       onClick={() => router.push(`/projects/${project.id}`)}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          router.push(`/projects/${project.id}`);
+        }
+      }}
+      role="button"
+      tabIndex={0}
     >
       <div className="flex flex-col md:flex-row h-full group">
         <div className="md:w-1/2 overflow-hidden relative min-h-[220px] sm:min-h-[280px] md:min-h-0">
@@ -94,7 +103,10 @@ export function FeaturedProjectCard({
         {session?.user && (
           <button
             type="button"
-            onClick={(e) => { e.stopPropagation(); onFavoriteToggle(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              onFavoriteToggle();
+            }}
             aria-label={
               isFavorited ? "Remove from favorites" : "Add to favorites"
             }
@@ -117,6 +129,6 @@ export function FeaturedProjectCard({
           </button>
         )}
       </div>
-    </article>
+    </div>
   );
 }

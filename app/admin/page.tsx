@@ -497,7 +497,6 @@ export default function AdminDashboardPage() {
                   key={user.id}
                   className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 sm:p-6 space-y-4"
                 >
-
                   <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3">
                     <div className="space-y-1 min-w-0">
                       <div className="flex flex-col sm:flex-row sm:items-center sm:gap-3 gap-1.5">
