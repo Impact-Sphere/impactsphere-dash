@@ -111,6 +111,24 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+    });
+
+    if (!user) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    if (!user.termsAcceptedAt) {
+      return NextResponse.json(
+        {
+          error:
+            "You must accept the Terms of Service and Privacy Policy before continuing.",
+        },
+        { status: 403 },
+      );
+    }
+
     const body = await request.json();
 
     const {

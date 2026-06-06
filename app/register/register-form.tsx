@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { authClient } from "@/app/lib/auth-client";
@@ -9,28 +10,43 @@ export function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [termsAccepted, setTermsAccepted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (!termsAccepted) {
+      setError("You must agree to the Terms of Service and Privacy Policy.");
+      return;
+    }
+
     setLoading(true);
 
-    const { error } = await authClient.signUp.email({
+    const { error: signUpError } = await authClient.signUp.email({
       name,
       email,
       password,
     });
 
-    setLoading(false);
-
-    if (error) {
-      setError(error.message || "Failed to create account");
-    } else {
-      router.push("/onboarding");
-      router.refresh();
+    if (signUpError) {
+      setLoading(false);
+      setError(signUpError.message || "Failed to create account");
+      return;
     }
+
+    // Record terms acceptance immediately after successful signup
+    try {
+      await fetch("/api/terms-acceptance", { method: "POST" });
+    } catch {
+      // Non-blocking: if this fails we still redirect, but log is lost
+    }
+
+    setLoading(false);
+    router.push("/onboarding");
+    router.refresh();
   };
 
   return (
@@ -83,6 +99,36 @@ export function RegisterForm() {
           placeholder="••••••••"
         />
         <p className="text-xs text-gray-400">Must be at least 8 characters</p>
+      </div>
+
+      <div className="flex items-start gap-2">
+        <input
+          id="terms"
+          type="checkbox"
+          checked={termsAccepted}
+          onChange={(e) => setTermsAccepted(e.target.checked)}
+          className="mt-1 h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+        />
+        <label htmlFor="terms" className="text-sm text-gray-600 leading-snug">
+          I agree to the{" "}
+          <Link
+            href="/terms"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Terms of Service
+          </Link>{" "}
+          and{" "}
+          <Link
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-primary hover:underline"
+          >
+            Privacy Policy
+          </Link>
+        </label>
       </div>
 
       {error && (

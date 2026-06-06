@@ -268,12 +268,19 @@ async function seedAdmin() {
 
   if (existing) {
     console.log(`Admin user ${email} already exists.`);
+    const updates: Record<string, unknown> = {};
     if (existing.userType !== "ADMIN") {
+      updates.userType = "ADMIN";
+    }
+    if (!existing.termsAcceptedAt) {
+      updates.termsAcceptedAt = new Date();
+    }
+    if (Object.keys(updates).length > 0) {
       await prisma.user.update({
         where: { id: existing.id },
-        data: { userType: "ADMIN" },
+        data: updates,
       });
-      console.log("Promoted to ADMIN.");
+      console.log("Admin updated:", Object.keys(updates).join(", "));
     }
     return;
   }
@@ -292,6 +299,7 @@ async function seedAdmin() {
       approvalStatus: "APPROVED",
       createdAt: now,
       updatedAt: now,
+      termsAcceptedAt: now,
     },
   });
 
@@ -320,6 +328,14 @@ async function seedNgos() {
     if (existing) {
       created.push(existing.id);
       console.log(`NGO ${ngo.email} already exists.`);
+
+      if (!existing.termsAcceptedAt) {
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { termsAcceptedAt: new Date() },
+        });
+        console.log(`  -> Marked terms as accepted for ${ngo.email}`);
+      }
 
       // Ensure existing seed NGO has required onboarding fields
       const info = existing.ngoInfo;
@@ -389,6 +405,7 @@ async function seedNgos() {
         approvalStatus: "APPROVED",
         createdAt: now,
         updatedAt: now,
+        termsAcceptedAt: now,
         ngoInfo: {
           create: {
             id: crypto.randomUUID(),
@@ -454,6 +471,14 @@ async function seedCompanies() {
     if (existing) {
       created.push(existing.id);
       console.log(`Company ${corp.email} already exists.`);
+
+      if (!existing.termsAcceptedAt) {
+        await prisma.user.update({
+          where: { id: existing.id },
+          data: { termsAcceptedAt: new Date() },
+        });
+        console.log(`  -> Marked terms as accepted for ${corp.email}`);
+      }
 
       // Ensure existing seed company has required onboarding fields
       const info = existing.companyInfo;
@@ -523,6 +548,7 @@ async function seedCompanies() {
         approvalStatus: "APPROVED",
         createdAt: now,
         updatedAt: now,
+        termsAcceptedAt: now,
         companyInfo: {
           create: {
             id: crypto.randomUUID(),
