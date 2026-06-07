@@ -1,9 +1,9 @@
 export type ProjectCategory =
-  | "Environment"
   | "Education"
   | "Healthcare"
   | "Tech Equity"
-  | "Disaster Relief";
+  | "Disaster Relief"
+  | "Housing";
 
 export interface ProjectDocument {
   id: string;

@@ -7,11 +7,11 @@ import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
 
 const CATEGORY_OPTIONS = [
-  "Environment",
   "Education",
   "Healthcare",
   "Tech Equity",
   "Disaster Relief",
+  "Housing",
 ];
 
 export default function NewProjectPage() {
@@ -20,7 +20,7 @@ export default function NewProjectPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Environment");
+  const [category, setCategory] = useState("Education");
   const [image, setImage] = useState("");
   const [projectDocuments, setProjectDocuments] = useState<
     {
