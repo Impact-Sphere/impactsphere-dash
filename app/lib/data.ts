@@ -20,21 +20,21 @@ export const footerNavItems: NavItem[] = [
 
 export const categories = [
   { id: "all", label: "All Impacts", active: true },
-  { id: "Environment", label: "Environment" },
   { id: "Education", label: "Education" },
   { id: "Healthcare", label: "Healthcare" },
   { id: "Tech Equity", label: "Tech Equity" },
   { id: "Disaster Relief", label: "Disaster Relief" },
+  { id: "Housing", label: "Housing" },
 ];
 
 export const featuredProject: Project = {
   id: "1",
-  title: "Amazon Reforestation & Digital Mapping",
-  category: "Environment",
+  title: "Affordable Housing for Vulnerable Families",
+  category: "Housing",
   description:
-    "Leveraging satellite AI to track growth in real-time while employing local communities for active restoration efforts.",
+    "Building and renovating affordable homes for low-income families, refugees, and displaced communities. Providing safe, stable housing alongside social support services.",
   image:
-    "https://lh3.googleusercontent.com/aida-public/AB6AXuC5GLw9pUiQMrYymt6xArKshFtU6IFjOlf762zvIFPglZy3-VbWV8gkDrCAVZLyT-XkgTDRLW07mS1KdOv0QQJhap_Gs0U8OJKBTSRw996kznDdzCXEEuhZWThNcy2ZbLt9u8PMgNuMNno9e_PjR8hyE4MZp5Mi-jKG8uLDWhMytF0SU1s34ZvPxr9gfexdrFrAxNMS96g62dxwN05vx1AMi4uwabYB_FaE07Gec3qsR7sS8wVxJD7qhID7P0rcGP8T6UeY-1gAUFmT",
+    "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop&q=60",
   targetBudget: 1_600_000,
   currentAmount: 1_200_000,
   serviceSpent: 0,

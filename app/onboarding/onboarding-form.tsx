@@ -31,7 +31,7 @@ type ValidationError = {
 const NGO_TYPES = [
   "education",
   "health",
-  "environment",
+  "human rights",
   "humanitarian",
   "other",
 ];

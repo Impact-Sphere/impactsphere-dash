@@ -13,20 +13,20 @@ const prisma = new PrismaClient({ adapter });
 
 const NGOS = [
   {
-    name: "Green Earth Alliance",
+    name: "Justice for All Foundation",
     email: "ngo1@demo.local",
     password: "demoongpass",
-    ngoName: "Green Earth Alliance",
+    ngoName: "Justice for All Foundation",
     taxId: "NGO-001-2024",
-    contact: "contact@greenearth.demo | +1 555-0101",
+    contact: "contact@justiceforall.demo | +1 555-0101",
     goals:
-      "Reforest 10,000 hectares of degraded land across the Amazon basin by 2030. Empower indigenous communities with sustainable livelihoods and environmental monitoring tools.",
+      "Provide legal aid and human rights advocacy to 50,000 marginalized individuals by 2030. Empower communities with legal literacy and digital monitoring tools for rights violations.",
     challenges:
-      "Limited funding for long-term maintenance, illegal logging activities in buffer zones, and climate variability affecting sapling survival rates.",
+      "Limited funding for long-term legal operations, political pressure in target regions, and securing pro-bono legal expertise across borders.",
     legalRepName: "Maria Silva",
     verificationTier: "FORMAL_REGISTRATION" as const,
-    statutesUrl: "https://example.com/greenearth-statutes.pdf",
-    activityReportUrl: "https://example.com/greenearth-report-2024.pdf",
+    statutesUrl: "https://example.com/justiceforall-statutes.pdf",
+    activityReportUrl: "https://example.com/justiceforall-report-2024.pdf",
   },
   {
     name: "Code for Kids",
@@ -71,7 +71,7 @@ const COMPANIES = [
     taxId: "CORP-001-2024",
     contact: "csr@techcorp.demo | +1 555-0201",
     causes:
-      "Education equity, climate tech innovation, digital accessibility for disabled communities, and STEM scholarships for underrepresented groups.",
+      "Education equity, digital accessibility for disabled communities, STEM scholarships for underrepresented groups, and human rights advocacy.",
     representativeName: "Sarah Johnson",
     representativePosition: "CSR Director",
   },
@@ -83,7 +83,7 @@ const COMPANIES = [
     taxId: "CORP-002-2024",
     contact: "impact@summit.demo | +1 555-0202",
     causes:
-      "Clean energy transition, sustainable agriculture, ocean conservation, and affordable housing initiatives.",
+      "Affordable housing initiatives, community development, and human rights empowerment.",
     representativeName: "Michael Torres",
     representativePosition: "Impact Investment Lead",
   },
@@ -91,12 +91,12 @@ const COMPANIES = [
 
 const PROJECT_SEEDS = [
   {
-    title: "Amazon Reforestation & Digital Mapping",
-    category: "Environment",
+    title: "Affordable Housing for Vulnerable Families",
+    category: "Housing",
     description:
-      "Leveraging satellite AI to track growth in real-time while employing local communities for active restoration efforts across 5,000 hectares of degraded rainforest.",
+      "Building and renovating affordable homes for low-income families, refugees, and displaced communities. Providing safe, stable housing alongside social support services.",
     image:
-      "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1560518883-ce09059eeffa?w=800&auto=format&fit=crop&q=60",
     target: 1_600_000,
     current: 1_200_000,
     ngoIdx: 0,
@@ -146,12 +146,12 @@ const PROJECT_SEEDS = [
     ngoIdx: 1,
   },
   {
-    title: "Wildlife Corridor Restoration",
-    category: "Environment",
+    title: "Refugee Legal Aid Network",
+    category: "Disaster Relief",
     description:
-      "Creating connected wildlife corridors across fragmented habitats in Southeast Asia. Protecting endangered elephant and tiger populations.",
+      "Establishing legal aid centers in refugee camps across 5 countries. Providing free legal representation, asylum support, and family reunification services.",
     image:
-      "https://images.unsplash.com/photo-1504280390367-361c6d9f38f4?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&auto=format&fit=crop&q=60",
     target: 800_000,
     current: 320_000,
     ngoIdx: 0,
@@ -190,12 +190,12 @@ const PROJECT_SEEDS = [
     ngoIdx: 1,
   },
   {
-    title: "Coral Reef Regeneration Lab",
-    category: "Environment",
+    title: "Anti-Trafficking Prevention Program",
+    category: "Healthcare",
     description:
-      "Building underwater nurseries to regrow coral reefs in the Caribbean. Using heat-resistant coral strains to combat bleaching.",
+      "Operating safe houses, hotlines, and community education programs to prevent human trafficking and support survivors with rehabilitation and reintegration.",
     image:
-      "https://images.unsplash.com/photo-1546026423-cc4642628d2b?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&auto=format&fit=crop&q=60",
     target: 600_000,
     current: 540_000,
     ngoIdx: 0,
@@ -234,12 +234,12 @@ const PROJECT_SEEDS = [
     ngoIdx: 1,
   },
   {
-    title: "Community Gardens Network",
-    category: "Environment",
+    title: "Women's Rights Advocacy Centers",
+    category: "Education",
     description:
-      "Establishing 100 community gardens in food deserts. Teaching urban agriculture and providing fresh produce to 50,000 residents.",
+      "Establishing advocacy centers in underserved regions to support women's rights, provide legal counseling, and drive gender equality initiatives.",
     image:
-      "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=800&auto=format&fit=crop&q=60",
+      "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?w=800&auto=format&fit=crop&q=60",
     target: 85_000,
     current: 72_000,
     ngoIdx: 0,

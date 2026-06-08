@@ -37,7 +37,7 @@ ImpactSphere is a Next.js web platform that connects NGOs with companies for fun
 
 - **Discovery & Search**
   - Browse all approved projects
-  - Filter by category: Environment, Education, Healthcare, Tech Equity, Disaster Relief
+  - Filter by category: Education, Healthcare, Tech Equity, Disaster Relief, Housing
   - View project details and NGO profiles
 
 - **Donations**

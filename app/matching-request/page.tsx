@@ -33,14 +33,12 @@ interface Project {
 }
 
 const CAUSE_OPTIONS = [
-  "Environment",
   "Education",
   "Healthcare",
   "Tech Equity",
   "Disaster Relief",
-  "Human Rights",
+  "Housing",
   "Poverty Alleviation",
-  "Animal Welfare",
   "Arts & Culture",
   "Community Development",
 ];
