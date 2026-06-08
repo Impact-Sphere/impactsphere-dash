@@ -7,7 +7,6 @@ import { CategoryFilter } from "@/app/components/project/category-filter";
 import { FeaturedProjectCard } from "@/app/components/project/featured-project-card";
 import { ProjectCard } from "@/app/components/project/project-card";
 import { ProjectCardSkeleton } from "@/app/components/project/project-card-skeleton";
-import { ImpactPulse } from "@/app/components/widgets/impact-pulse";
 import { categories } from "@/app/lib/data";
 import type { Project } from "@/app/types/project";
 
@@ -162,9 +161,6 @@ function DiscoverContent() {
                 />
               ))}
 
-              {/* Impact Pulse Widget */}
-
-              {!isSearching && <ImpactPulse percentage={64} amount="€24.8k" />}
             </div>
 
             {/* Pagination */}
