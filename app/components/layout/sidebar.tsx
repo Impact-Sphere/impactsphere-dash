@@ -69,7 +69,7 @@ export function Sidebar() {
       data-state={open ? "open" : "closed"}
       aria-label="Primary navigation"
       className={cn(
-        "h-screen w-72 fixed left-0 top-0 overflow-y-auto bg-slate-50 flex flex-col p-6 space-y-8 z-50",
+        "h-dvh w-72 fixed left-0 top-0 overflow-y-auto overflow-x-hidden bg-slate-50 flex flex-col p-4 sm:p-6 space-y-4 sm:space-y-6 z-50",
         "transition-transform duration-300 ease-in-out will-change-transform",
         "lg:translate-x-0 lg:z-40",
         open ? "translate-x-0" : "-translate-x-full",

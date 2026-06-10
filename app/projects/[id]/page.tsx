@@ -463,7 +463,7 @@ export default function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -471,7 +471,7 @@ export default function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <main className="min-h-screen flex items-center justify-center text-gray-500">
+      <main className="min-h-dvh flex items-center justify-center text-gray-500">
         Project not found.
       </main>
     );
@@ -488,7 +488,7 @@ export default function ProjectDetailPage() {
   const acquisitions = project.serviceAcquisitions || [];
 
   return (
-    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-dvh bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         {/* Image */}
         <div className="relative w-full h-56 sm:h-64 lg:h-80 rounded-2xl overflow-hidden">

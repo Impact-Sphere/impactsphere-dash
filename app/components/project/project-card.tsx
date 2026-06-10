@@ -133,7 +133,7 @@ export function ProjectCard({
       </p>
       <div className="mt-6 sm:mt-8 space-y-4">
         <div className="space-y-1.5">
-          <div className="flex justify-between text-xs font-bold">
+          <div className="flex justify-between text-xs font-bold flex-wrap gap-1">
             <span className="text-primary">{funded}%</span>
             <span className="text-on-surface-variant">
               {format(project.currentAmount)} / {format(project.targetBudget)}

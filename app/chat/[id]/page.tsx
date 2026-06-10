@@ -260,7 +260,7 @@ export default function WorkroomPage({
 
   if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -268,7 +268,7 @@ export default function WorkroomPage({
 
   if (error) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="text-center space-y-4">
           <p className="text-gray-500">{error}</p>
           <button
@@ -297,7 +297,7 @@ export default function WorkroomPage({
         />
       )}
 
-      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+      <main className="min-h-dvh bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto space-y-4 sm:space-y-6 px-4 sm:px-0">
           {/* Header */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -334,7 +334,7 @@ export default function WorkroomPage({
             </div>
           </div>
 
-          <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100vh-15rem)]">
+          <div className="bg-white sm:rounded-2xl shadow-sm border-y sm:border border-gray-100 overflow-hidden flex flex-col lg:flex-row h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-15rem)]">
             {/* Chat Area */}
             <div className="flex-1 flex flex-col min-w-0">
               {/* Chat Header with Actions */}

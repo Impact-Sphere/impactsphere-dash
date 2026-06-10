@@ -34,7 +34,7 @@ export function MobileTopBar() {
         </span>
       </Link>
 
-      {session?.user && (
+      {session?.user ? (
         <Link
           href="/profile"
           className="ml-auto flex items-center justify-center w-8 h-8 rounded-full bg-violet-100 overflow-hidden"
@@ -53,6 +53,14 @@ export function MobileTopBar() {
               {session.user.name?.charAt(0) || session.user.email?.charAt(0)}
             </span>
           )}
+        </Link>
+      ) : (
+        <Link
+          href="/login"
+          className="ml-auto flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold text-violet-700 hover:bg-violet-50 transition-colors"
+        >
+          <span className="material-symbols-outlined text-base">login</span>
+          <span>Sign in</span>
         </Link>
       )}
     </div>
