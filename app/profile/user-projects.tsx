@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import { getFundedPercent, getProjectImage } from "@/app/lib/project-utils";
@@ -14,6 +15,7 @@ export function UserProjects({
   userId?: string;
   isPublic?: boolean;
 }) {
+  const router = useRouter();
   const { format } = useCurrency();
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -30,6 +32,26 @@ export function UserProjects({
       })
       .catch(() => setLoading(false));
   }, [userId]);
+
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (projectId: string) => {
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this project? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+    setDeletingId(projectId);
+    const res = await fetch(`/api/projects/${projectId}`, {
+      method: "DELETE",
+    });
+    setDeletingId(null);
+    if (res.ok) {
+      setProjects((prev) => prev.filter((p) => p.id !== projectId));
+    } else {
+      const data = await res.json().catch(() => ({}));
+      alert(data.error || "Failed to delete project.");
+    }
+  };
 
   if (loading) {
     return (
@@ -87,7 +109,7 @@ export function UserProjects({
                   className="w-full h-full object-cover"
                 />
               </div>
-              <div className="flex-1 min-w-0 space-y-1">
+                <div className="flex-1 min-w-0 space-y-1">
                 <div className="flex items-center space-x-2">
                   <h3 className="text-sm font-bold text-on-surface truncate">
                     {project.title}
@@ -122,6 +144,41 @@ export function UserProjects({
                   />
                 </div>
               </div>
+              {!isPublic && userType === "NGO" && (
+                <div className="flex flex-col gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      router.push(`/projects/${project.id}`);
+                    }}
+                    className="p-2 rounded-lg border border-gray-200 text-gray-500 hover:bg-gray-50 transition-colors"
+                    aria-label="Edit project"
+                    title="Edit project"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      edit
+                    </span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDelete(project.id);
+                    }}
+                    disabled={deletingId === project.id}
+                    className="p-2 rounded-lg border border-red-200 text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                    aria-label="Delete project"
+                    title="Delete project"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">
+                      delete
+                    </span>
+                  </button>
+                </div>
+              )}
             </a>
           );
         })}

@@ -8,6 +8,7 @@ import DatePicker from "react-datepicker";
 import { useCurrency } from "@/app/components/currency/currency-context";
 import StripeCheckoutForm from "@/app/components/donate/stripe-checkout-form";
 import { Badge } from "@/app/components/ui/badge";
+import { ImageUploadField } from "@/app/components/ui/image-upload-field";
 import { ProgressBar } from "@/app/components/ui/progress-bar";
 import { StatusMessage } from "@/app/components/ui/status-message";
 import { authClient } from "@/app/lib/auth-client";
@@ -67,6 +68,32 @@ export default function ProjectDetailPage() {
   } | null>(null);
 
   const [isFavorited, setIsFavoritedLocal] = useState(false);
+
+  const CATEGORY_OPTIONS = [
+    "Education",
+    "Healthcare",
+    "Tech Equity",
+    "Disaster Relief",
+    "Housing",
+  ];
+
+  const [editOpen, setEditOpen] = useState(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editImage, setEditImage] = useState("");
+  const [editTargetBudget, setEditTargetBudget] = useState("");
+  const [editProjectDocuments, setEditProjectDocuments] = useState<
+    {
+      id: string;
+      url: string;
+      fileName: string;
+      mimeType?: string | null;
+      size?: number | null;
+    }[]
+  >([]);
+  const [savingEdit, setSavingEdit] = useState(false);
+  const [deleting, setDeleting] = useState(false);
   const onFavoriteToggle = async () => {
     if (!project) return;
 
@@ -94,6 +121,135 @@ export default function ProjectDetailPage() {
         ? "Project removed from favorites."
         : "Project added to favorites.",
     });
+  };
+
+  const openEditModal = () => {
+    if (!project) return;
+    setEditTitle(project.title);
+    setEditDescription(project.description);
+    setEditCategory(project.category);
+    setEditImage(project.image || "");
+    setEditTargetBudget(String(project.targetBudget));
+    setEditProjectDocuments(project.projectDocuments || []);
+    setEditOpen(true);
+    setStatusMessage(null);
+  };
+
+  const closeEditModal = () => {
+    setEditOpen(false);
+    setSavingEdit(false);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!project) return;
+    setStatusMessage(null);
+    setSavingEdit(true);
+
+    const res = await fetch(`/api/projects/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editTitle,
+        description: editDescription,
+        category: editCategory,
+        image: editImage || undefined,
+        targetBudget: Number(editTargetBudget),
+        projectDocuments: editProjectDocuments.map((doc) => doc.id),
+      }),
+    });
+
+    setSavingEdit(false);
+
+    if (res.ok) {
+      const updated = await res.json();
+      setProject(updated);
+      setEditOpen(false);
+      setStatusMessage({
+        type: "success",
+        message: "Project updated successfully.",
+      });
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to update project.",
+      });
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    if (!project) return;
+    const confirmed = window.confirm(
+      "Are you sure you want to delete this project? This action cannot be undone.",
+    );
+    if (!confirmed) return;
+
+    setStatusMessage(null);
+    setDeleting(true);
+
+    const res = await fetch(`/api/projects/${id}`, {
+      method: "DELETE",
+    });
+
+    setDeleting(false);
+
+    if (res.ok) {
+      router.push("/profile?tab=projects");
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setStatusMessage({
+        type: "error",
+        message: data.error || "Failed to delete project.",
+      });
+    }
+  };
+
+  const handleUploadDocuments = async (files: FileList | null) => {
+    setStatusMessage(null);
+    if (!files?.length) return;
+
+    const countLeft = 5 - editProjectDocuments.length;
+    if (countLeft <= 0) {
+      setStatusMessage({
+        type: "error",
+        message: "You can only upload up to 5 documents.",
+      });
+      return;
+    }
+
+    const selectedFiles = Array.from(files).slice(0, countLeft);
+    const uploaded: typeof editProjectDocuments = [];
+    for (const file of selectedFiles) {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        uploaded.push({
+          id: data.id,
+          url: data.url,
+          fileName: file.name,
+          mimeType: file.type,
+          size: file.size,
+        });
+      } else {
+        const error = await res.json().catch(() => ({ error: "Upload failed" }));
+        setStatusMessage({
+          type: "error",
+          message: error.error || "Unable to upload document.",
+        });
+      }
+    }
+    setEditProjectDocuments((current) => [...current, ...uploaded]);
+  };
+
+  const removeDocument = (docId: string) => {
+    setEditProjectDocuments((current) =>
+      current.filter((doc) => doc.id !== docId),
+    );
   };
 
   const fetchProject = useCallback(async () => {
@@ -464,7 +620,29 @@ export default function ProjectDetailPage() {
           )}
 
           {isOwner && (
-            <p className="text-sm text-gray-500">You created this project.</p>
+            <div className="flex flex-wrap gap-2 pt-2">
+              <button
+                type="button"
+                onClick={openEditModal}
+                className="flex items-center gap-1.5 px-4 py-2 border border-gray-200 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors text-sm"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  edit
+                </span>
+                Edit
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteProject}
+                disabled={deleting}
+                className="flex items-center gap-1.5 px-4 py-2 border border-red-200 text-red-700 font-medium rounded-lg hover:bg-red-50 transition-colors text-sm disabled:opacity-50"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  delete
+                </span>
+                {deleting ? "Deleting..." : "Delete"}
+              </button>
+            </div>
           )}
         </div>
 
@@ -791,6 +969,153 @@ export default function ProjectDetailPage() {
                 />
               </Elements>
             )}
+          </div>
+        </div>
+      )}
+
+      {/* Edit Modal */}
+      {editOpen && project && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 sm:p-4">
+          <div className="bg-white rounded-t-2xl sm:rounded-2xl shadow-xl w-full max-w-2xl p-5 sm:p-6 lg:p-8 space-y-6 max-h-[100dvh] sm:max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-bold text-on-surface">Edit Project</h2>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Project Title
+              </div>
+              <input
+                type="text"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                required
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">Category</div>
+              <select
+                value={editCategory}
+                onChange={(e) => setEditCategory(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent bg-white"
+              >
+                {CATEGORY_OPTIONS.map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Description
+              </div>
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                required
+                rows={5}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Cover Image
+              </div>
+              <ImageUploadField
+                value={editImage}
+                onChange={setEditImage}
+                label="Upload cover image"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Target Budget (EUR)
+              </div>
+              <input
+                type="number"
+                value={editTargetBudget}
+                onChange={(e) => setEditTargetBudget(e.target.value)}
+                required
+                min={1}
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <div className="text-sm font-medium text-on-surface">
+                Supporting Documents
+              </div>
+              <input
+                type="file"
+                multiple
+                onChange={(e) => handleUploadDocuments(e.target.files)}
+                disabled={editProjectDocuments.length >= 5}
+                className="w-full text-sm text-gray-500 file:border-0 file:bg-gray-100 file:px-3 file:py-2 file:text-sm file:font-medium file:text-gray-700 file:rounded-lg file:hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-60"
+              />
+              {editProjectDocuments.length ? (
+                <div className="flex flex-wrap gap-3 mt-3">
+                  {editProjectDocuments.map((doc) => (
+                    <div
+                      key={doc.id}
+                      className="group relative flex items-center justify-center w-24 h-24 sm:w-28 sm:h-28 rounded-2xl border border-gray-200 bg-gray-50 p-3 text-xs text-left overflow-hidden"
+                    >
+                      <div className="absolute inset-0 bg-white/60 opacity-0 transition-opacity duration-200 group-hover:opacity-100" />
+                      <div className="relative z-10 w-full h-full flex flex-col justify-between">
+                        <div className="text-xs font-semibold text-gray-800 truncate">
+                          {doc.fileName}
+                        </div>
+                        <div className="flex items-center justify-between gap-2">
+                          <a
+                            href={doc.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-primary underline text-[11px]"
+                          >
+                            Open
+                          </a>
+                          <button
+                            type="button"
+                            onClick={() => removeDocument(doc.id)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 opacity-70 transition-opacity duration-200 group-hover:opacity-100 focus-visible:opacity-100 hover:bg-red-50 hover:text-red-600"
+                            aria-label={`Remove ${doc.fileName}`}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+              <p className="text-xs text-gray-400">Up to 5 documents.</p>
+            </div>
+
+            <div className="flex flex-col-reverse sm:flex-row gap-3 pt-2">
+              <button
+                type="button"
+                onClick={closeEditModal}
+                className="flex-1 py-2.5 px-4 border border-gray-200 text-gray-600 font-medium rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleSaveEdit}
+                disabled={
+                  savingEdit ||
+                  !editTitle ||
+                  !editDescription ||
+                  !editTargetBudget
+                }
+                className="flex-1 py-2.5 px-4 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              >
+                {savingEdit ? "Saving..." : "Save Changes"}
+              </button>
+            </div>
           </div>
         </div>
       )}

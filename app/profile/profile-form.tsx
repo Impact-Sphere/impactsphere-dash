@@ -388,6 +388,20 @@ export function ProfileForm() {
       {/* Projects Tab */}
       {activeTab === "projects" && (
         <div className="space-y-6">
+          {profile.userType === "NGO" && (
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={() => router.push("/projects/new")}
+                className="flex items-center gap-2 px-5 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors text-sm"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  add
+                </span>
+                Create Project
+              </button>
+            </div>
+          )}
           {(profile.userType === "NGO" || profile.userType === "COMPANY") && (
             <UserProjects userType={profile.userType} />
           )}
