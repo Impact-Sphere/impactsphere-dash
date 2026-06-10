@@ -142,17 +142,17 @@ export default function SupportPage() {
 
   const activeChatData = chats.find((c) => c.id === activeChat);
 
-  if (isPending || loading) {
+    if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
-      <div className="max-w-5xl mx-auto h-[calc(100vh-150px)] bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex">
+    <main className="min-h-dvh bg-surface py-12 px-8">
+      <div className="max-w-5xl mx-auto h-[calc(100dvh-150px)] bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex">
         {/* Chat List */}
         <div className="w-80 border-r border-gray-100 flex flex-col">
           <div className="p-4 border-b border-gray-100 flex items-center justify-between">

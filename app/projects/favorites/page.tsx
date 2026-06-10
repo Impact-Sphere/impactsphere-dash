@@ -69,7 +69,7 @@ function DiscoverContent() {
   const hasNoResults = !loading && projects.length === 0;
 
   return (
-    <main className="min-h-screen">
+    <main className="min-h-dvh">
       <Header
         title="Favorite Projects"
         subtitle="Projects saved by you"
@@ -156,7 +156,7 @@ function DiscoverContent() {
 
 function DiscoverFallback() {
   return (
-    <main className="min-h-screen">
+    <main className="min-h-dvh">
       <div className="sticky top-14 lg:top-0 z-20 bg-white/70 backdrop-blur-2xl px-4 sm:px-6 lg:px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
         <div className="min-w-0">
           <div className="h-9 w-48 sm:w-64 bg-surface-container rounded-lg animate-pulse" />

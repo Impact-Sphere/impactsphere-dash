@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function ResubmitPage() {
   return (
-    <div className="min-h-screen flex items-start justify-center bg-surface py-12">
+    <div className="min-h-dvh flex items-start justify-center bg-surface py-12">
       <div className="w-full max-w-2xl p-8 space-y-8 bg-white rounded-2xl shadow-lg">
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold text-on-surface">

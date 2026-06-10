@@ -8,7 +8,7 @@ export const metadata: Metadata = {
 
 export default function PublicProfilePage() {
   return (
-    <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+    <main className="min-h-dvh bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
       <PublicProfileView />
     </main>
   );

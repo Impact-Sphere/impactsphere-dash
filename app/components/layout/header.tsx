@@ -23,7 +23,7 @@ export function Header({
   onTabChange,
 }: HeaderProps) {
   return (
-    <header className="sticky top-14 lg:top-0 z-20 bg-white/70 backdrop-blur-2xl px-4 sm:px-6 lg:px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4">
+    <header className="sticky top-14 lg:top-0 z-20 bg-white/70 backdrop-blur-2xl px-4 sm:px-6 lg:px-12 py-6 flex flex-col lg:flex-row lg:justify-between lg:items-center gap-4 overflow-hidden">
       <div className="min-w-0">
         <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-on-surface">
           {title}

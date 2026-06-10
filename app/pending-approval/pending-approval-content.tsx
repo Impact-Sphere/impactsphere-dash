@@ -104,7 +104,7 @@ export function PendingApprovalContent() {
 
   if (sessionPending || loading) {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-center justify-center bg-surface">
+      <div className="min-h-[calc(100dvh-3.5rem)] lg:min-h-dvh flex items-center justify-center bg-surface">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
@@ -112,7 +112,7 @@ export function PendingApprovalContent() {
 
   if (status === "APPROVED") {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
+      <div className="min-h-[calc(100dvh-3.5rem)] lg:min-h-dvh flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
         <div className="w-full max-w-md p-5 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
           <div className="w-16 h-16 mx-auto bg-emerald-100 rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-3xl text-emerald-600">
@@ -142,7 +142,7 @@ export function PendingApprovalContent() {
 
   if (status === "REJECTED") {
     return (
-      <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
+      <div className="min-h-[calc(100dvh-3.5rem)] lg:min-h-dvh flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
         <div className="w-full max-w-md p-5 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
           <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-3xl text-red-600">
@@ -194,7 +194,7 @@ export function PendingApprovalContent() {
 
   if (status === "MORE_INFO_REQUESTED") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="min-h-dvh flex items-center justify-center bg-surface">
         <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
           <div className="w-16 h-16 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-3xl text-amber-600">
@@ -243,7 +243,7 @@ export function PendingApprovalContent() {
     const isScheduled = verificationMeeting?.status === "SCHEDULED";
 
     return (
-      <div className="min-h-screen flex items-center justify-center bg-surface">
+      <div className="min-h-dvh flex items-center justify-center bg-surface">
         <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
           <div className="w-16 h-16 mx-auto bg-violet-100 rounded-full flex items-center justify-center">
             <span className="material-symbols-outlined text-3xl text-violet-600">
@@ -368,7 +368,7 @@ export function PendingApprovalContent() {
 
   // PENDING (default)
   return (
-    <div className="min-h-[calc(100vh-3.5rem)] lg:min-h-screen flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
+    <div className="min-h-[calc(100dvh-3.5rem)] lg:min-h-dvh flex items-center justify-center bg-surface px-4 py-6 sm:px-6 sm:py-8">
       <div className="w-full max-w-md p-5 sm:p-8 space-y-6 bg-white rounded-2xl shadow-lg text-center">
         <div className="w-16 h-16 mx-auto bg-amber-100 rounded-full flex items-center justify-center">
           <span className="material-symbols-outlined text-3xl text-amber-600">

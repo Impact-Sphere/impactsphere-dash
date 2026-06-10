@@ -155,7 +155,7 @@ export default function MyServicesPage() {
 
   if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -171,7 +171,7 @@ export default function MyServicesPage() {
         />
       )}
 
-      <main className="min-h-screen bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
+      <main className="min-h-dvh bg-surface py-6 sm:py-8 lg:py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto space-y-6 sm:space-y-8">
           <div className="space-y-2">
             <h1 className="text-2xl sm:text-3xl font-bold text-on-surface">

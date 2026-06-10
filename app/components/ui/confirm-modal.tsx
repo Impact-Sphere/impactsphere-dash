@@ -24,7 +24,7 @@ export function ConfirmModal({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto min-h-screen">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 overflow-y-auto min-h-dvh">
       <div className="bg-white rounded-2xl shadow-xl w-full max-w-lg p-8 space-y-6">
         <div>
           <h2 className="text-xl font-bold text-on-surface">{title}</h2>

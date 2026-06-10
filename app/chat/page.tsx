@@ -201,7 +201,7 @@ export default function ChatPage() {
 
   if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
@@ -217,8 +217,8 @@ export default function ChatPage() {
         />
       )}
 
-      <main className="min-h-screen bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
-        <div className="max-w-5xl mx-auto h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-8rem)] lg:h-[calc(100vh-9rem)] bg-white sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
+      <main className="min-h-dvh bg-surface py-4 sm:py-6 lg:py-12 px-0 sm:px-6 lg:px-8">
+        <div className="max-w-5xl mx-auto h-[calc(100dvh-7rem)] sm:h-[calc(100dvh-8rem)] lg:h-[calc(100dvh-9rem)] bg-white sm:rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col sm:flex-row">
           {/* Chat List */}
           <div
             className={`w-full sm:w-80 border-b sm:border-b-0 sm:border-r border-gray-100 flex-col ${

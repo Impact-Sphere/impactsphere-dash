@@ -76,7 +76,7 @@ export function FeaturedProjectCard({
           </div>
           <div className="mt-8 space-y-6">
             <div className="space-y-2">
-              <div className="flex justify-between items-end gap-3">
+              <div className="flex justify-between items-end gap-3 flex-wrap">
                 <span className="text-xl sm:text-2xl font-black text-primary">
                   {funded}%{" "}
                   <span className="text-sm font-medium text-on-surface-variant">

@@ -186,14 +186,14 @@ export default function MatchingRequestPage() {
 
   if (isPending || loading) {
     return (
-      <main className="min-h-screen flex items-center justify-center">
+      <main className="min-h-dvh flex items-center justify-center">
         <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-surface py-12 px-8">
+    <main className="min-h-dvh bg-surface py-12 px-8">
       <div className="max-w-4xl mx-auto space-y-8">
         <div className="flex items-center justify-between">
           <div className="space-y-2">
