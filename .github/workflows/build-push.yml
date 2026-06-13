@@ -29,8 +29,8 @@ jobs:
           context: .
           push: true
           tags: |
-            registry.henriquesf.me/impact-sphere/impact-sphere-dash:${{ github.sha }}
-            registry.henriquesf.me/impact-sphere/impact-sphere-dash:latest
+            harbor.henriquesf.me/impact-sphere/impact-sphere-dash:${{ github.sha }}
+            harbor.henriquesf.me/impact-sphere/impact-sphere-dash:latest
           build-args: |
             NEXT_PUBLIC_BETTER_AUTH_URL=${{ secrets.NEXT_PUBLIC_BETTER_AUTH_URL }}
             NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=${{ secrets.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY }}
